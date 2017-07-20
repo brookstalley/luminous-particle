@@ -89,6 +89,7 @@ std::vector<float> Colorspace::Hue2EmitterPower(HSIColor &HSI) {
   // Has all LED output values followed by white.
   std::vector<float> emitterPowers[];
 
+  // Start by assuming all emitters are off
   for (int i=0; i<(_emitters.size()+1); i++) {
     emitterPowers.push_back(0);
   }
