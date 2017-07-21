@@ -77,6 +77,9 @@ LZ7->addEmitter(emitterLZ7violet, 6);
 // Actual nodes
 HSILamp testnode(LZ7, 0x3c, 0);
 
+// Our lists
+std:vector<HSILamp> allNodes {testnode};
+
 ////////////////////////// MAIN ////////////////////////////
 
 void debugPrint(char* text) {
