@@ -24,10 +24,11 @@ outputEmitter makeOutputEmitter (const emitter& e, uint8_t pwmOffset, float powe
 }
 
 CompositeLight::CompositeLight (Emitter &white, uint8_t pwmOffset) :
-  _white(makeOutputEmitter(white, pwmOffset, 0.0f)) {
+{
+  _white = makeOutputEmitter(white, pwmOffset, 0.0f);
 }
 
-void CompositeLight::addEmitter(Emitter &emitter, uint8_t pwmOffset) {
+void CompositeLight::addEmitter (Emitter &emitter, uint8_t pwmOffset) {
   // To figure out where to put it in the colorspace, calculate the angle from the white point.
   float uEmitter = emitter.getU();
   float vEmitter = emitter.getV();

@@ -72,7 +72,7 @@ Emitter emitterLZ7blue("LZ7-b",0.1747943747, 0.1117834986, (float)30/30);
 Emitter emitterLZ7violet("LZ7-v",0.35, 0.15, (float)30/30);
 
 // Standard luminous node & wiring
-CompositeLight LZ7(emitterLZ7white, 5);
+CompositeLight *LZ7 = new CompositeLight(emitterLZ7white, 5);
 
 LZ7->addEmitter(emitterLZ7red,0);
 
