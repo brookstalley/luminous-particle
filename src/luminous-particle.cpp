@@ -72,17 +72,10 @@ Emitter emitterLZ7blue("LZ7-b",0.1747943747, 0.1117834986, (float)30/30);
 Emitter emitterLZ7violet("LZ7-v",0.35, 0.15, (float)30/30);
 
 // Standard luminous node & wiring
-CompositeLight *LZ7 = new CompositeLight(emitterLZ7white, 5);
+CompositeLight LZ7(emitterLZ7white, 5);
 
-LZ7->addEmitter(emitterLZ7red,0);
 
-/*l->addEmitter(emitterLZ7red, 0);
-LZ7->addEmitter(emitterLZ7amber, 3);
-LZ7->addEmitter(emitterLZ7green, 1);
-LZ7->addEmitter(emitterLZ7cyan, 4);
-LZ7->addEmitter(emitterLZ7blue, 2);
-LZ7->addEmitter(emitterLZ7violet, 6);
-*/
+
 
 // Actual nodes
 HSILamp testnode(LZ7, 0x3c, 0);
@@ -110,6 +103,13 @@ void setupDisplay() {
 }
 
 void setupLEDs() {
+  LZ7.addEmitter(emitterLZ7red, 0);
+  LZ7.addEmitter(emitterLZ7amber, 3);
+  LZ7.addEmitter(emitterLZ7green, 1);
+  LZ7.addEmitter(emitterLZ7cyan, 4);
+  LZ7.addEmitter(emitterLZ7blue, 2);
+  LZ7.addEmitter(emitterLZ7violet, 6);
+
   pwm.begin();
   pwm.setPWMFreq(400);
 }
