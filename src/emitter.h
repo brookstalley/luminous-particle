@@ -15,7 +15,7 @@ class Emitter {
     float _u, _v, _maxvalue;
     char (&_name)[10];
   public:
-    Emitter(char (&name)[10], float u, float v, float maxvalue);
+    Emitter(const char *name, float u, float v, float maxvalue);
     Emitter(void);
     float getU(void);
     float getV(void);

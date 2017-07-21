@@ -15,7 +15,6 @@
 #include "emitter.h"
 #include "hsicolor.h"
 
-
 struct outputEmitter {
   Emitter &emitter;
   // within a light of this type, what

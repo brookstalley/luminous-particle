@@ -9,7 +9,7 @@
 
 #include "Emitter.h"
 
-Emitter::Emitter(char (&name)[10], float u, float v, float maxvalue) :
+Emitter::Emitter(const char *name, float u, float v, float maxvalue) :
   _u(u),
   _v(v),
   _name(name),
