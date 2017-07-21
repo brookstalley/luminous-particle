@@ -1,23 +1,30 @@
 #include "hsilamp.h"
 
-HSILamp::HSILamp(std::shared_ptr<Colorspace> colorspace) :
-  _colorspace(colorspace),
-  _maxvalues = colorspace->getMaxValues()
+HSILamp::HSILamp(Colorspace &colorspace, byte i2cAddress,
+  byte pwmAddress) :
+    _colorspace(colorspace),
+    _i2caddress(i2cAddress),
+    _pwmAddress(pwmAddress),
 {
-
+  HSIColor off(0,0,0);
+  _emitterPowers = off;
 }
 
 void HSILamp::setColor(HSIColor &color) {
-  std::vector<float> emitters = _colorspace->Hue2EmitterPower(color);
-  for (int i=0; i<emitters.size(); i++) {
-    emitters[i] = _maxvalues[i] * emitters[i];
-  }
-  setEmitters(emitters, _pins);
+  _emitterPowers = _compositeLight->Hue2EmitterPower(color);
+  setEmitters();
 }
 
-void HSILamp::setEmitters(std::vector<float> &emitters) {
-  for (int i=0; i<emitters.size(); i++) {
-    analogWrite(pins[i], 0xFFFF * emitters[i] * globalBrightness);
+void HSILamp::setSingleEmitterOn(unsigned int index) {
+  for (int i=0; i < _emitterPowers.size(); i++) {
+    _emitterPowers[i].power = (index % _emitterPowers.size() == 0) ? 1.0 : 0.0;
   }
+  setEmitters();
+}
 
+void HSILamp::setEmitters() {
+  for (int i=0; i<emitters.size(); i++) {
+    sendI2CPwm(i2cAddress, pwmAddress + _emitterPowers[i].pwmOffset,
+      0xFFFF * _emitterPowers[i].power * globalBrightness)
+  }
 }

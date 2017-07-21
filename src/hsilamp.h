@@ -1,11 +1,14 @@
+#include "compositelight.h"
 
 class HSILamp {
   private:
-    std::vector<float> _maxvalues;
-    std::shared_ptr<Colorspace> _colorspace;
+    CompositeLight &_compositeLight;
+    byte _i2cAddress;
+    byte _pwmAddress;
+    std::vector<outputEmitter> _emitterPowers;
   public:
-    HSILamp(std::shared_ptr<Colorspace> colorspace, int i2caddress)
-    void addColorspace(std::shared_ptr<Colorspace> colorspace);
+    HSILamp(CompositeLight &compositelight, byte i2caddress, byte pwmAddress)
     void setColor(HSIColor &color);
-    void setEmitters(std::vector<float> &LEDs, std::vector<int> &pins);
+    void getColor(HSIColor*);
+    void setEmitters(std::vector<float> &emitters);
 };
