@@ -7,6 +7,9 @@
 // Neltner's TeensyLED Controller Library:
 // https://github.com/saikoLED/TeensyLED
 
+#ifndef EMITTER_H
+#define EMITTER_H
+
 class Emitter {
   private:
     float _u, _v, _maxvalue;
@@ -19,3 +22,4 @@ class Emitter {
     float getMax(void);
     char* getName(void);
 };
+#endif

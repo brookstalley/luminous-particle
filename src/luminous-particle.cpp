@@ -6,6 +6,11 @@
 #include "Adafruit_SSD1351_Photon/Adafruit_SSD1351_Photon.h"
 #include "Adafruit_PWMServoDriver/Adafruit_PWMServoDriver.h"
 #include "Debounce/Debounce.h"
+//#include "E131/E131.h"
+
+#include "emitter.h"
+#include "hsicolor.h"
+#include "compositelight.h"
 
 ////////////////////////// DECLARATIONS ///////////////////
 
@@ -100,7 +105,8 @@ void setupDisplay() {
 }
 
 void setupLEDs() {
-
+  pwm.begin();
+  pwm.setPWMFreq(400);
 }
 
 void setupControls() {
@@ -143,6 +149,10 @@ void effectTest() {
   }
 }
 
+void effectOff() {
+
+}
+
 void loopSensors() {
 
 }
@@ -152,7 +162,7 @@ void loopInputs() {
 }
 
 void loopLEDs() {
-
+ effectTest();
 }
 
 char * TimeToString(unsigned long t)

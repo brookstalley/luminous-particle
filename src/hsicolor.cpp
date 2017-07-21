@@ -21,6 +21,7 @@
 //
 //**********************************************************
 
+#include <math.h>
 #include "hsicolor.h"
 
 HSIColor::HSIColor(float hue, float saturation, float intensity) {

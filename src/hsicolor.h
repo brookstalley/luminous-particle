@@ -21,6 +21,8 @@
 //
 //**********************************************************
 
+#ifndef HSICOLOR_H
+#define HSICOLOR_H
 
 class HSIColor {
   private:
@@ -37,3 +39,5 @@ class HSIColor {
     float getIntensity(void);
     void getHSI(float *HSI);
 };
+
+#endif
