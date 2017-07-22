@@ -2,10 +2,10 @@
 
 ////////////////////////// INCLUDES ///////////////////////
 
-//#include "Adafruit_mfGFX/Adafruit_mfGFX.h"
-//#include "Adafruit_SSD1351_Photon.h"
-//#include "Adafruit_PWMServoDriver/Adafruit_PWMServoDriver.h"
-//#include "Debounce/Debounce.h"
+#include "Adafruit_mfGFX/Adafruit_mfGFX.h"
+#include "Adafruit_SSD1351_Photon.h"
+#include "Adafruit_PWMServoDriver/Adafruit_PWMServoDriver.h"
+#include "Debounce/Debounce.h"
 //#include "E131/E131.h"
 
 #include "emitter.h"
@@ -95,9 +95,6 @@ Emitter emitterLZ7violet("LZ7-v",0.35, 0.15, (float)30/30);
 
 // Standard luminous node & wiring
 CompositeLight LZ7(emitterLZ7white, 5);
-
-
-
 
 // Actual nodes
 HSILamp testnode(LZ7, 0x3c, 0);
