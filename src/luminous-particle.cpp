@@ -2,10 +2,16 @@
 
 ////////////////////////// INCLUDES ///////////////////////
 
-#include "Adafruit_mfGFX/Adafruit_mfGFX.h"
-#include "Adafruit_SSD1351_Photon/Adafruit_SSD1351_Photon.h"
-#include "Adafruit_PWMServoDriver/Adafruit_PWMServoDriver.h"
-#include "Debounce/Debounce.h"
+//#include "Adafruit_mfGFX/Adafruit_mfGFX.h"
+//#include "Adafruit_SSD1351_Photon.h"
+//#include "Adafruit_PWMServoDriver/Adafruit_PWMServoDriver.h"
+//#include "Debounce/Debounce.h"
+//#include "E131/E131.h"
+
+#include "emitter.h"
+#include "hsicolor.h"
+#include "compositelight.h"
+#include "hsilamp.h"
 
 ////////////////////////// DECLARATIONS ///////////////////
 
@@ -44,10 +50,6 @@ void LPtest();
 
 ////////////////////////// STRUCTS ///////////////////////////
 
-struct lightNode {
-  byte pwmAddress;
-  byte tempAddress;
-};
 
 typedef void (* luminousFunctionPointer) ();
 
@@ -78,25 +80,34 @@ Adafruit_SSD1351 display = Adafruit_SSD1351(spi_pin_cs, spi_pin_dc, spi_pin_rst)
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 Debounce modeButtonDebouncer = Debounce();
 
-///////////////////////// Luminous functions -- move to own file
-
-void LPoff() {
-  // Turn all lights off
-
-}
-
-void LPtest() {
-   // test cycle for lights
-
-}
-
-void LPe131() {
-
-}
-
 ///////////////////////// Main
 
 void debugPrint(const char* text) {
+// Shared lights
+
+Emitter emitterLZ7white("LZ7-w",0.202531646, 0.469936709, (float)180/180);
+Emitter emitterLZ7red("LZ7-r",0.5137017676, 0.5229440531, (float)78/78);
+Emitter emitterLZ7amber("LZ7-a",0.3135687079, 0.5529418124, (float)60/60);
+Emitter emitterLZ7green("LZ7-g",0.0595846867, 0.574988823, (float)125/125);
+Emitter emitterLZ7cyan("LZ7-c",0.0306675939, 0.5170937486, (float)95/95);
+Emitter emitterLZ7blue("LZ7-b",0.1747943747, 0.1117834986, (float)30/30);
+Emitter emitterLZ7violet("LZ7-v",0.35, 0.15, (float)30/30);
+
+// Standard luminous node & wiring
+CompositeLight LZ7(emitterLZ7white, 5);
+
+
+
+
+// Actual nodes
+HSILamp testnode(LZ7, 0x3c, 0);
+
+// Our lists
+std::vector<HSILamp> allNodes {testnode};
+
+////////////////////////// MAIN ////////////////////////////
+
+void debugPrint(char* text) {
   Serial.println(text);
 }
 
@@ -114,7 +125,15 @@ void setupDisplay() {
 }
 
 void setupLEDs() {
+  LZ7.addEmitter(emitterLZ7red, 0);
+  LZ7.addEmitter(emitterLZ7amber, 3);
+  LZ7.addEmitter(emitterLZ7green, 1);
+  LZ7.addEmitter(emitterLZ7cyan, 4);
+  LZ7.addEmitter(emitterLZ7blue, 2);
+  LZ7.addEmitter(emitterLZ7violet, 6);
 
+  pwm.begin();
+  pwm.setPWMFreq(400);
 }
 
 void setupControls() {
@@ -145,6 +164,22 @@ void setup(void) {
   setupSensors();
 }
 
+void effectTest() {
+  const int millisPerColor = 2000;
+  static unsigned long timeSinceChange = 0  ;
+  static unsigned int counter = 0;
+
+  if (millis() - timeSinceChange > millisPerColor) {
+    timeSinceChange = millis();
+    testnode.setSingleEmitterOn(counter);
+    counter++;
+  }
+}
+
+void effectOff() {
+
+}
+
 void loopSensors() {
 
 }
@@ -154,7 +189,7 @@ void loopInputs() {
 }
 
 void loopLEDs() {
-
+ effectTest();
 }
 
 char * TimeToString(unsigned long t)
