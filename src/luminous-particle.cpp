@@ -12,6 +12,8 @@
 void setupDisplay();
 void setup(void);
 void loop();
+void LPoff();
+void LPtest();
 
 ///////////////////////// DEFINES /////////////////////////
 
@@ -30,14 +32,15 @@ void loop();
 #define MODE_BUTTON_PIN D4
 
 // Color definitions
-#define	BLACK           0x0000
-#define	BLUE            0x001F
-#define	RED             0xF800
-#define	GREEN           0x07E0
+#define BLACK           0x0000
+#define BLUE            0x001F
+#define RED             0xF800
+#define GREEN           0x07E0
 #define CYAN            0x07FF
 #define MAGENTA         0xF81F
 #define YELLOW          0xFFE0
 #define WHITE           0xFFFF
+
 
 ////////////////////////// STRUCTS ///////////////////////////
 
@@ -46,6 +49,22 @@ struct lightNode {
   byte tempAddress;
 };
 
+typedef void (* luminousFunctionPointer) ();
+
+typedef struct {
+  const char name[10];
+  luminousFunctionPointer functionPointer;
+} luminousMode ;
+
+const int modeCount = 2;
+
+luminousMode modes[modeCount] = {
+  {"Off", LPoff},
+  {"Test", LPtest},
+  {"E131", LPe131}
+};
+
+int currentMode = 0;
 
 ////////////////////////// GLOBALS ///////////////////////////
 
@@ -54,12 +73,30 @@ float LEDTempCelsius = 20.0f;
 
 bool displayMustUpdate = false;
 
-// Controllers and stuff
+////////////////////////// Controllers and stuff
 Adafruit_SSD1351 display = Adafruit_SSD1351(spi_pin_cs, spi_pin_dc, spi_pin_rst);
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 Debounce modeButtonDebouncer = Debounce();
 
-void debugPrint(char* text) {
+///////////////////////// Luminous functions -- move to own file
+
+void LPoff() {
+  // Turn all lights off
+
+}
+
+void LPtest() {
+   // test cycle for lights
+
+}
+
+void LPe131() {
+
+}
+
+///////////////////////// Main
+
+void debugPrint(const char* text) {
   Serial.println(text);
 }
 
@@ -82,7 +119,7 @@ void setupLEDs() {
 
 void setupControls() {
   // Setup the first button with an internal pull-up :
-  pinMode(MODE_BUTTON_PIN,INPUT_PULLUP);
+  pinMode(MODE_BUTTON_PIN, INPUT_PULLUP);
   // After setting up the button, setup the Bounce instance :
   modeButtonDebouncer.attach(MODE_BUTTON_PIN);
   modeButtonDebouncer.interval(10); // interval in ms
@@ -132,46 +169,20 @@ char * TimeToString(unsigned long t)
 }
 
 void loopDisplay() {
-  static unsigned int loopCount = 0;
+  const unsigned long maxUpdateLagMillis = 1000;
+  static unsigned long lastUpdateMillis = 0;
 
-  loopCount++;
-  if (loopCount>100000) {
+  if (millis() - lastUpdateMillis > maxUpdateLagMillis) {
     displayMustUpdate = true;
-    loopCount = 0;
   }
+
   if (displayMustUpdate) {
     const byte numChars = 64;
-    static char modeName[numChars];
-    static char brightness[numChars];
-    static char temperature[numChars];
-    static char loops[numChars];
+    static char brightnessReadout[numChars];
+    //static char temperature[numChars];
 
-    switch (0) {
-      case 0: // Standard HSI mode.
-        strcpy(modeName,"Mode: HSI");
-        break;
-      case 1: // Handle Strober mode.
-        strcpy(modeName,"Mode: Stobe");
-        break;
-      case 2: // Fade HSI mode.
-        strcpy(modeName,"Mode: Fade");
-        break;
-      case 3: // Standalone Cycling mode.
-        strcpy(modeName,"Mode: Cycle");
-        break;
-      case 4: // Random LED shifting for art.
-        strcpy(modeName,"Mode: Random");
-        break;
-      case 5: // Rotate among LEDs
-        strcpy(modeName,"Mode: Rotate");
-        break;
-    }
+    sprintf (brightnessReadout, "Brightness: %2.1f", globalBrightness * 100);
 /*
-    char str_temp[6];
-    dtostrf(globalBrightness * 100, 2, 0, str_temp);
-    snprintf (brightness, numChars, "Brightness: %s", str_temp);
-    display.drawStr(0,31,brightness);
-
     dtostrf(LEDTempCelsius, 2, 1, str_temp);
     snprintf (temperature, numChars, "Temp: %s c", str_temp);
     display.drawStr(0,46,temperature);
@@ -184,25 +195,21 @@ void loopDisplay() {
     display.setTextColor(WHITE);
     display.setTextSize(1.5);
     display.println(TimeToString(millis()/1000));
+    display.println(modes[currentMode].name);
+    display.println(brightnessReadout);
 
-
+    lastUpdateMillis = millis();
+    displayMustUpdate = false;
 
 
   }
 }
 
-void loopControls() {
+void loopControlBrightness() {
   static float brightness_EMA_a = 0.2;      //initialization of EMA alpha
   static int brightness_EMA_S = 1023 - analogRead(BRIGHTNESS_PIN);          //initialization of EMA S
   static int minBrightness = 100;
   static int maxBrightness = 900;
-
-  modeButtonDebouncer.update();
-  int modeButton = modeButtonDebouncer.read();
-  if ( modeButtonDebouncer.fell() ) {
-    //mode = static_cast<modes>((static_cast<int>(mode) + 1) % static_cast<int>(MODE_COUNT));
-    displayMustUpdate = true;
-  }
 
   int sensorValue = 1023 - analogRead(BRIGHTNESS_PIN);
   if (sensorValue > maxBrightness) {
@@ -231,15 +238,29 @@ void loopControls() {
 
   brightness_EMA_S = (brightness_EMA_a*sensorValue) + ((1-brightness_EMA_a)*brightness_EMA_S);    //run the EMA
   float newBrightness = brightness_EMA_S/(1023.0 * 100);
+  float brightnessChange = newBrightness - globalBrightness;
+  globalBrightness = newBrightness;
 
-  if (newBrightness != globalBrightness) {
-    globalBrightness = newBrightness;
+  if (abs(brightnessChange) > 0.1) {
     displayMustUpdate = true;
   }
 }
 
+void loopControls() {
+
+  modeButtonDebouncer.update();
+  if ( modeButtonDebouncer.fell() ) {
+    currentMode = ((currentMode + 1) % modeCount);
+    displayMustUpdate = true;
+  }
+
+  loopControlBrightness();
+
+}
+
 void loop() {
   loopSensors();
+  loopControls();
   loopInputs();
   loopLEDs();
   loopDisplay();
