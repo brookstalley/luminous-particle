@@ -1,3 +1,6 @@
 [submodule "lib/Adafruit_SSD1351_Photon"]
 	path = lib/Adafruit_SSD1351_Photon
 	url = https://github.com/nfriedly/Adafruit_SSD1351_Photon.git
+[submodule "lib/--force"]
+	path = lib/--force
+	url = https://github.com/brookstalley/Adafruit-GFX-Library.git
