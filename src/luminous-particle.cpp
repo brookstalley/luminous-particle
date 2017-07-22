@@ -2,7 +2,7 @@
 
 ////////////////////////// INCLUDES ///////////////////////
 
-#include "Adafruit_mfGFX/Adafruit_mfGFX.h"
+#include "Adafruit-GFX-library/Adafruit_GFX.h"
 #include "Adafruit_SSD1351_Photon.h"
 #include "Adafruit_PWMServoDriver/Adafruit_PWMServoDriver.h"
 #include "Debounce/Debounce.h"
