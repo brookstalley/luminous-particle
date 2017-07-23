@@ -13,13 +13,12 @@
 class Emitter {
   private:
     float _u, _v, _maxvalue;
-    char (&_name)[10];
+    const char *_name;
   public:
     Emitter(const char *name, float u, float v, float maxvalue);
-    Emitter(void);
-    float getU(void);
-    float getV(void);
-    float getMax(void);
-    char* getName(void);
+    float getU(void) const;
+    float getV(void) const;
+    float getMax(void) const;
+    const char* getName(void) const;
 };
 #endif

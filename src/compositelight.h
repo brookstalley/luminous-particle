@@ -14,9 +14,10 @@
 #include "application.h"
 #include "emitter.h"
 #include "hsicolor.h"
+#include "debug.h"
 
 struct outputEmitter {
-  Emitter &emitter;
+  const Emitter *emitter;
   // within a light of this type, what
   uint8_t pwmOffset;
   float power;
@@ -33,7 +34,7 @@ class CompositeLight {
     void addEmitter(Emitter &emitter, uint8_t pwmOffset);
     float getAngle(int emitternum);
     float getSlope(int emitternum);
-    std::vector<outputEmitter> Hue2EmitterPower(HSIColor &HSI);
+    std::vector<outputEmitter> Hue2EmitterPower(const HSIColor &HSI) const;
 };
 
 #endif

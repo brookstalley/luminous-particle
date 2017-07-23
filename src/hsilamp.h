@@ -3,23 +3,25 @@
 
 #include "hsicolor.h"
 #include "compositelight.h"
-#include "Adafruit_PWMServoDriver.h"
+#include "PCA9685-Particle/PCA9685.h"
+#include "debug.h"
 
 extern float globalBrightness;
-extern Adafruit_PWMServoDriver pwm;
+extern PCA9685 pwm;
 
 class HSILamp {
   private:
-    CompositeLight &_compositeLight;
-    uint8_t _i2cAddress;
+    const CompositeLight &_compositeLight;
+    const PCA9685 &_pwm;
     uint8_t _pwmAddress;
     std::vector<outputEmitter> _emitterPowers;
     void setEmitters();
 
   public:
-    HSILamp(CompositeLight &compositelight, uint8_t i2caddress, uint8_t pwmAddress);
-    void setColor(HSIColor &color);
-    void getColor(HSIColor*);
+    HSILamp(const CompositeLight &compositelight, const PCA9685 &pwm, const uint8_t pwmAddress);
+    void begin();
+    void setColor(const HSIColor &color);
+    void getColor(const HSIColor*);
     void setSingleEmitterOn(unsigned int index);
 };
 #endif

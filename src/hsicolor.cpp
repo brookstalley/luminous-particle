@@ -55,15 +55,15 @@ void HSIColor::setHSI(float hue, float saturation, float intensity) {
   setIntensity(intensity);
 }
 
-float HSIColor::getHue(void) {
+const float HSIColor::getHue(void) const {
   return _hue;
 }
 
-float HSIColor::getSaturation(void) {
+const float HSIColor::getSaturation(void) const {
   return _saturation;
 }
 
-float HSIColor::getIntensity(void) {
+const float HSIColor::getIntensity(void) const {
   return _intensity;
 }
 

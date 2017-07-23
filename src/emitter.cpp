@@ -12,25 +12,23 @@
 Emitter::Emitter(const char *name, float u, float v, float maxvalue) :
   _u(u),
   _v(v),
-  _name(name),
-  _maxvalue(maxvalue)
+  _maxvalue(maxvalue),
+  _name(name)
+{
 }
 
-Emitter::Emitter(void) {
-}
-
-float Emitter::getU(void) {
+float Emitter::getU(void) const {
   return _u;
 }
 
-float Emitter::getV(void) {
+float Emitter::getV(void) const {
   return _v;
 }
 
-float Emitter::getMax(void) {
+float Emitter::getMax(void) const {
   return _maxvalue;
 }
 
-char * Emitter::getName(void) {
+const char * Emitter::getName(void) const {
   return _name;
 }

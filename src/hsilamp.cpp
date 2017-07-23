@@ -1,30 +1,47 @@
 #include "hsilamp.h"
 
-HSILamp::HSILamp(CompositeLight &compositeLight, uint8_t i2cAddress,
-  uint8_t pwmAddress) :
+HSILamp::HSILamp(const CompositeLight &compositeLight, const PCA9685 &pwm,
+  const uint8_t pwmAddress) :
     _compositeLight(compositeLight),
-    _i2cAddress(i2cAddress),
+    _pwm(pwm),
     _pwmAddress(pwmAddress)
 {
-  HSIColor black = HSIColor(0,0,0);
-  this->setColor (black);
+
 }
 
-void HSILamp::setColor(HSIColor &color) {
+void HSILamp::begin() {
+  std::vector<outputEmitter> powers;
+  powers = _compositeLight.Hue2EmitterPower(HSIColor(0,0,0));
+  _emitterPowers = _compositeLight.Hue2EmitterPower(HSIColor(0,0,0));
+}
+
+void HSILamp::setColor(const HSIColor &color) {
   _emitterPowers = _compositeLight.Hue2EmitterPower(color);
   this->setEmitters();
 }
 
 void HSILamp::setSingleEmitterOn(unsigned int index) {
-  for (int i=0; i < _emitterPowers.size(); i++) {
-    _emitterPowers[i].power = (index % _emitterPowers.size() == 0) ? 1.0 : 0.0;
+  char msg[100];
+  sprintf(msg,"Setting single emitter for index %u",index);
+  debugPrint(msg);
+  for (unsigned int i=0; i < _emitterPowers.size(); i++) {
+    _emitterPowers[i].power = (index % _emitterPowers.size() == i) ? 1.0 : 0.0;
   }
   this->setEmitters();
 }
 
 void HSILamp::setEmitters() {
-  for (int i=0; i < _emitterPowers.size(); i++) {
-    pwm.setPin(_pwmAddress + _emitterPowers[i].pwmOffset,
-      0x0FFF * _emitterPowers[i].power * globalBrightness, false);
+  debugPrint("setting emitters");
+  float emitterPower = 0.0f;
+  char msg[100];
+  unsigned int pwmChannel;
+  uint16_t channelPower = 0;
+  for (unsigned int i=0; i < _emitterPowers.size(); i++) {
+    emitterPower = _emitterPowers[i].power * globalBrightness;
+    channelPower = 0x0FFF * emitterPower;
+    pwmChannel = _pwmAddress + _emitterPowers[i].pwmOffset;
+    sprintf(msg,"Setting PWM channel %u to %u",pwmChannel, channelPower);
+    debugPrint(msg);
+    pwm.setChannelPWM(pwmChannel, channelPower);
   }
 }

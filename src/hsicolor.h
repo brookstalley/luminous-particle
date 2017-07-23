@@ -34,9 +34,9 @@ class HSIColor {
     void setSaturation(float saturation);
     void setIntensity(float intensity);
     void setHSI(float hue, float saturation, float intensity);
-    float getHue(void);
-    float getSaturation(void);
-    float getIntensity(void);
+    const float getHue(void) const;
+    const float getSaturation(void) const;
+    const float getIntensity(void) const;
     void getHSI(float *HSI);
 };
 

@@ -4,24 +4,29 @@
 
 #include "Adafruit-GFX-library/Adafruit_GFX.h"
 #include "Adafruit_SSD1351_Photon.h"
-#include "Adafruit_PWMServoDriver/Adafruit_PWMServoDriver.h"
-#include "Debounce/Debounce.h"
+#include "PCA9685-Particle/PCA9685.h"
+#include "clickButton/clickButton.h"
 //#include "E131/E131.h"
 
 #include "emitter.h"
 #include "hsicolor.h"
 #include "compositelight.h"
 #include "hsilamp.h"
+#include "debug.h"
 
 ////////////////////////// DECLARATIONS ///////////////////
 
 void setupDisplay();
 void setup(void);
 void loop();
-void LPoff();
-void LPtest();
+void modeOff();
+void modeTest();
+void modeE131();
 
 ///////////////////////// DEFINES /////////////////////////
+
+// Debugging
+#define PCA9685_ENABLE_DEBUG_OUTPUT
 
 // You can use any (4 or) 5 pins
 #define spi_pin_sclk A3
@@ -58,12 +63,12 @@ typedef struct {
   luminousFunctionPointer functionPointer;
 } luminousMode ;
 
-const int modeCount = 2;
+const int modeCount = 3;
 
 luminousMode modes[modeCount] = {
-  {"Off", LPoff},
-  {"Test", LPtest},
-  {"E131", LPe131}
+  {"Off", modeOff},
+  {"Test", modeTest},
+  {"E131", modeE131}
 };
 
 int currentMode = 0;
@@ -74,15 +79,13 @@ float globalBrightness = 1.0f;
 float LEDTempCelsius = 20.0f;
 
 bool displayMustUpdate = false;
+bool lightsMustUpdate = false;
 
 ////////////////////////// Controllers and stuff
 Adafruit_SSD1351 display = Adafruit_SSD1351(spi_pin_cs, spi_pin_dc, spi_pin_rst);
-Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
-Debounce modeButtonDebouncer = Debounce();
+PCA9685 pwm = PCA9685(Wire);
+ClickButton modeButton = ClickButton(MODE_BUTTON_PIN, LOW,  CLICKBTN_PULLUP);
 
-///////////////////////// Main
-
-void debugPrint(const char* text) {
 // Shared lights
 
 Emitter emitterLZ7white("LZ7-w",0.202531646, 0.469936709, (float)180/180);
@@ -96,17 +99,48 @@ Emitter emitterLZ7violet("LZ7-v",0.35, 0.15, (float)30/30);
 // Standard luminous node & wiring
 CompositeLight LZ7(emitterLZ7white, 5);
 
-// Actual nodes
-HSILamp testnode(LZ7, 0x3c, 0);
+HSILamp testnode(LZ7, pwm, (uint8_t)0);
 
+//////////////// MODES ///////////////////////////////////
+void modeOff() {
+
+}
+
+void effectTest() {
+  const unsigned int millisPerColor = 2000;
+  static unsigned long firstChange = millis();
+  static unsigned int counter = 0;
+  static unsigned int lastCounter = 0;
+  static char msg[200];
+
+  counter = floor((millis() - firstChange) / millisPerColor);
+
+  //sprintf(msg,"millis %d, firstchange %d, millisperColor %u, counter %d",millis(),firstChange,millisPerColor,counter);
+  //debugPrint(msg);
+  if (lightsMustUpdate || (counter != lastCounter)) {
+    testnode.setSingleEmitterOn(counter);
+    lastCounter = counter;
+  }
+}
+
+void modeTest() {
+  effectTest();
+}
+
+void modeE131() {
+
+}
+
+
+// Actual nodes
+// BREAKS
+//HSILamp testnode(LZ7, pwm, (uint8_t)0);
+/*
 // Our lists
 std::vector<HSILamp> allNodes {testnode};
-
+*/
 ////////////////////////// MAIN ////////////////////////////
 
-void debugPrint(char* text) {
-  Serial.println(text);
-}
 
 void setupDisplay() {
   debugPrint("Setting up display");
@@ -122,6 +156,8 @@ void setupDisplay() {
 }
 
 void setupLEDs() {
+  debugPrint("Setting up LEDs");
+
   LZ7.addEmitter(emitterLZ7red, 0);
   LZ7.addEmitter(emitterLZ7amber, 3);
   LZ7.addEmitter(emitterLZ7green, 1);
@@ -129,16 +165,30 @@ void setupLEDs() {
   LZ7.addEmitter(emitterLZ7blue, 2);
   LZ7.addEmitter(emitterLZ7violet, 6);
 
-  pwm.begin();
-  pwm.setPWMFreq(400);
+  debugPrint("Setting up lamps");
+
+  testnode.begin();
+
+  debugPrint("Setting up outputs");
+  Wire.begin();                       // Wire must be started first
+  Wire.setClock(400000);              // Supported baud rates are 100kHz, 400kHz, and 1000kHz
+  debugPrint("  resetDevices");
+  pwm.resetDevices();
+  debugPrint("  init");
+  pwm.init(B000000, PCA9685_MODE_OUTPUT_ONACK | PCA9685_MODE_OUTPUT_TPOLE);
+  debugPrint("  setPWMFrequency");
+  pwm.setPWMFrequency(400);
+  debugPrint("Done setting up LEDs");
+
 }
 
 void setupControls() {
   // Setup the first button with an internal pull-up :
   pinMode(MODE_BUTTON_PIN, INPUT_PULLUP);
-  // After setting up the button, setup the Bounce instance :
-  modeButtonDebouncer.attach(MODE_BUTTON_PIN);
-  modeButtonDebouncer.interval(10); // interval in ms
+  modeButton.debounceTime   = 20;   // Debounce timer in ms
+  modeButton.multiclickTime = 250;  // Time limit for multi clicks
+  modeButton.longClickTime  = 750; // time until "held-down clicks" register
+
 }
 
 void setupSensors() {
@@ -146,31 +196,22 @@ void setupSensors() {
 }
 
 void setup(void) {
-  Serial.begin(115200);
+  setDebugOutput(true);
+  Serial.begin(9600);
 
   setupDisplay();
 
   int delayLoops = 0;
-  while ((!Serial) && (delayLoops<100)) {
+  while ((!Serial) && (delayLoops<300)) {
     delay(10);
     delayLoops++;
   }
+  if (Serial)
+    debugPrint("Serial came up");
 
   setupLEDs();
   setupControls();
   setupSensors();
-}
-
-void effectTest() {
-  const int millisPerColor = 2000;
-  static unsigned long timeSinceChange = 0  ;
-  static unsigned int counter = 0;
-
-  if (millis() - timeSinceChange > millisPerColor) {
-    timeSinceChange = millis();
-    testnode.setSingleEmitterOn(counter);
-    counter++;
-  }
 }
 
 void effectOff() {
@@ -186,7 +227,9 @@ void loopInputs() {
 }
 
 void loopLEDs() {
- effectTest();
+ //effectTest();
+ modes[currentMode].functionPointer();
+ lightsMustUpdate = false;
 }
 
 char * TimeToString(unsigned long t)
@@ -201,19 +244,23 @@ char * TimeToString(unsigned long t)
 }
 
 void loopDisplay() {
-  const unsigned long maxUpdateLagMillis = 1000;
+  const unsigned long maxUpdateLagMillis = 500;
   static unsigned long lastUpdateMillis = 0;
+
+  const byte numChars = 64;
+  static char brightnessReadout[numChars];
+  static char debugReadout[numChars];
 
   if (millis() - lastUpdateMillis > maxUpdateLagMillis) {
     displayMustUpdate = true;
   }
 
   if (displayMustUpdate) {
-    const byte numChars = 64;
-    static char brightnessReadout[numChars];
+
     //static char temperature[numChars];
 
     sprintf (brightnessReadout, "Brightness: %2.1f", globalBrightness * 100);
+    sprintf (debugReadout, (getDebugOutput() ? "Debug: serial" : "Debug: off"));
 /*
     dtostrf(LEDTempCelsius, 2, 1, str_temp);
     snprintf (temperature, numChars, "Temp: %s c", str_temp);
@@ -229,6 +276,7 @@ void loopDisplay() {
     display.println(TimeToString(millis()/1000));
     display.println(modes[currentMode].name);
     display.println(brightnessReadout);
+    display.println(debugReadout);
 
     lastUpdateMillis = millis();
     displayMustUpdate = false;
@@ -270,20 +318,42 @@ void loopControlBrightness() {
 
   brightness_EMA_S = (brightness_EMA_a*sensorValue) + ((1-brightness_EMA_a)*brightness_EMA_S);    //run the EMA
   float newBrightness = brightness_EMA_S/(1023.0 * 100);
+
   float brightnessChange = newBrightness - globalBrightness;
+
+
+  if (abs(brightnessChange) >= 0.001) {
+    char msg[100];
+    sprintf(msg,"New brightness: %f (change %f)",newBrightness,brightnessChange);
+    debugPrint(msg);
+    //displayMustUpdate = true;
+    lightsMustUpdate = true;
+  }
+
+
   globalBrightness = newBrightness;
 
-  if (abs(brightnessChange) > 0.1) {
-    displayMustUpdate = true;
-  }
+
 }
 
 void loopControls() {
+  static int modeClicks = 0;
+  modeButton.Update();
+  modeClicks = modeButton.clicks;
+  if (modeButton.clicks != 0) {
 
-  modeButtonDebouncer.update();
-  if ( modeButtonDebouncer.fell() ) {
-    currentMode = ((currentMode + 1) % modeCount);
-    displayMustUpdate = true;
+    if ( modeClicks == 1 ) {
+      debugPrint("One click");
+      currentMode = ((currentMode + 1) % modeCount);
+      displayMustUpdate = true;
+      lightsMustUpdate = true;
+    }
+
+    if ( modeClicks == -1 ) {
+      debugPrint("One long click");
+      setDebugOutput(!getDebugOutput());
+      displayMustUpdate = true;
+    }
   }
 
   loopControlBrightness();
@@ -291,9 +361,9 @@ void loopControls() {
 }
 
 void loop() {
-  loopSensors();
+  //loopSensors();
   loopControls();
-  loopInputs();
+  //loopInputs();
   loopLEDs();
   loopDisplay();
 }
