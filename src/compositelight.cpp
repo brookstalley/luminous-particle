@@ -102,14 +102,14 @@ std::vector<outputEmitter> CompositeLight::Hue2EmitterPower(const HSIColor &HSI)
   // Copy our emitter setup, which wills start with power being zero
   std::vector<outputEmitter> emitterPowers = _colorEmitters;
 
-  debugPrint("Allocated emitterPowers");
+  //debugPrint("Allocated emitterPowers");
   unsigned int emitter1, emitter2;
 
-  char m[100];
-  sprintf(m, "emitterPowers: %u", emitterPowers.size());
-  debugPrint(m);
-  sprintf(m, "_colorEmitters: %u", _colorEmitters.size());
-  debugPrint(m);
+  //char m[100];
+  //sprintf(m, "emitterPowers: %u", emitterPowers.size());
+  //debugPrint(m);
+  //sprintf(m, "_colorEmitters: %u", _colorEmitters.size());
+  //debugPrint(m);
 
   // Check the range to determine which intersection to do.
   // For angle less than the smallest CIE hue or larger than the largest, special case.
@@ -132,10 +132,10 @@ std::vector<outputEmitter> CompositeLight::Hue2EmitterPower(const HSIColor &HSI)
     emitter1 = i-1;
     emitter2 = i;
   }
-  char msg[100];
-  sprintf(msg, "Emitter 1: %u, Emitter 2: %u", emitter1, emitter2);
-  debugPrint("Found emitters");
-  debugPrint(msg);
+  //char msg[100];
+  //sprintf(msg, "Emitter 1: %u, Emitter 2: %u", emitter1, emitter2);
+  //debugPrint("Found emitters");
+  //debugPrint(msg);
 
   // Get the ustar and vstar values for the target LEDs.
 
@@ -145,7 +145,6 @@ std::vector<outputEmitter> CompositeLight::Hue2EmitterPower(const HSIColor &HSI)
   float emitter2_ustar = emitterPowers[emitter2].emitter->getU() - _white.emitter->getU();
   float emitter2_vstar = emitterPowers[emitter2].emitter->getV() - _white.emitter->getV();
 
-  debugPrint("Got stars");
 
   // Get the slope between LED1 and LED2.
   float slope = _slope[emitter1];
@@ -157,12 +156,10 @@ std::vector<outputEmitter> CompositeLight::Hue2EmitterPower(const HSIColor &HSI)
   emitterPowers[emitter1].power = I * S * abs(ustar-emitter2_ustar)/abs(emitter2_ustar - emitter1_ustar);
   emitterPowers[emitter2].power = I * S * abs(ustar-emitter1_ustar)/abs(emitter2_ustar - emitter1_ustar);
 
-  debugPrint("set colors");
   // Add white to the end, and set the power
   emitterPowers.push_back(_white);
   emitterPowers[emitterPowers.size()-1].power = I * (1 - S);
 
-  debugPrint("added white");
 //  // For debugging, print the actual output values.
 //  Serial.println("Target Hue of " + String(H) + " between LEDs " + String(LED1) + " and " + String(LED2));
 //  Serial.println("Output Values");

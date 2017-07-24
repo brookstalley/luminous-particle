@@ -21,9 +21,9 @@ void HSILamp::setColor(const HSIColor &color) {
 }
 
 void HSILamp::setSingleEmitterOn(unsigned int index) {
-  char msg[100];
-  sprintf(msg,"Setting single emitter for index %u",index);
-  debugPrint(msg);
+  //char msg[100];
+  //sprintf(msg,"Setting single emitter for index %u",index);
+  //debugPrint(msg);
   for (unsigned int i=0; i < _emitterPowers.size(); i++) {
     _emitterPowers[i].power = (index % _emitterPowers.size() == i) ? 1.0 : 0.0;
   }
@@ -31,9 +31,9 @@ void HSILamp::setSingleEmitterOn(unsigned int index) {
 }
 
 void HSILamp::setEmitters() {
-  debugPrint("setting emitters");
-  float emitterPower = 0.0f;
+  //debugPrint("setting emitters");
   char msg[100];
+  float emitterPower = 0.0f;
   unsigned int pwmChannel;
   uint16_t channelPower = 0;
   for (unsigned int i=0; i < _emitterPowers.size(); i++) {

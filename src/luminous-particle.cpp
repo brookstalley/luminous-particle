@@ -21,6 +21,7 @@ void setup(void);
 void loop();
 void modeOff();
 void modeTest();
+void modeRotate();
 void modeE131();
 
 ///////////////////////// DEFINES /////////////////////////
@@ -63,11 +64,12 @@ typedef struct {
   luminousFunctionPointer functionPointer;
 } luminousMode ;
 
-const int modeCount = 3;
+const int modeCount = 4;
 
 luminousMode modes[modeCount] = {
   {"Off", modeOff},
   {"Test", modeTest},
+  {"Rotate", modeRotate},
   {"E131", modeE131}
 };
 
@@ -111,7 +113,7 @@ void effectTest() {
   static unsigned long firstChange = millis();
   static unsigned int counter = 0;
   static unsigned int lastCounter = 0;
-  static char msg[200];
+  //static char msg[200];
 
   counter = floor((millis() - firstChange) / millisPerColor);
 
@@ -123,8 +125,54 @@ void effectTest() {
   }
 }
 
+void effectRotate() {
+  const unsigned int millisPerHueRotation = 1000 * 60;
+  const unsigned int millisPerSatRotation = millisPerHueRotation *2;
+
+  const unsigned int minMillis=100;
+
+  static double hue = 0.0f;
+  static double sat = 1.0f;
+
+  static signed int satDir = -1;
+  static unsigned long lastMillis = millis();
+  static HSIColor rotateColor;
+
+  unsigned long nowMillis = millis();
+
+  unsigned long millisPassed = nowMillis - lastMillis;
+  if (millisPassed < minMillis)
+    return;
+
+  lastMillis = nowMillis;
+
+  double hueToAdd = 360.0f * ((double)millisPassed / (double)millisPerHueRotation);
+  hue += hueToAdd;
+  if (hue>360) {
+    hue = hue - 360;
+  }
+  sat += ((double)millisPassed / (double)millisPerSatRotation) * satDir;
+  if (sat > 1.0f) {
+    sat = 1.0f;
+    satDir = -1;
+  } else if (sat < 0.0f) {
+    sat = 0.0f;
+    satDir = 1;
+  }
+  char msg[30];
+  sprintf(msg,"H: %3.0f (+ %3.3f, %u) S: %3.2f I: 1.0", hue, hueToAdd, millisPassed, sat);
+  debugPrint(msg);
+  rotateColor.setHSI(hue, sat, 0.5f);
+
+  testnode.setColor(rotateColor);
+}
+
 void modeTest() {
   effectTest();
+}
+
+void modeRotate() {
+  effectRotate();
 }
 
 void modeE131() {
@@ -227,7 +275,7 @@ void loopInputs() {
 }
 
 void loopLEDs() {
- //effectTest();
+
  modes[currentMode].functionPointer();
  lightsMustUpdate = false;
 }
@@ -266,7 +314,7 @@ void loopDisplay() {
 
     sprintf (lineData[0], "Running:    %s", TimeToString(millis()/1000));
     sprintf (lineData[1], "Mode:       %s", modes[currentMode].name);
-    sprintf (lineData[2], "Brightness: %2.1f", globalBrightness * 100);
+    sprintf (lineData[2], "Brightness: %2.0f%%", globalBrightness * 100);
     strcpy (lineData[3], (getDebugOutput() ?
                           "Debug:      serial" :
                           "Debug:      off"));
@@ -282,14 +330,26 @@ void loopDisplay() {
       // We always have 12 characters of label
       // So, clear the space from char 13 until the end (currently hardcoded at 128)
       if (strcmp(lineData[i],lineDataPrevious[i]) != 0) {
-        display.fillRect(
-          (uint16_t)(12 * charWidth),
-          (uint16_t)(i * lineHeight),
-          (uint16_t)(127 - (12 * charWidth)),
-          (uint16_t)lineHeight,
-          BLACK);
+        // Print our new text
         display.setCursor(0, i * lineHeight);
         display.println(lineData[i]);
+
+        // Determine how much we need to clear after the next text
+        uint16_t charsBeforeEOL = 11 + strlen(lineData[i]);
+
+        size_t lengthPrevious = strlen(lineDataPrevious[i]);
+        size_t lengthNew = strlen(lineData[i]);
+
+        if (lengthPrevious > lengthNew) {
+          display.fillRect(
+            (uint16_t)(charsBeforeEOL * charWidth),
+            (uint16_t)(i * lineHeight),
+            (uint16_t)(127 - (lengthNew * charWidth)),
+            (uint16_t)lineHeight,
+            BLACK);
+        }
+
+        // Save the new text for next time
         strcpy(lineDataPrevious[i],lineData[i]);
       }
     }
