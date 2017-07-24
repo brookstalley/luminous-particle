@@ -239,28 +239,37 @@ char * TimeToString(unsigned long t)
  t = t % 3600;
  int m = t / 60;
  int s = t % 60;
- sprintf(str, "%04ld:%02d:%02d", h, m, s);
+ sprintf(str, "%02ld:%02d:%02d", h, m, s);
  return str;
 }
 
 void loopDisplay() {
+  // Assumes monospace fonts
+  const uint8_t displayWidth = 128;
   const unsigned long maxUpdateLagMillis = 500;
+  const uint8_t lineHeight = 9;
+  const uint8_t charWidth = 6;
+  const uint8_t charsPerLine = floor(displayWidth / charWidth);
+  const uint8_t linesToDisplay = 4;
+
   static unsigned long lastUpdateMillis = 0;
 
-  const byte numChars = 64;
-  static char brightnessReadout[numChars];
-  static char debugReadout[numChars];
+  static char lineData[linesToDisplay][charsPerLine + 1] = { };
+  static char lineDataPrevious[linesToDisplay][charsPerLine +1] = { };
 
   if (millis() - lastUpdateMillis > maxUpdateLagMillis) {
     displayMustUpdate = true;
   }
 
   if (displayMustUpdate) {
+    display.setTextColor(WHITE, BLACK);
 
-    //static char temperature[numChars];
-
-    sprintf (brightnessReadout, "Brightness: %2.1f", globalBrightness * 100);
-    sprintf (debugReadout, (getDebugOutput() ? "Debug: serial" : "Debug: off"));
+    sprintf (lineData[0], "Running:    %s", TimeToString(millis()/1000));
+    sprintf (lineData[1], "Mode:       %s", modes[currentMode].name);
+    sprintf (lineData[2], "Brightness: %2.1f", globalBrightness * 100);
+    strcpy (lineData[3], (getDebugOutput() ?
+                          "Debug:      serial" :
+                          "Debug:      off"));
 /*
     dtostrf(LEDTempCelsius, 2, 1, str_temp);
     snprintf (temperature, numChars, "Temp: %s c", str_temp);
@@ -269,24 +278,30 @@ void loopDisplay() {
     display.sendBuffer();          // transfer internal memory to the display
 */
 
-    display.fillScreen(BLACK);
-    display.setCursor(0, 5);
-    display.setTextColor(WHITE);
-    display.setTextSize(1.5);
-    display.println(TimeToString(millis()/1000));
-    display.println(modes[currentMode].name);
-    display.println(brightnessReadout);
-    display.println(debugReadout);
+    for (uint8_t i = 0; i < linesToDisplay; i++) {
+      // We always have 12 characters of label
+      // So, clear the space from char 13 until the end (currently hardcoded at 128)
+      if (strcmp(lineData[i],lineDataPrevious[i]) != 0) {
+        display.fillRect(
+          (uint16_t)(12 * charWidth),
+          (uint16_t)(i * lineHeight),
+          (uint16_t)(127 - (12 * charWidth)),
+          (uint16_t)lineHeight,
+          BLACK);
+        display.setCursor(0, i * lineHeight);
+        display.println(lineData[i]);
+        strcpy(lineDataPrevious[i],lineData[i]);
+      }
+    }
 
     lastUpdateMillis = millis();
     displayMustUpdate = false;
-
 
   }
 }
 
 void loopControlBrightness() {
-  static float brightness_EMA_a = 0.2;      //initialization of EMA alpha
+  static float brightness_EMA_a = 0.7;      //initialization of EMA alpha
   static int brightness_EMA_S = 1023 - analogRead(BRIGHTNESS_PIN);          //initialization of EMA S
   static int minBrightness = 100;
   static int maxBrightness = 900;
@@ -302,17 +317,17 @@ void loopControlBrightness() {
   }
 
   sensorValue = map(sensorValue, minBrightness, maxBrightness, 0, 1023);
-  if (sensorValue < 50) {
+  if (sensorValue < 25) {
     sensorValue = (sensorValue)/2;
-    if (sensorValue < 25) {
+    if (sensorValue < 10) {
       sensorValue = (sensorValue)/4;
-      if (sensorValue < 10) {
+      if (sensorValue < 5) {
         sensorValue = 0;
       }
     }
   }
-  if (sensorValue > 987) {
-    sensorValue = sensorValue + (sensorValue-987) * 2;
+  if (sensorValue > 1000) {
+    sensorValue = sensorValue + (sensorValue-1000) * 2;
   }
   sensorValue = 100*constrain(sensorValue,0,1023);
 
@@ -321,19 +336,15 @@ void loopControlBrightness() {
 
   float brightnessChange = newBrightness - globalBrightness;
 
-
-  if (abs(brightnessChange) >= 0.001) {
-    char msg[100];
-    sprintf(msg,"New brightness: %f (change %f)",newBrightness,brightnessChange);
-    debugPrint(msg);
+  if (abs(brightnessChange) >= 0.002) {
+    //char msg[100];
+    //sprintf(msg,"New brightness: %f (change %f)",newBrightness,brightnessChange);
+    //debugPrint(msg);
     //displayMustUpdate = true;
     lightsMustUpdate = true;
+    displayMustUpdate = true;
   }
-
-
   globalBrightness = newBrightness;
-
-
 }
 
 void loopControls() {
