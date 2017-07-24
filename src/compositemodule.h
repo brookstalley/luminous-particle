@@ -7,8 +7,8 @@
 // Neltner's TeensyLED Controller Library:
 // https://github.com/saikoLED/TeensyLED
 
-#ifndef COMPOSITELIGHT_H
-#define COMPOSITELIGHT_H
+#ifndef COMPOSITEMODULE_H
+#define COMPOSITEMODULE_H
 
 #include <vector>
 #include "application.h"
@@ -38,12 +38,12 @@ struct outputEmitter {
   float power;
 };
 
-class CompositeLight {
+class CompositeModule {
   private:
     std::vector<componentEmitter> _colorEmitters;
-    componentEmitter _white;
+    componentEmitter _whiteEmitter;
   public:
-    CompositeLight (Emitter &white, uint8_t pwmOffset);
+    CompositeModule (Emitter &white, uint8_t pwmOffset);
     void addEmitter(Emitter &emitter, uint8_t pwmOffset);
     float getAngle(int emitternum);
     float getSlope(int emitternum);

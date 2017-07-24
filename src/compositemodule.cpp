@@ -7,27 +7,27 @@
 // Neltner's TeensyLED Controller Library:
 // https://github.com/saikoLED/TeensyLED
 
-// CompositeLight models a light that contains multiple emitters.
+// CompositeModule models a light that contains multiple emitters.
 // Constructor takes a single emitter to use as white. This will be used
 // to desaturate based on HSI
 //
 // After constructing, add color emitters using addEmitter.
 
 #include <math.h>
-#include "compositelight.h"
+#include "compositemodule.h"
 
-CompositeLight::CompositeLight (Emitter &white, uint8_t pwmOffset)
+CompositeModule::CompositeModule (Emitter &white, uint8_t pwmOffset)
 {
   // slope and angle not relevant for white
-  _white = componentEmitter(&white, pwmOffset, 0, 0);
+  _whiteEmitter = componentEmitter(&white, pwmOffset, 0, 0);
 }
 
-void CompositeLight::addEmitter (Emitter &emitter, uint8_t pwmOffset) {
+void CompositeModule::addEmitter (Emitter &emitter, uint8_t pwmOffset) {
   // To figure out where to put it in the colorspace, calculate the angle from the white point.
   float uEmitter = emitter.getU();
   float vEmitter = emitter.getV();
-  float uWHITE = _white.emitter->getU();
-  float vWHITE = _white.emitter->getV();
+  float uWHITE = _whiteEmitter.emitter->getU();
+  float vWHITE = _whiteEmitter.emitter->getV();
 
   float angle = fmod((180/M_PI) * atan2((vEmitter - vWHITE),(uEmitter - uWHITE)) + 360, 360);
 
@@ -76,11 +76,11 @@ void CompositeLight::addEmitter (Emitter &emitter, uint8_t pwmOffset) {
 //  Serial.println("");
 }
 
-float CompositeLight::getAngle(int num) {
+float CompositeModule::getAngle(int num) {
   return _angle[num];
 }
 
-std::vector<outputEmitter> CompositeLight::Hue2EmitterPower(const HSIColor &HSI) const {
+std::vector<outputEmitter> CompositeModule::Hue2EmitterPower(const HSIColor &HSI) const {
   float H = fmod(HSI.getHue()+360,360);
   float S = HSI.getSaturation();
   float I = HSI.getIntensity();
@@ -119,8 +119,9 @@ std::vector<outputEmitter> CompositeLight::Hue2EmitterPower(const HSIColor &HSI)
         emitter2 = i;
       }
     }
-    //emitter1 = i-1;
-    //emitter2 = i;
+    // TODO: This seems redundant; is the whole "if" block ablove required?
+    emitter1 = i-1;
+    emitter2 = i;
   }
   //char msg[100];
   //sprintf(msg, "Emitter 1: %u, Emitter 2: %u", emitter1, emitter2);
@@ -128,13 +129,13 @@ std::vector<outputEmitter> CompositeLight::Hue2EmitterPower(const HSIColor &HSI)
   //debugPrint(msg);
 
   // Get the ustar and vstar values for the target LEDs.
-  float emitter1_ustar = _colorEmitters[emitter1].emitter->getU() - _white.emitter->getU();
-  float emitter1_vstar = _colorEmitters[emitter1].emitter->getV() - _white.emitter->getV();
-  float emitter2_ustar = _colorEmitters[emitter2].emitter->getU() - _white.emitter->getU();
-  float emitter2_vstar = _colorEmitters[emitter2].emitter->getV() - _white.emitter->getV();
+  float emitter1_ustar = _colorEmitters[emitter1].emitter->getU() - _whiteEmitter.emitter->getU();
+  float emitter1_vstar = _colorEmitters[emitter1].emitter->getV() - _whiteEmitter.emitter->getV();
+  float emitter2_ustar = _colorEmitters[emitter2].emitter->getU() - _whiteEmitter.emitter->getU();
+  float emitter2_vstar = _colorEmitters[emitter2].emitter->getV() - _whiteEmitter.emitter->getV();
 
   // Get the slope between LED1 and LED2.
-  float slope = _slope[emitter1];
+  float slope = _colorEmitters[emitter1].slope;
 
   float ustar = (emitter2_vstar - slope*emitter2_ustar)/(tanH - slope);
   float vstar = tanH/(slope - tanH) * (slope * emitter2_ustar - emitter2_vstar);
@@ -144,7 +145,7 @@ std::vector<outputEmitter> CompositeLight::Hue2EmitterPower(const HSIColor &HSI)
   emitterPowers[emitter2].power = I * S * abs(ustar-emitter1_ustar)/abs(emitter2_ustar - emitter1_ustar);
 
   // Add white to the end, and set the power
-  emitterPowers.push_back(_white.pwmOffset, I * (1 - S));
+  emitterPowers.push_back(_whiteEmitter.pwmOffset, I * (1 - S));
 
 //  // For debugging, print the actual output values.
 //  Serial.println("Target Hue of " + String(H) + " between LEDs " + String(LED1) + " and " + String(LED2));
