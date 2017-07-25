@@ -6,6 +6,7 @@
 static bool debugOutputMode = true;
 
 void debugPrint(const char* text);
+
 void setDebugOutput(bool newMode);
 bool getDebugOutput();
 

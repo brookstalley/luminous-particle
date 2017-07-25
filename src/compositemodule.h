@@ -7,8 +7,8 @@
 // Neltner's TeensyLED Controller Library:
 // https://github.com/saikoLED/TeensyLED
 
-#ifndef COMPOSITELIGHT_H
-#define COMPOSITELIGHT_H
+#ifndef COMPOSITEMODULE_H
+#define COMPOSITEMODULE_H
 
 #include <vector>
 #include "application.h"
@@ -16,21 +16,34 @@
 #include "hsicolor.h"
 #include "debug.h"
 
-struct outputEmitter {
+struct componentEmitter {
+  componentEmitter (const Emitter *e, uint8_t pwm, float a, float s) {
+    emitter = e;
+    pwmOffset = pwm;
+    angle = a;
+    slope = s;
+  }
   const Emitter *emitter;
-  // within a light of this type, what
+  uint8_t pwmOffset;
+  float angle;
+  float slope;
+};
+
+struct outputEmitter {
+  outputEmitter(uint8_t po, float pwr) {
+    pwmOffset = po;
+    power = pwr;
+  }
   uint8_t pwmOffset;
   float power;
 };
 
-class CompositeLight {
+class CompositeModule {
   private:
-    std::vector<outputEmitter> _colorEmitters;
-    outputEmitter _white;
-    std::vector<float> _slope;
-    std::vector<float> _angle;
+    std::vector<componentEmitter> _colorEmitters;
+    componentEmitter _whiteEmitter;
   public:
-    CompositeLight (Emitter &white, uint8_t pwmOffset);
+    CompositeModule (Emitter &white, uint8_t pwmOffset);
     void addEmitter(Emitter &emitter, uint8_t pwmOffset);
     float getAngle(int emitternum);
     float getSlope(int emitternum);

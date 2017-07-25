@@ -11,8 +11,8 @@
 
 #include "emitter.h"
 #include "hsicolor.h"
-#include "compositelight.h"
-#include "hsilamp.h"
+#include "compositemodule.h"
+#include "hsilight.h"
 #include "debug.h"
 
 ////////////////////////// DECLARATIONS ///////////////////
@@ -57,13 +57,12 @@ void modeE131();
 
 ////////////////////////// STRUCTS ///////////////////////////
 
-
 typedef void (* luminousFunctionPointer) ();
 
 typedef struct {
   const char name[10];
   luminousFunctionPointer functionPointer;
-} luminousMode ;
+} luminousMode;
 
 const int modeCount = 4;
 
@@ -100,9 +99,9 @@ Emitter emitterLZ7blue("LZ7-b",0.1747943747, 0.1117834986, (float)30/30);
 Emitter emitterLZ7violet("LZ7-v",0.35, 0.15, (float)30/30);
 
 // Standard luminous node & wiring
-CompositeLight LZ7(emitterLZ7white, 5);
+CompositeModule LZ7(emitterLZ7white, 5);
 
-HSILamp testnode(LZ7, pwm, (uint8_t)0);
+HSILight testnode(LZ7, pwm, (uint8_t)0);
 
 //////////////// MODES ///////////////////////////////////
 void modeOff() {
@@ -180,10 +179,10 @@ void modeE131() {
 
 // Actual nodes
 // BREAKS
-//HSILamp testnode(LZ7, pwm, (uint8_t)0);
+//HSILight testnode(LZ7, pwm, (uint8_t)0);
 /*
 // Our lists
-std::vector<HSILamp> allNodes {testnode};
+std::vector<HSILight> allNodes {testnode};
 */
 ////////////////////////// MAIN ////////////////////////////
 
