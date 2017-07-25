@@ -1,4 +1,5 @@
 #include "application.h"
+#include <math.h>
 
 ////////////////////////// INCLUDES ///////////////////////
 
@@ -147,10 +148,7 @@ void effectRotate() {
   lastMillis = nowMillis;
 
   double hueToAdd = 360.0f * ((double)millisPassed / (double)millisPerHueRotation);
-  hue += hueToAdd;
-  if (hue>360) {
-    hue = hue - 360;
-  }
+  hue = fmod(hue + hueToAdd + 360.0f,360);
   sat += ((double)millisPassed / (double)millisPerSatRotation) * satDir;
   if (sat > 1.0f) {
     sat = 1.0f;

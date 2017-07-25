@@ -114,16 +114,16 @@ std::vector<outputEmitter> CompositeLight::Hue2EmitterPower(const HSIColor &HSI)
   // Check the range to determine which intersection to do.
   // For angle less than the smallest CIE hue or larger than the largest, special case.
 
-  if ((H < _angle[0]) || (H >= _angle[emitterPowers.size()-1])) {
+  if ((H < _angle[0]) || (H >= _angle[_colorEmitters.size()-1])) {
     // Then we're mixing the lowest angle LED with the highest angle LED.
-    emitter1 = emitterPowers.size() - 1;
+    emitter1 = _colorEmitters.size() - 1;
     emitter2 = 0;
   }
 
   else {
     // Iterate through the angles until we find an LED with hue smaller than the angle.
     unsigned int i;
-    for (i=1; (H > _angle[i]) && (i<(emitterPowers.size()-1)); i++) {
+    for (i=1; (H > _angle[i]) && (i<(_colorEmitters.size()-1)); i++) {
       if (H > _angle[i]) {
         emitter1 = i-1;
         emitter2 = i;
@@ -132,19 +132,17 @@ std::vector<outputEmitter> CompositeLight::Hue2EmitterPower(const HSIColor &HSI)
     emitter1 = i-1;
     emitter2 = i;
   }
-  //char msg[100];
-  //sprintf(msg, "Emitter 1: %u, Emitter 2: %u", emitter1, emitter2);
-  //debugPrint("Found emitters");
-  //debugPrint(msg);
+  char msg[100];
+  sprintf(msg, "Emitter 1: %u, Emitter 2: %u", emitter1, emitter2);
+  debugPrint("Found emitters");
+  debugPrint(msg);
 
   // Get the ustar and vstar values for the target LEDs.
-
 
   float emitter1_ustar = emitterPowers[emitter1].emitter->getU() - _white.emitter->getU();
   float emitter1_vstar = emitterPowers[emitter1].emitter->getV() - _white.emitter->getV();
   float emitter2_ustar = emitterPowers[emitter2].emitter->getU() - _white.emitter->getU();
   float emitter2_vstar = emitterPowers[emitter2].emitter->getV() - _white.emitter->getV();
-
 
   // Get the slope between LED1 and LED2.
   float slope = _slope[emitter1];
@@ -155,6 +153,9 @@ std::vector<outputEmitter> CompositeLight::Hue2EmitterPower(const HSIColor &HSI)
   // Set the two selected colors.
   emitterPowers[emitter1].power = I * S * abs(ustar-emitter2_ustar)/abs(emitter2_ustar - emitter1_ustar);
   emitterPowers[emitter2].power = I * S * abs(ustar-emitter1_ustar)/abs(emitter2_ustar - emitter1_ustar);
+
+  sprintf(msg, "I: %3.2f S: %3.2f u: %3.2f v: %3.2f p1: %4.4f p2: %4.4f", I, S, ustar, vstar, emitterPowers[emitter1].power, emitterPowers[emitter2].power);
+  debugPrint(msg);
 
   // Add white to the end, and set the power
   emitterPowers.push_back(_white);
