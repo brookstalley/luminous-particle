@@ -99,7 +99,7 @@ Emitter emitterLZ7blue("LZ7-b",0.1747943747, 0.1117834986, (float)30/30);
 Emitter emitterLZ7violet("LZ7-v",0.35, 0.15, (float)30/30);
 
 // Standard luminous node & wiring
-CompositeModule LZ7(emitterLZ7white, 5);
+CompositeModule LZ7();
 
 HSILight testnode(LZ7, pwm, (uint8_t)0);
 
@@ -203,6 +203,7 @@ void setupDisplay() {
 void setupLEDs() {
   debugPrint("Setting up LEDs");
 
+  LZ7.addWhiteEmitter(emitterLZ7white, 5);
   LZ7.addEmitter(emitterLZ7red, 0);
   LZ7.addEmitter(emitterLZ7amber, 3);
   LZ7.addEmitter(emitterLZ7green, 1);

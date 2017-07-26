@@ -34,8 +34,9 @@ class CompositeModule {
     std::vector<componentEmitter> _colorEmitters;
     componentEmitter _whiteEmitter;
   public:
-    CompositeModule (const Emitter &white, uint16_t localAddress);
-    void addEmitter(Emitter &emitter, uint16_t localAddress);
+    void CompositeModule ();
+    void addWhiteEmitter (const Emitter &white, uint16_t localAddress);
+    void addColorEmitter(Emitter &emitter, uint16_t localAddress);
     float getAngle(int emitternum);
     float getSlope(int emitternum);
     std::vector<outputEmitter> Hue2EmitterPower(const HSIColor &HSI) const;

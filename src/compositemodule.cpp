@@ -17,13 +17,18 @@
 #include <math.h>
 
 
-CompositeModule::CompositeModule (const Emitter &white, uint16_t localAddress)
+CompositeModule::CompositeModule ()
 {
-  // slope and angle not relevant for white
+
+}
+
+void CompositeModule::addWhiteEmitter(const Emitter &white, uint16_t localAddress) {
+  // slope and angle not relevant for white emitter
+  // currently supports only one white emitter per composite module
   _whiteEmitter = componentEmitter(&white, localAddress, 0.0f, 0.0f);
 }
 
-void CompositeModule::addEmitter (Emitter &emitter, uint16_t localAddress) {
+void CompositeModule::addColorEmitter (Emitter &emitter, uint16_t localAddress) {
   // To figure out where to put it in the colorspace, calculate the angle from the white point.
   float uEmitter = emitter.getU();
   float vEmitter = emitter.getV();
