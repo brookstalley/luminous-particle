@@ -15,6 +15,21 @@
 #include "hsilight.h"
 #include "debug.h"
 
+////////////////////////// PARTICLE ///////////////////////
+
+SYSTEM_MODE(MANUAL);
+enum {PARTICLE_DISCONNECTED, PARTICLE_CONNECTED} particleState;
+
+enum {WIFI_DISCONNECTED, WIFI_CONNECTED} wifiState;
+
+particleState particleCurrentState = PARTICLE_DISCONNECTED;
+particleState particleDesiredState = PARTICLE_DISCONNECTED;
+
+wifiState wifiCurrentState = WIFI_DISCONNECTED;
+wifiState wifiDesiredState = WIFI_DISCONNECTED;
+
+#DEFINE PARTICLE_CONNECTION_TIMEOUT 30000
+
 ////////////////////////// DECLARATIONS ///////////////////
 
 void setupDisplay();
@@ -296,7 +311,7 @@ void loopDisplay() {
   const uint8_t lineHeight = 9;
   const uint8_t charWidth = 6;
   const uint8_t charsPerLine = floor(displayWidth / charWidth);
-  const uint8_t linesToDisplay = 4;
+  const uint8_t linesToDisplay = 6;
 
   static unsigned long lastUpdateMillis = 0;
 
@@ -316,6 +331,13 @@ void loopDisplay() {
     strcpy (lineData[3], (getDebugOutput() ?
                           "Debug:      serial" :
                           "Debug:      off"));
+    strcpy (lineData[4], (particleCurrentState == PARTICLE_CONNECTED ?
+                          "Particle:   connected" :
+                          "Particle:   disconnected"));
+    strcpy (lineData[5], (particleDesiredState != particleCurrentState ?
+                            (particleDesiredState == PARTICLE_CONNECTED ?
+                              "  Connecting" : "  Disconnecting")
+                            : ""));
 /*
     dtostrf(LEDTempCelsius, 2, 1, str_temp);
     snprintf (temperature, numChars, "Temp: %s c", str_temp);
@@ -389,7 +411,8 @@ void loopControlBrightness() {
   }
   sensorValue = 100*constrain(sensorValue,0,1023);
 
-  brightness_EMA_S = (brightness_EMA_a*sensorValue) + ((1-brightness_EMA_a)*brightness_EMA_S);    //run the EMA
+  brightness_EMA_S = (brightness_EMA_a*sensorValue) +
+                     ((1-brightness_EMA_a)*brightness_EMA_S);    //run the EMA
   float newBrightness = brightness_EMA_S/(1023.0 * 100);
 
   float brightnessChange = newBrightness - globalBrightness;
@@ -405,6 +428,69 @@ void loopControlBrightness() {
   globalBrightness = newBrightness;
 }
 
+void particleConnect() {
+  static unsigned long connectionStartMillis = 0;
+
+  if Particle.connected() {
+    // We're already connected, thanks, but maybe the state wasn't updated
+    particleCurrentState = PARTICLE_CONNECTED;
+    return;
+  }
+
+  // We are not connected, but the desired state is to be connected
+  if (particleDesiredState == PARTICLE_CONNECTED) {
+    if ((millis() - connectionStartMillis) > PARTICLE_CONNECTION_TIMEOUT ) {
+      // Timeout. Give up
+      // TODO: build periodic reconnection attempt
+      debugPrint("Timed out connecting to Particle cloud");
+      particleDisconnect();
+    }
+    // Have not connected yet, but still within timeout
+    return;
+  }
+
+  // We must be in PARTICLE_DISCONNECTED state, but someone called Connect()
+  connectionStartMillis = millis();
+  Particle.connect();
+  particleDesiredState = PARTICLE_CONNECTED;
+}
+
+void particleDisconnect() {
+  if (!Particle.connected() && (particleDesiredState == PARTICLE_DISCONNECTED)) {
+    // We're already not connected, and we want to be disconnected.
+    particleCurrentState = PARTICLE_DISCONNECTED;
+  }
+  if ((particleCurrentState == PARTICLE_CONNECTED) || (particleDesiredState == PARTICLE_CONNECTED))
+    // We are either connected or in the process of connecting. Shut that down.
+    Particle.disconnect();
+    particleDesiredState = PARTICLE_DISCONNECTED;
+    return;
+  }
+}
+
+void particleToggle() {
+  if (particleDesiredState == PARTICLE_CONNECTED) {
+    particleDisconnect();
+  } else {
+    particleConnect();
+  }
+}
+
+void particleProcess() {
+  if (Particle.Connected()) {
+    Particle.process();
+  } else {
+    if (particleCurrentState == PARTICLE_CONNECTED) {
+      // We think we're connected but Particle thinks otherwise
+      particleCurrentState == PARTICLE_DISCONNECTED;
+      if (particleDesiredState == PARTICLE_CONNECTED) {
+        // ...but we WANT to be connected, so try to reconnect
+        particleConnect();
+      }
+    }
+  }
+}
+
 void loopControls() {
   static int modeClicks = 0;
   modeButton.Update();
@@ -416,6 +502,12 @@ void loopControls() {
       currentMode = ((currentMode + 1) % modeCount);
       displayMustUpdate = true;
       lightsMustUpdate = true;
+    }
+
+    if ( modeClicks == 2 ) {
+      debugPrint("Two clicks");
+      particleToggle();
+      displayMustUpdate = true;
     }
 
     if ( modeClicks == -1 ) {
@@ -434,5 +526,11 @@ void loop() {
   loopControls();
   //loopInputs();
   loopLEDs();
+  particleProcess();
   loopDisplay();
+  particleProcess();
+}
+
+void connect() {
+  particleCurrentState = PARTICLE_CONNECTED;
 }
