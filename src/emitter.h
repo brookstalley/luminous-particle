@@ -10,6 +10,17 @@
 #ifndef EMITTER_H
 #define EMITTER_H
 
+#include "application.h"
+
+struct outputEmitter {
+  outputEmitter(uint8_t la, float pwr) {
+    localAddress = la;
+    power = pwr;
+  }
+  uint16_t localAddress;
+  float power;
+};
+
 class Emitter {
   private:
     float _u, _v, _maxvalue;

@@ -12,17 +12,18 @@
 // to desaturate based on HSI
 //
 // After constructing, add color emitters using addEmitter.
-
-#include <math.h>
 #include "compositemodule.h"
 
-CompositeModule::CompositeModule (Emitter &white, uint8_t pwmOffset)
+#include <math.h>
+
+
+CompositeModule::CompositeModule (const Emitter &white, uint16_t localAddress)
 {
   // slope and angle not relevant for white
-  _whiteEmitter = componentEmitter(&white, pwmOffset, 0, 0);
+  _whiteEmitter = componentEmitter(&white, localAddress, 0.0f, 0.0f);
 }
 
-void CompositeModule::addEmitter (Emitter &emitter, uint8_t pwmOffset) {
+void CompositeModule::addEmitter (Emitter &emitter, uint16_t localAddress) {
   // To figure out where to put it in the colorspace, calculate the angle from the white point.
   float uEmitter = emitter.getU();
   float vEmitter = emitter.getV();
@@ -34,7 +35,7 @@ void CompositeModule::addEmitter (Emitter &emitter, uint8_t pwmOffset) {
   if (_colorEmitters.empty()) {
     // If it is the first LED, simply place it in the array.
     // With only one LED, slope is undefined.
-    _colorEmitters.push_back(componentEmitter(&emitter, pwmOffset, angle, 0));
+    _colorEmitters.push_back(componentEmitter(&emitter, localAddress, angle, 0));
   } else {
     // Otherwise, place the LED at the appropriate point in the array, and also recalculate slopes.
     unsigned int insertlocation;
@@ -45,7 +46,7 @@ void CompositeModule::addEmitter (Emitter &emitter, uint8_t pwmOffset) {
 
     // Insert the new emitter, set the pwm offset, set slope to zero pending recalc
     _colorEmitters.insert(_colorEmitters.begin() + insertlocation
-      , componentEmitter(&emitter, pwmOffset, angle, 0));
+      , componentEmitter(&emitter, localAddress, angle, 0));
 
     // And then recalculate all slopes except the last
     for (unsigned int i=0; i<_colorEmitters.size(); i++) {
@@ -77,7 +78,7 @@ void CompositeModule::addEmitter (Emitter &emitter, uint8_t pwmOffset) {
 }
 
 float CompositeModule::getAngle(int num) {
-  return _angle[num];
+  return _colorEmitters[num].angle;
 }
 
 std::vector<outputEmitter> CompositeModule::Hue2EmitterPower(const HSIColor &HSI) const {
@@ -89,9 +90,8 @@ std::vector<outputEmitter> CompositeModule::Hue2EmitterPower(const HSIColor &HSI
 
   // Copy our color emitters with default power of zero
   std::vector<outputEmitter> emitterPowers;
-  for (unsigned int i = 0; i < _colorEmitters.size; i++) {
-    output = outputEmitter();
-    emitterPowers.push_back(outputEmitter(_colorEmitters[i].pwmOffset, 0.0f));
+  for (unsigned int i = 0; i < _colorEmitters.size(); i++) {
+    emitterPowers.push_back(outputEmitter(_colorEmitters[i].localAddress, 0.0f));
   }
 
   //debugPrint("Allocated emitterPowers");
@@ -149,7 +149,7 @@ std::vector<outputEmitter> CompositeModule::Hue2EmitterPower(const HSIColor &HSI
   debugPrint(msg);
 
   // Add white to the end, and set the power
-  emitterPowers.push_back(_whiteEmitter.pwmOffset, I * (1 - S));
+  emitterPowers.push_back(outputEmitter(_whiteEmitter.localAddress, I * (1 - S)));
 
 //  // For debugging, print the actual output values.
 //  Serial.println("Target Hue of " + String(H) + " between LEDs " + String(LED1) + " and " + String(LED2));

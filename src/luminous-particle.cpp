@@ -157,7 +157,7 @@ void effectRotate() {
     satDir = 1;
   }
   char msg[30];
-  sprintf(msg,"H: %3.0f (+ %3.3f, %u) S: %3.2f I: 1.0", hue, hueToAdd, millisPassed, sat);
+  sprintf(msg,"H: %3.0f (+ %3.3f, %lu) S: %3.2f I: 1.0", hue, hueToAdd, millisPassed, sat);
   debugPrint(msg);
   rotateColor.setHSI(hue, sat, 0.5f);
 

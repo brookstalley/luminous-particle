@@ -17,25 +17,16 @@
 #include "debug.h"
 
 struct componentEmitter {
-  componentEmitter (const Emitter *e, uint8_t pwm, float a, float s) {
+  componentEmitter (const Emitter *e, uint16_t la, float a, float s) {
     emitter = e;
-    pwmOffset = pwm;
+    localAddress = la;
     angle = a;
     slope = s;
   }
   const Emitter *emitter;
-  uint8_t pwmOffset;
+  uint16_t localAddress;
   float angle;
   float slope;
-};
-
-struct outputEmitter {
-  outputEmitter(uint8_t po, float pwr) {
-    pwmOffset = po;
-    power = pwr;
-  }
-  uint8_t pwmOffset;
-  float power;
 };
 
 class CompositeModule {
@@ -43,8 +34,8 @@ class CompositeModule {
     std::vector<componentEmitter> _colorEmitters;
     componentEmitter _whiteEmitter;
   public:
-    CompositeModule (Emitter &white, uint8_t pwmOffset);
-    void addEmitter(Emitter &emitter, uint8_t pwmOffset);
+    CompositeModule (const Emitter &white, uint16_t localAddress);
+    void addEmitter(Emitter &emitter, uint16_t localAddress);
     float getAngle(int emitternum);
     float getSlope(int emitternum);
     std::vector<outputEmitter> Hue2EmitterPower(const HSIColor &HSI) const;
