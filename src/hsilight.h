@@ -12,13 +12,14 @@ extern PCA9685 pwm;
 class HSILight {
   private:
     const CompositeModule &_compositeModule;
-    const PCA9685 &_pwm;
-    uint8_t _pwmAddress;
+    const OutputInterface &_interface;
+    uint16_t _localAddress;
+
     std::vector<outputEmitter> _emitterPowers;
     void setEmitters();
 
   public:
-    HSILight(const CompositeModule &compositemodule, const PCA9685 &pwm, const uint8_t pwmAddress);
+    HSILight(const CompositeModule &compositemodule, const OutputInterface &interface, const uint8_t pwmAddress);
     void begin();
     void setColor(const HSIColor &color);
     void getColor(const HSIColor*);

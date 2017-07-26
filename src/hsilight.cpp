@@ -1,10 +1,10 @@
 #include "hsilight.h"
 
-HSILight::HSILight(const CompositeModule &compositeModule, const PCA9685 &pwm,
-  const uint8_t pwmAddress) :
+HSILight::HSILight(const CompositeModule &compositeModule, const OutputInterface &interface,
+  const uint16_t localAddress) :
     _compositeModule(compositeModule),
-    _pwm(pwm),
-    _pwmAddress(pwmAddress)
+    _interface(interface),
+    _localAddress(localAddress)
 {
 
 }
@@ -32,16 +32,5 @@ void HSILight::setSingleEmitterOn(unsigned int index) {
 
 void HSILight::setEmitters() {
   //debugPrint("setting emitters");
-  char msg[100];
-  float emitterPower = 0.0f;
-  unsigned int pwmChannel;
-  uint16_t channelPower = 0;
-  for (unsigned int i=0; i < _emitterPowers.size(); i++) {
-    emitterPower = _emitterPowers[i].power * globalBrightness;
-    channelPower = 0x0FFF * emitterPower;
-    pwmChannel = _pwmAddress + _emitterPowers[i].pwmOffset;
-    sprintf(msg,"Setting PWM channel %u to %u",pwmChannel, channelPower);
-    debugPrint(msg);
-    pwm.setChannelPWM(pwmChannel, channelPower);
-  }
+    _interface.setEmitterBrightness(_emitterPowers);
 }

@@ -100,7 +100,7 @@ bool lightsMustUpdate = false;
 
 ////////////////////////// Controllers and stuff
 Adafruit_SSD1351 display = Adafruit_SSD1351(spi_pin_cs, spi_pin_dc, spi_pin_rst);
-PCA9685 pwm = PCA9685(Wire);
+OutputPCA9685 mainOutput = OutputPCA9685(Wire, 0x40);
 ClickButton modeButton = ClickButton(MODE_BUTTON_PIN, LOW,  CLICKBTN_PULLUP);
 
 // Shared lights
@@ -116,7 +116,8 @@ Emitter emitterLZ7violet("LZ7-v",0.35, 0.15, (float)30/30);
 // Standard luminous node & wiring
 CompositeModule LZ7();
 
-HSILight testnode(LZ7, pwm, (uint8_t)0);
+// Create a light that has an LZ7 module, on our main output at address 0
+HSILight testnode(LZ7, mainOutput, (uint8_t)0);
 
 //////////////// MODES ///////////////////////////////////
 void modeOff() {
@@ -233,12 +234,9 @@ void setupLEDs() {
   debugPrint("Setting up outputs");
   Wire.begin();                       // Wire must be started first
   Wire.setClock(400000);              // Supported baud rates are 100kHz, 400kHz, and 1000kHz
-  debugPrint("  resetDevices");
-  pwm.resetDevices();
-  debugPrint("  init");
-  pwm.init(B000000, PCA9685_MODE_OUTPUT_ONACK | PCA9685_MODE_OUTPUT_TPOLE);
-  debugPrint("  setPWMFrequency");
-  pwm.setPWMFrequency(400);
+
+  mainOutput.init();
+
   debugPrint("Done setting up LEDs");
 
 }
