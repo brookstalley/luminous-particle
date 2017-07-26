@@ -1,14 +1,19 @@
 # luminous-particle
 Luminous implementation on Particle
 
-Color mixing is derived from TeesnyLED by Brian Neltner:
-<https://github.com/saikoLED/TeensyLED>
+## Color mixing is derived from [TeesnyLED](https://github.com/saikoLED/TeensyLED) by Brian Neltner:
 
-Object model:
-  Emitter: a single emitter with a wavelength. Example: the red LED in a RGBW module.
+## Object model:
+- Emitter: a single emitter with a wavelength. Example: the red LED in a RGBW module.
+- CompositeModule: a light source that combines multiple emitters, with logic to return each Emitter's out level based on desired light output (currently just HSI). Example: LedEngin LZ4.
+- OutputInterface: generic interface to set emitter brightnesses.
+- OutputPCA9685: OutputInterface wrapper for the PCA9685 I2C PWM controller.
+- HSILight: a light fixture that has a CompositeModule in it and is addressable on an OutputInterface
+- HSIColor: class to model colors in HSI; directly from TeensyLED
 
-  CompositeModule: a light source that combines multiple emitters, with logic to return each Emitter's out level based on desired light output (currently just HSI). Example: LedEngin LZ4.
+## Notes
+You only need one Emitter per *type* of light emitter. Likewise, only one CompositeModule per *type* of module.
 
-  HSILight: a light fixture that has a CompositeModule in it. You'd create one CompositeModule for a particular model of multi-color LED, and one HSILight for each physical device. HSILight takes a CompositeModule, an OutputDevice, and an optional address offset in the OutputDevice
+Use one HSILight per addressable module.
 
-  HSIColor: class to model colors in HSI; directly from TeensyLED.
+The global `globalBrightness` variable can be used as a blackout. All OutputInterfaces should multiply the power for the emitters they are responsible for by `globalBrightness` before sending.
