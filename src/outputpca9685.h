@@ -1,8 +1,8 @@
 #ifndef OUTPUTPCA9685_H
 #define OUTPUTPCA9685_H
 
+#include "outputinterface.h"
 #include "Particle.h"
-#include <algorithm>
 #include <vector>
 
 #include "PCA9685-Particle/PCA9685.h"
@@ -23,7 +23,7 @@ class OutputPCA9685 : public OutputInterface {
 
     bool setEmitterPowers(std::vector<outputEmitter> emitters) const;
 
-    bool init();
+    bool init() {initImplementation(); return true;};
     bool sleep();
     bool allOff();
 

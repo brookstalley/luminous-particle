@@ -6,8 +6,6 @@
 #include "outputinterface.h"
 #include "debug.h"
 
-extern float globalBrightness;
-
 class HSILight {
   private:
     const CompositeModule &_compositeModule;

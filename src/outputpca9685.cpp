@@ -14,15 +14,15 @@ bool OutputPCA9685::initImplmentation() {
   _pwm.init(B000000, PCA9685_MODE_OUTPUT_ONACK | PCA9685_MODE_OUTPUT_TPOLE);
   debugPrint("  setPWMFrequency");
   _pwm.setPWMFrequency(400);
-
+  return true;
 }
 
 bool OutputPCA9685::sleepImplementation() {
-
+  return true;
 }
 
 bool OutputPCA9685::allOffImplementation() {
-
+  return true;
 }
 
 bool OutputPCA9685::setEmitterPowers(const std::vector<outputEmitter> emitterPowers) const {
@@ -35,17 +35,17 @@ bool OutputPCA9685::setEmitterPowers(const std::vector<outputEmitter> emitterPow
 
   for (uint16_t i = 0; i < emitterPowers.size(); i++) {
     if (emitterPowers[i].localAddress < minAddress) {
-      minAddress = emitterPowers[i];
+      minAddress = emitterPowers[i].localAddress;
     }
   }
   for (uint16_t i = 0; i < emitterPowers.size(); i++) {
-    if ((globalBrightness == 1.0f) && (emitterPowers[i].power = 1.0f)) {
-      powerTo9685 = PCA9685_PWM_FULL
+    if ((globalBrightness == 1.0f) && (emitterPowers[i].power == 1.0f)) {
+      powerTo9685 = PCA9685_PWM_FULL;
     } else {
-      powerTo9685 = (4096.0f * globalBrightness * emitterPowers[i].power) & 0x0FFF
+      powerTo9685 = (uint16_t)(4096.0f * globalBrightness * emitterPowers[i].power) & 0x0FFF;
     }
     pwms[emitterPowers[i].localAddress - minAddress] = powerTo9685;
 
   }
-
+  return true;
 }
