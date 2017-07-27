@@ -3,26 +3,25 @@
 
 #include "hsicolor.h"
 #include "compositemodule.h"
-#include "PCA9685-Particle/PCA9685.h"
+#include "outputinterface.h"
 #include "debug.h"
 
 extern float globalBrightness;
-extern PCA9685 pwm;
 
 class HSILight {
   private:
     const CompositeModule &_compositeModule;
     const OutputInterface &_interface;
-    uint16_t _localAddress;
+    const uint16_t _localAddress;
 
     std::vector<outputEmitter> _emitterPowers;
     void setEmitters();
 
   public:
-    HSILight(const CompositeModule &compositemodule, const OutputInterface &interface, const uint8_t pwmAddress);
+    HSILight(const CompositeModule &compositemodule, const OutputInterface &interface, const uint16_t localAddress);
     void begin();
     void setColor(const HSIColor &color);
-    void getColor(const HSIColor*);
+    void getColor(const HSIColor*) const;
     void setSingleEmitterOn(unsigned int index);
 };
 #endif

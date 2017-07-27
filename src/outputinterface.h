@@ -11,7 +11,7 @@ class OutputInterface {
     virtual bool allOffImplementation();
 
   public:
-    virtual bool setEmitterPowers(std::vector<outputEmitter> emitters) = 0;
+    virtual bool setEmitterPowers(std::vector<outputEmitter> emitters) const = 0;
 
     bool init();
     bool sleep();

@@ -23,6 +23,9 @@ struct componentEmitter {
     angle = a;
     slope = s;
   }
+
+  componentEmitter() {}
+  
   const Emitter *emitter;
   uint16_t localAddress;
   float angle;
@@ -34,7 +37,7 @@ class CompositeModule {
     std::vector<componentEmitter> _colorEmitters;
     componentEmitter _whiteEmitter;
   public:
-    void CompositeModule ();
+    CompositeModule (void);
     void addWhiteEmitter (const Emitter &white, uint16_t localAddress);
     void addColorEmitter(Emitter &emitter, uint16_t localAddress);
     float getAngle(int emitternum);

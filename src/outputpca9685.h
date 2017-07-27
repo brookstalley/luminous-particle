@@ -1,9 +1,13 @@
 #ifndef OUTPUTPCA9685_H
 #define OUTPUTPCA9685_H
 
-#include "PCA9685-Particle/PCA9685-Particle.h"
+#include "Particle.h"
+#include <algorithm>
+#include <vector>
 
-class OutputPCA9685 : OutputInterface {
+#include "PCA9685-Particle/PCA9685.h"
+
+class OutputPCA9685 : public OutputInterface {
   private:
     TwoWire &_i2cbus;
     PCA9685 _pwm;
@@ -15,11 +19,11 @@ class OutputPCA9685 : OutputInterface {
     bool allOffImplementation();
 
   public:
-    void OutputPCA9685(TwoWire &i2cbus, uint8_t i2caddress);
+    OutputPCA9685(TwoWire &i2cbus, uint8_t i2caddress);
 
-    bool setEmitterPowers(std::vector<outputEmitter> emitterOutputs) = 0;
+    bool setEmitterPowers(std::vector<outputEmitter> emitters) const;
 
-    bool init(TwoWire& i2cbus);
+    bool init();
     bool sleep();
     bool allOff();
 

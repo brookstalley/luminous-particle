@@ -8,14 +8,13 @@
 // https://github.com/saikoLED/TeensyLED
 
 // CompositeModule models a light that contains multiple emitters.
-// Constructor takes a single emitter to use as white. This will be used
-// to desaturate based on HSI
 //
-// After constructing, add color emitters using addEmitter.
+// After constructing, add white emitter using addWhiteEmitter and
+// add color emitters using addColorEmitter.
+
 #include "compositemodule.h"
 
 #include <math.h>
-
 
 CompositeModule::CompositeModule ()
 {

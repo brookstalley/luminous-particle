@@ -5,7 +5,6 @@
 
 #include "Adafruit-GFX-library/Adafruit_GFX.h"
 #include "Adafruit_SSD1351_Photon.h"
-#include "PCA9685-Particle/PCA9685.h"
 #include "clickButton/clickButton.h"
 //#include "E131/E131.h"
 
@@ -15,13 +14,14 @@
 #include "hsilight.h"
 #include "debug.h"
 #include "effects.h"
+#include "outputPCA9685.h"
 
 ////////////////////////// PARTICLE ///////////////////////
 
 SYSTEM_MODE(MANUAL);
-enum {PARTICLE_DISCONNECTED, PARTICLE_CONNECTED} particleState;
+enum particleState {PARTICLE_DISCONNECTED, PARTICLE_CONNECTED};
 
-enum {WIFI_DISCONNECTED, WIFI_CONNECTED} wifiState;
+enum wifiState {WIFI_DISCONNECTED, WIFI_CONNECTED};
 
 particleState particleCurrentState = PARTICLE_DISCONNECTED;
 particleState particleDesiredState = PARTICLE_DISCONNECTED;
@@ -29,7 +29,7 @@ particleState particleDesiredState = PARTICLE_DISCONNECTED;
 wifiState wifiCurrentState = WIFI_DISCONNECTED;
 wifiState wifiDesiredState = WIFI_DISCONNECTED;
 
-#DEFINE PARTICLE_CONNECTION_TIMEOUT 30000
+#define PARTICLE_CONNECTION_TIMEOUT 30000
 
 ////////////////////////// DECLARATIONS ///////////////////
 
@@ -115,10 +115,12 @@ Emitter emitterLZ7blue("LZ7-b",0.1747943747, 0.1117834986, (float)30/30);
 Emitter emitterLZ7violet("LZ7-v",0.35, 0.15, (float)30/30);
 
 // Standard luminous node & wiring
-CompositeModule LZ7();
+CompositeModule LZ7;
 
 // Create a light that has an LZ7 module, on our main output at address 0
-HSILight testnode(LZ7, mainOutput, (uint8_t)0);
+HSILight testnode(LZ7, mainOutput, (uint16_t)0);
+
+std::vector<HSILight> allLights {testnode};
 
 //////////////// MODES ///////////////////////////////////
 void modeOff() {
@@ -126,25 +128,17 @@ void modeOff() {
 }
 
 void modeTest() {
-  effectTest();
+  effectTest(allLights, lightsMustUpdate);
 }
 
 void modeRotate() {
-  effectRotate();
+  effectRotate(allLights, lightsMustUpdate);
 }
 
 void modeE131() {
 
 }
 
-
-// Actual nodes
-// BREAKS
-//HSILight testnode(LZ7, pwm, (uint8_t)0);
-/*
-// Our lists
-std::vector<HSILight> allNodes {testnode};
-*/
 ////////////////////////// MAIN ////////////////////////////
 
 
@@ -165,12 +159,12 @@ void setupLEDs() {
   debugPrint("Setting up LEDs");
 
   LZ7.addWhiteEmitter(emitterLZ7white, 5);
-  LZ7.addEmitter(emitterLZ7red, 0);
-  LZ7.addEmitter(emitterLZ7amber, 3);
-  LZ7.addEmitter(emitterLZ7green, 1);
-  LZ7.addEmitter(emitterLZ7cyan, 4);
-  LZ7.addEmitter(emitterLZ7blue, 2);
-  LZ7.addEmitter(emitterLZ7violet, 6);
+  LZ7.addColorEmitter(emitterLZ7red, 0);
+  LZ7.addColorEmitter(emitterLZ7amber, 3);
+  LZ7.addColorEmitter(emitterLZ7green, 1);
+  LZ7.addColorEmitter(emitterLZ7cyan, 4);
+  LZ7.addColorEmitter(emitterLZ7blue, 2);
+  LZ7.addColorEmitter(emitterLZ7violet, 6);
 
   debugPrint("Setting up lamps");
 
@@ -371,10 +365,23 @@ void loopControlBrightness() {
   globalBrightness = newBrightness;
 }
 
+void particleDisconnect() {
+  if (!Particle.connected() && (particleDesiredState == PARTICLE_DISCONNECTED)) {
+    // We're already not connected, and we want to be disconnected.
+    particleCurrentState = PARTICLE_DISCONNECTED;
+  }
+  if ((particleCurrentState == PARTICLE_CONNECTED) || (particleDesiredState == PARTICLE_CONNECTED)) {
+    // We are either connected or in the process of connecting. Shut that down.
+    Particle.disconnect();
+    particleDesiredState = PARTICLE_DISCONNECTED;
+    return;
+  }
+}
+
 void particleConnect() {
   static unsigned long connectionStartMillis = 0;
 
-  if Particle.connected() {
+  if (Particle.connected()) {
     // We're already connected, thanks, but maybe the state wasn't updated
     particleCurrentState = PARTICLE_CONNECTED;
     return;
@@ -398,19 +405,6 @@ void particleConnect() {
   particleDesiredState = PARTICLE_CONNECTED;
 }
 
-void particleDisconnect() {
-  if (!Particle.connected() && (particleDesiredState == PARTICLE_DISCONNECTED)) {
-    // We're already not connected, and we want to be disconnected.
-    particleCurrentState = PARTICLE_DISCONNECTED;
-  }
-  if ((particleCurrentState == PARTICLE_CONNECTED) || (particleDesiredState == PARTICLE_CONNECTED))
-    // We are either connected or in the process of connecting. Shut that down.
-    Particle.disconnect();
-    particleDesiredState = PARTICLE_DISCONNECTED;
-    return;
-  }
-}
-
 void particleToggle() {
   if (particleDesiredState == PARTICLE_CONNECTED) {
     particleDisconnect();
@@ -420,12 +414,12 @@ void particleToggle() {
 }
 
 void particleProcess() {
-  if (Particle.Connected()) {
+  if (Particle.connected()) {
     Particle.process();
   } else {
     if (particleCurrentState == PARTICLE_CONNECTED) {
       // We think we're connected but Particle thinks otherwise
-      particleCurrentState == PARTICLE_DISCONNECTED;
+      particleCurrentState = PARTICLE_DISCONNECTED;
       if (particleDesiredState == PARTICLE_CONNECTED) {
         // ...but we WANT to be connected, so try to reconnect
         particleConnect();

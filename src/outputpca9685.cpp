@@ -2,7 +2,7 @@
 
 #define PCA9685_PWM_FULL 4096
 
-void OutputPCA9685(TwoWire &i2cbus, uint8_t i2caddress) :
+OutputPCA9685::OutputPCA9685(TwoWire &i2cbus, uint8_t i2caddress) :
   _i2cbus(i2cbus),
   _i2caddress(i2caddress) {
 }
@@ -25,7 +25,7 @@ bool OutputPCA9685::allOffImplementation() {
 
 }
 
-bool OutputPCA9685::setEmitterPowers(std::vector<outputEmitter> emitterPowers) {
+bool OutputPCA9685::setEmitterPowers(const std::vector<outputEmitter> emitterPowers) const {
   // Note that this does not support non-contiguous updates;
   // assumes that the start address is the lowest localAddress
   // in emitterPowers

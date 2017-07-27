@@ -15,9 +15,9 @@ void HSILight::begin() {
   _emitterPowers = _compositeModule.Hue2EmitterPower(HSIColor(0,0,0));
 }
 
-void HSILight::setColor(const HSIColor &color) {
+void HSILight::setColor(const HSIColor &color)  {
   _emitterPowers = _compositeModule.Hue2EmitterPower(color);
-  this->setEmitters();
+  setEmitters();
 }
 
 void HSILight::setSingleEmitterOn(unsigned int index) {
@@ -27,10 +27,10 @@ void HSILight::setSingleEmitterOn(unsigned int index) {
   for (unsigned int i=0; i < _emitterPowers.size(); i++) {
     _emitterPowers[i].power = (index % _emitterPowers.size() == i) ? 1.0 : 0.0;
   }
-  this->setEmitters();
+  setEmitters();
 }
 
 void HSILight::setEmitters() {
   //debugPrint("setting emitters");
-    _interface.setEmitterBrightness(_emitterPowers);
+    _interface.setEmitterPowers(_emitterPowers);
 }
