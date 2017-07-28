@@ -13,19 +13,18 @@ class OutputPCA9685 : public OutputInterface {
     PCA9685 _pwm;
     uint8_t _i2caddress;
 
-  protected:
-    bool initImplmentation();
-    bool sleepImplementation();
-    bool allOffImplementation();
+    bool initImplementation();
+    bool sleepImplementation() const;
+    bool allOffImplementation() const;
 
   public:
     OutputPCA9685(TwoWire &i2cbus, uint8_t i2caddress);
 
     bool setEmitterPowers(std::vector<outputEmitter> emitters) const;
 
-    bool init() {initImplementation(); return true;};
-    bool sleep();
-    bool allOff();
+    bool init();
+    bool sleep() const;
+    bool allOff() const;
 
 };
 

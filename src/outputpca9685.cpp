@@ -7,7 +7,7 @@ OutputPCA9685::OutputPCA9685(TwoWire &i2cbus, uint8_t i2caddress) :
   _i2caddress(i2caddress) {
 }
 
-bool OutputPCA9685::initImplmentation() {
+bool OutputPCA9685::initImplementation() {
   debugPrint("  resetDevices");
   _pwm.resetDevices();
   debugPrint("  init");
@@ -17,11 +17,11 @@ bool OutputPCA9685::initImplmentation() {
   return true;
 }
 
-bool OutputPCA9685::sleepImplementation() {
+bool OutputPCA9685::sleepImplementation() const {
   return true;
 }
 
-bool OutputPCA9685::allOffImplementation() {
+bool OutputPCA9685::allOffImplementation() const {
   return true;
 }
 
@@ -45,7 +45,19 @@ bool OutputPCA9685::setEmitterPowers(const std::vector<outputEmitter> emitterPow
       powerTo9685 = (uint16_t)(4096.0f * globalBrightness * emitterPowers[i].power) & 0x0FFF;
     }
     pwms[emitterPowers[i].localAddress - minAddress] = powerTo9685;
-
+    // _pwm.setChannelsPWM(pwms, minAddress);
   }
   return true;
+}
+
+bool OutputPCA9685::init() {
+  return initImplementation();
+}
+
+bool OutputPCA9685::sleep() const {
+  return sleepImplementation();
+}
+
+bool OutputPCA9685::allOff() const {
+  return allOffImplementation();
 }

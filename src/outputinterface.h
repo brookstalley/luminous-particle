@@ -10,17 +10,12 @@ extern float globalBrightness;
 
 class OutputInterface {
 
-  protected:
-    virtual bool initImplementation();
-    virtual bool sleepImplementation();
-    virtual bool allOffImplementation();
-
   public:
     virtual bool setEmitterPowers(std::vector<outputEmitter> emitters) const = 0;
 
-    bool init() {initImplementation(); return true;};
-    bool sleep();
-    bool allOff();
+    virtual bool init() = 0;
+    virtual bool sleep() const = 0;
+    virtual bool allOff() const = 0;
 
 };
 
