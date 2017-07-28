@@ -38,45 +38,52 @@ void CompositeModule::addColorEmitter (const Emitter &emitter, uint16_t localAdd
   float vWHITE = _whiteEmitter.emitter->getV();
   char msg[100];
 
-  float angle = fmod((180/M_PI) * atan2((vEmitter - vWHITE),(uEmitter - uWHITE)) + 360, 360);
+  float newAngle = fmod((180/M_PI) * atan2((vEmitter - vWHITE),(uEmitter - uWHITE)) + 360, 360);
 
   if (_colorEmitters.empty()) {
     // If it is the first LED, simply place it in the array.
     // With only one LED, slope is undefined.
-    _colorEmitters.push_back(std::make_shared<componentEmitter>(componentEmitter(&emitter, localAddress, angle, 0)));
+    _colorEmitters.push_back(std::make_shared<componentEmitter>(componentEmitter(&emitter, localAddress, newAngle, 0)));
     sprintf(msg, "Added emitter %s at la %u", emitter.getName(), localAddress);
     debugPrint(msg);
   } else {
     // Otherwise, place the LED at the appropriate point in the array, and also recalculate slopes.
-    unsigned int insertlocation;
+
+    // Create our component emitter based on the prototype emitter, plus this one's particular address
+    std::shared_ptr<componentEmitter> newEmitter =
+      std::make_shared<componentEmitter>(componentEmitter(&emitter, localAddress, newAngle, 0));
 
     // Iterate through until finding the first location where the angle is bigger than the current value.
-    for (insertlocation = 0; (_colorEmitters[insertlocation]->angle < angle) &&
-        (insertlocation < _colorEmitters.size()); insertlocation++);
-/*
+    // TODO: Fix to use iterator
+    std::vector<componentEmitter>::iterator it = _colorEmitters.begin();
+    while((it != _colorEmitters.end()) && (*it->angle < newAngle)) {
+        it++;
+    }
+    // We will now either be in the correct slot in the vector, or at the end of the vector
+
     // Insert the new emitter, set the pwm offset, set slope to zero pending recalc
-    auto newEmitter = std::make_shared<componentEmitter>(componentEmitter(&emitter, localAddress, angle, 0));
-    _colorEmitters.insert(_colorEmitters.begin() + insertlocation, newEmitter);
+    _colorEmitters.insert(it, newEmitter);
 
     sprintf(msg, "Added emitter %s at la %u", emitter.getName(), localAddress);
     debugPrint(msg);
 
     // And then recalculate all slopes except the last
 
-    for (unsigned int i=0; i<_colorEmitters.size(); i++) {
-      unsigned int nextEmitter;
+    for (std::vector<componentEmitter>::iterator it = _colorEmitters.begin();
+          it<_colorEmitters.end();
+          it++) {
+      componentEmitter nextEmitter;
       // Slope is to the next emitter, except the last one wraps around to the first
-      if (i < _colorEmitters.size() -1) {
-        nextEmitter = i+1;
+      if ((it != _colorEmitters.end()) && (next(it) == _colorEmitters.end())) {
+        nextEmitter = next(it);
       } else {
-        nextEmitter = 0;
+        nextEmitter = _colorEmitters.begin();
       }
 
       _colorEmitters[i]->slope = (_colorEmitters[nextEmitter]->emitter->getV() - _colorEmitters[i]->emitter->getV())
         / (_colorEmitters[nextEmitter]->emitter->getU() - _colorEmitters[i]->emitter->getU());
 
     }
-      */
   }
 
 

@@ -1,6 +1,8 @@
 #include "application.h"
 #include <math.h>
 
+#define DEBUG_MODE 1
+
 ////////////////////////// INCLUDES ///////////////////////
 
 #include "Adafruit-GFX-library/Adafruit_GFX.h"
