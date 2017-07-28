@@ -22,10 +22,11 @@ struct componentEmitter {
     localAddress = la;
     angle = a;
     slope = s;
+
   }
 
   componentEmitter() {}
-  
+
   const Emitter *emitter;
   uint16_t localAddress;
   float angle;
@@ -34,12 +35,12 @@ struct componentEmitter {
 
 class CompositeModule {
   private:
-    std::vector<componentEmitter> _colorEmitters;
+    std::vector<std::shared_ptr<componentEmitter>> _colorEmitters;
     componentEmitter _whiteEmitter;
   public:
     CompositeModule (void);
     void addWhiteEmitter (const Emitter &white, uint16_t localAddress);
-    void addColorEmitter(Emitter &emitter, uint16_t localAddress);
+    void addColorEmitter(const Emitter &emitter, uint16_t localAddress);
     float getAngle(int emitternum);
     float getSlope(int emitternum);
     std::vector<outputEmitter> Hue2EmitterPower(const HSIColor &HSI) const;

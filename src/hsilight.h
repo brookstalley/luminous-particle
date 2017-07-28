@@ -13,7 +13,8 @@ class HSILight {
     const uint16_t _localAddress;
 
     std::vector<outputEmitter> _emitterPowers;
-    void setEmitters();
+
+    void setEmitters() const;
 
   public:
     HSILight(const CompositeModule &compositemodule, const OutputInterface &interface, const uint16_t localAddress);
@@ -21,5 +22,7 @@ class HSILight {
     void setColor(const HSIColor &color);
     void getColor(const HSIColor*) const;
     void setSingleEmitterOn(unsigned int index);
+
+    void debugOutput() const;
 };
 #endif

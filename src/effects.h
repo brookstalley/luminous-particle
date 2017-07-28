@@ -9,8 +9,8 @@
 #include "hsicolor.h"
 #include "debug.h"
 
-bool effectTest(std::vector<HSILight> lights, bool lightsMustUpdate);
+bool effectTest(std::vector<std::shared_ptr<HSILight>> lights, bool lightsMustUpdate);
 
-bool effectRotate(std::vector<HSILight> lights, bool lightsMustUpdate);
+bool effectRotate(std::vector<std::shared_ptr<HSILight>> lights, bool lightsMustUpdate);
 
 #endif

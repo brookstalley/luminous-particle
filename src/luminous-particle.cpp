@@ -118,9 +118,10 @@ Emitter emitterLZ7violet("LZ7-v",0.35, 0.15, (float)30/30);
 CompositeModule LZ7;
 
 // Create a light that has an LZ7 module, on our main output at address 0
-HSILight testnode(LZ7, mainOutput, (uint16_t)0);
 
-std::vector<HSILight> allLights {testnode};
+std::vector<std::shared_ptr<HSILight>> allLights = {
+  std::make_shared<HSILight>(HSILight(LZ7, mainOutput, (uint16_t)0))
+};
 
 //////////////// MODES ///////////////////////////////////
 void modeOff() {
@@ -156,6 +157,12 @@ void setupDisplay() {
 }
 
 void setupLEDs() {
+  debugPrint("Setting up outputs");
+  Wire.begin();                       // Wire must be started first
+  Wire.setClock(400000);              // Supported baud rates are 100kHz, 400kHz, and 1000kHz
+
+  mainOutput.init();
+
   debugPrint("Setting up LEDs");
 
   LZ7.addWhiteEmitter(emitterLZ7white, 5);
@@ -168,16 +175,11 @@ void setupLEDs() {
 
   debugPrint("Setting up lamps");
 
-  testnode.begin();
-
-  debugPrint("Setting up outputs");
-  Wire.begin();                       // Wire must be started first
-  Wire.setClock(400000);              // Supported baud rates are 100kHz, 400kHz, and 1000kHz
-
-  mainOutput.init();
+  std::for_each(allLights.begin(), allLights.end(), [&] (std::shared_ptr<HSILight> light) {
+    light->begin();
+  });
 
   debugPrint("Done setting up LEDs");
-
 }
 
 void setupControls() {
@@ -196,6 +198,7 @@ void setupSensors() {
 void setup(void) {
   setDebugOutput(true);
   Serial.begin(9600);
+  delay(5000);
 
   setupDisplay();
 
@@ -269,8 +272,8 @@ void loopDisplay() {
                           "Debug:      serial" :
                           "Debug:      off"));
     strcpy (lineData[4], (particleCurrentState == PARTICLE_CONNECTED ?
-                          "Particle:   connected" :
-                          "Particle:   disconnected"));
+                          "Particle:   online" :
+                          "Particle:   offline"));
     strcpy (lineData[5], (particleDesiredState != particleCurrentState ?
                             (particleDesiredState == PARTICLE_CONNECTED ?
                               "  Connecting" : "  Disconnecting")
@@ -301,7 +304,7 @@ void loopDisplay() {
           display.fillRect(
             (uint16_t)(charsBeforeEOL * charWidth),
             (uint16_t)(i * lineHeight),
-            (uint16_t)(127 - (lengthNew * charWidth)),
+            (uint16_t)(127 - ((lengthNew + 1) * charWidth)),
             (uint16_t)lineHeight,
             BLACK);
         }
@@ -366,6 +369,7 @@ void loopControlBrightness() {
 }
 
 void particleDisconnect() {
+  debugPrint("particleDisconnect: start");
   if (!Particle.connected() && (particleDesiredState == PARTICLE_DISCONNECTED)) {
     // We're already not connected, and we want to be disconnected.
     particleCurrentState = PARTICLE_DISCONNECTED;
@@ -374,8 +378,10 @@ void particleDisconnect() {
     // We are either connected or in the process of connecting. Shut that down.
     Particle.disconnect();
     particleDesiredState = PARTICLE_DISCONNECTED;
+    debugPrint("particleDisconnect: disconnecting");
     return;
   }
+  debugPrint("particleDisconnect: end");
 }
 
 void particleConnect() {
@@ -384,6 +390,7 @@ void particleConnect() {
   if (Particle.connected()) {
     // We're already connected, thanks, but maybe the state wasn't updated
     particleCurrentState = PARTICLE_CONNECTED;
+    debugPrint("particleConnect: connected");
     return;
   }
 
@@ -403,27 +410,35 @@ void particleConnect() {
   connectionStartMillis = millis();
   Particle.connect();
   particleDesiredState = PARTICLE_CONNECTED;
+  debugPrint("particleConnect: connecting");
 }
 
 void particleToggle() {
   if (particleDesiredState == PARTICLE_CONNECTED) {
+    debugPrint("particleToggle: disconnecting");
     particleDisconnect();
   } else {
+    debugPrint("particleToggle: connecting");
     particleConnect();
   }
 }
 
 void particleProcess() {
   if (Particle.connected()) {
+    if (particleCurrentState == PARTICLE_DISCONNECTED) {
+      particleCurrentState = PARTICLE_CONNECTED;
+      debugPrint("particleProcess: connected");
+    }
     Particle.process();
-  } else {
-    if (particleCurrentState == PARTICLE_CONNECTED) {
-      // We think we're connected but Particle thinks otherwise
-      particleCurrentState = PARTICLE_DISCONNECTED;
-      if (particleDesiredState == PARTICLE_CONNECTED) {
-        // ...but we WANT to be connected, so try to reconnect
-        particleConnect();
-      }
+    return;
+  }
+
+  if (particleCurrentState == PARTICLE_CONNECTED) {
+    // We think we're connected but Particle thinks otherwise
+    particleCurrentState = PARTICLE_DISCONNECTED;
+    if (particleDesiredState == PARTICLE_CONNECTED) {
+      // ...but we WANT to be connected, so try to reconnect
+      particleConnect();
     }
   }
 }
@@ -469,5 +484,6 @@ void loop() {
 }
 
 void connect() {
+  debugPrint("connect: connected");
   particleCurrentState = PARTICLE_CONNECTED;
 }

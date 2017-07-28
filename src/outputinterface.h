@@ -11,7 +11,7 @@ extern float globalBrightness;
 class OutputInterface {
 
   public:
-    virtual bool setEmitterPowers(std::vector<outputEmitter> emitters) const = 0;
+    virtual bool setEmitterPowers(const std::vector<outputEmitter>& emitters) const = 0;
 
     virtual bool init() = 0;
     virtual bool sleep() const = 0;

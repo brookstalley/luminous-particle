@@ -3,6 +3,7 @@
 
 #include "outputinterface.h"
 #include "Particle.h"
+#include "debug.h"
 #include <vector>
 
 #include "PCA9685-Particle/PCA9685.h"
@@ -20,7 +21,7 @@ class OutputPCA9685 : public OutputInterface {
   public:
     OutputPCA9685(TwoWire &i2cbus, uint8_t i2caddress);
 
-    bool setEmitterPowers(std::vector<outputEmitter> emitters) const;
+    bool setEmitterPowers(const std::vector<outputEmitter>& emitters) const;
 
     bool init();
     bool sleep() const;

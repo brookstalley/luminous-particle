@@ -25,34 +25,44 @@ void CompositeModule::addWhiteEmitter(const Emitter &white, uint16_t localAddres
   // slope and angle not relevant for white emitter
   // currently supports only one white emitter per composite module
   _whiteEmitter = componentEmitter(&white, localAddress, 0.0f, 0.0f);
+  char msg[100];
+  sprintf(msg, "Added white emitter %s at la %u", white.getName(), localAddress);
+  debugPrint(msg);
 }
 
-void CompositeModule::addColorEmitter (Emitter &emitter, uint16_t localAddress) {
+void CompositeModule::addColorEmitter (const Emitter &emitter, uint16_t localAddress) {
   // To figure out where to put it in the colorspace, calculate the angle from the white point.
   float uEmitter = emitter.getU();
   float vEmitter = emitter.getV();
   float uWHITE = _whiteEmitter.emitter->getU();
   float vWHITE = _whiteEmitter.emitter->getV();
+  char msg[100];
 
   float angle = fmod((180/M_PI) * atan2((vEmitter - vWHITE),(uEmitter - uWHITE)) + 360, 360);
 
   if (_colorEmitters.empty()) {
     // If it is the first LED, simply place it in the array.
     // With only one LED, slope is undefined.
-    _colorEmitters.push_back(componentEmitter(&emitter, localAddress, angle, 0));
+    _colorEmitters.push_back(std::make_shared<componentEmitter>(componentEmitter(&emitter, localAddress, angle, 0)));
+    sprintf(msg, "Added emitter %s at la %u", emitter.getName(), localAddress);
+    debugPrint(msg);
   } else {
     // Otherwise, place the LED at the appropriate point in the array, and also recalculate slopes.
     unsigned int insertlocation;
 
     // Iterate through until finding the first location where the angle is bigger than the current value.
-    for (insertlocation = 0; (_colorEmitters[insertlocation].angle < angle) &&
+    for (insertlocation = 0; (_colorEmitters[insertlocation]->angle < angle) &&
         (insertlocation < _colorEmitters.size()); insertlocation++);
-
+/*
     // Insert the new emitter, set the pwm offset, set slope to zero pending recalc
-    _colorEmitters.insert(_colorEmitters.begin() + insertlocation
-      , componentEmitter(&emitter, localAddress, angle, 0));
+    auto newEmitter = std::make_shared<componentEmitter>(componentEmitter(&emitter, localAddress, angle, 0));
+    _colorEmitters.insert(_colorEmitters.begin() + insertlocation, newEmitter);
+
+    sprintf(msg, "Added emitter %s at la %u", emitter.getName(), localAddress);
+    debugPrint(msg);
 
     // And then recalculate all slopes except the last
+
     for (unsigned int i=0; i<_colorEmitters.size(); i++) {
       unsigned int nextEmitter;
       // Slope is to the next emitter, except the last one wraps around to the first
@@ -61,10 +71,14 @@ void CompositeModule::addColorEmitter (Emitter &emitter, uint16_t localAddress) 
       } else {
         nextEmitter = 0;
       }
-      _colorEmitters[i].slope = (_colorEmitters[nextEmitter].emitter->getV() - _colorEmitters[i].emitter->getV())
-        / (_colorEmitters[nextEmitter].emitter->getU() - _colorEmitters[i].emitter->getU());
+
+      _colorEmitters[i]->slope = (_colorEmitters[nextEmitter]->emitter->getV() - _colorEmitters[i]->emitter->getV())
+        / (_colorEmitters[nextEmitter]->emitter->getU() - _colorEmitters[i]->emitter->getU());
+
     }
+      */
   }
+
 
 //  // For debugging, print the current array of angles.
 //  Serial.println("Current LED Angles");
@@ -82,7 +96,7 @@ void CompositeModule::addColorEmitter (Emitter &emitter, uint16_t localAddress) 
 }
 
 float CompositeModule::getAngle(int num) {
-  return _colorEmitters[num].angle;
+  return _colorEmitters[num]->angle;
 }
 
 std::vector<outputEmitter> CompositeModule::Hue2EmitterPower(const HSIColor &HSI) const {
@@ -90,12 +104,17 @@ std::vector<outputEmitter> CompositeModule::Hue2EmitterPower(const HSIColor &HSI
   float S = HSI.getSaturation();
   float I = HSI.getIntensity();
 
+  char msg[100];
   float tanH = tan(M_PI*fmod(H,360)/(float)180); // Get the tangent since we will use it often.
 
   // Copy our color emitters with default power of zero
   std::vector<outputEmitter> emitterPowers;
   for (unsigned int i = 0; i < _colorEmitters.size(); i++) {
-    emitterPowers.push_back(outputEmitter(_colorEmitters[i].localAddress, 0.0f));
+    emitterPowers.push_back(outputEmitter(_colorEmitters[i]->localAddress, 0.0f));
+    sprintf(msg,"CompositeModule::Hue2EmitterPower added emitterPower[%u] at la %u", i, _colorEmitters[i]->localAddress);
+    debugPrint(msg);
+    sprintf(msg,"CompositeModule::Hue2EmitterPower added emitterPower[%u] at la %u with power %f", i, emitterPowers[emitterPowers.size()-1].localAddress, emitterPowers[emitterPowers.size()-1].power);
+    debugPrint(msg);
   }
 
   //debugPrint("Allocated emitterPowers");
@@ -111,15 +130,15 @@ std::vector<outputEmitter> CompositeModule::Hue2EmitterPower(const HSIColor &HSI
   // For angle less than the smallest CIE hue or larger than the largest, special case.
 
 
-  if ((H < _colorEmitters[0].angle) || (H >= _colorEmitters[_colorEmitters.size()-1].angle)) {
+  if ((H < _colorEmitters[0]->angle) || (H >= _colorEmitters[_colorEmitters.size()-1]->angle)) {
     // Then we're mixing the lowest angle LED with the highest angle LED.
     emitter1 = _colorEmitters.size() - 1;
     emitter2 = 0;
   } else {
     // Iterate through the angles until we find an LED with hue smaller than the angle.
     unsigned int i;
-    for (i=1; (H > _colorEmitters[i].angle) && (i<(_colorEmitters.size()-1)); i++) {
-      if (H > _colorEmitters[i].angle) {
+    for (i=1; (H > _colorEmitters[i]->angle) && (i<(_colorEmitters.size()-1)); i++) {
+      if (H > _colorEmitters[i]->angle) {
         emitter1 = i-1;
         emitter2 = i;
       }
@@ -128,19 +147,19 @@ std::vector<outputEmitter> CompositeModule::Hue2EmitterPower(const HSIColor &HSI
     emitter1 = i-1;
     emitter2 = i;
   }
-  char msg[100];
+
   sprintf(msg, "Emitter 1: %u, Emitter 2: %u", emitter1, emitter2);
   debugPrint("Found emitters");
   debugPrint(msg);
 
   // Get the ustar and vstar values for the target LEDs.
-  float emitter1_ustar = _colorEmitters[emitter1].emitter->getU() - _whiteEmitter.emitter->getU();
-  float emitter1_vstar = _colorEmitters[emitter1].emitter->getV() - _whiteEmitter.emitter->getV();
-  float emitter2_ustar = _colorEmitters[emitter2].emitter->getU() - _whiteEmitter.emitter->getU();
-  float emitter2_vstar = _colorEmitters[emitter2].emitter->getV() - _whiteEmitter.emitter->getV();
+  float emitter1_ustar = _colorEmitters[emitter1]->emitter->getU() - _whiteEmitter.emitter->getU();
+  float emitter1_vstar = _colorEmitters[emitter1]->emitter->getV() - _whiteEmitter.emitter->getV();
+  float emitter2_ustar = _colorEmitters[emitter2]->emitter->getU() - _whiteEmitter.emitter->getU();
+  float emitter2_vstar = _colorEmitters[emitter2]->emitter->getV() - _whiteEmitter.emitter->getV();
 
   // Get the slope between LED1 and LED2.
-  float slope = _colorEmitters[emitter1].slope;
+  float slope = _colorEmitters[emitter1]->slope;
 
   float ustar = (emitter2_vstar - slope*emitter2_ustar)/(tanH - slope);
   float vstar = tanH/(slope - tanH) * (slope * emitter2_ustar - emitter2_vstar);
