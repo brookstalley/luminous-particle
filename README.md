@@ -1,7 +1,7 @@
 # luminous-particle
 Luminous implementation on Particle
 
-## Color mixing is derived from [TeesnyLED](https://github.com/saikoLED/TeensyLED) by Brian Neltner:
+### Color mixing is derived from [TeesnyLED](https://github.com/saikoLED/TeensyLED) by Brian Neltner:
 
 ## Object model:
 - Emitter: a single emitter with a wavelength. Example: the red LED in a RGBW module.
@@ -17,3 +17,5 @@ You only need one Emitter per *type* of light emitter. Likewise, only one Compos
 Use one HSILight per addressable module.
 
 The global `globalBrightness` variable can be used as a blackout. All OutputInterfaces should multiply the power for the emitters they are responsible for by `globalBrightness` before sending.
+
+At present only the PCA9685 is supported for output, but it should be trivial to write a new outputinterface for direct pin output.

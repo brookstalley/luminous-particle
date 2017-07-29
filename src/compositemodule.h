@@ -23,7 +23,6 @@ struct componentEmitter {
     localAddress = la;
     angle = a;
     slope = s;
-
   }
 
   componentEmitter() {}

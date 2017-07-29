@@ -23,6 +23,5 @@ class HSILight {
     void getColor(const HSIColor*) const;
     void setSingleEmitterOn(unsigned int index);
 
-    void debugOutput() const;
 };
 #endif
