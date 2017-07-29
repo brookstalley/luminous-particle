@@ -14,8 +14,6 @@
 
 #include "compositemodule.h"
 
-#include <math.h>
-
 CompositeModule::CompositeModule ()
 {
 
@@ -27,7 +25,7 @@ void CompositeModule::addWhiteEmitter(const Emitter &white, uint16_t localAddres
   _whiteEmitter = componentEmitter(&white, localAddress, 0.0f, 0.0f);
   char msg[100];
   sprintf(msg, "Added white emitter %s at la %u", white.getName(), localAddress);
-  debugPrint(msg);
+  debugPrint(DEBUG_TRACE, msg);
 }
 
 void CompositeModule::addColorEmitter (const Emitter &emitter, uint16_t localAddress) {
@@ -45,61 +43,47 @@ void CompositeModule::addColorEmitter (const Emitter &emitter, uint16_t localAdd
     // With only one LED, slope is undefined.
     _colorEmitters.push_back(std::make_shared<componentEmitter>(componentEmitter(&emitter, localAddress, newAngle, 0)));
     sprintf(msg, "Added emitter %s at la %u", emitter.getName(), localAddress);
-    debugPrint(msg);
-  } else {
-    // Otherwise, place the LED at the appropriate point in the array, and also recalculate slopes.
+    debugPrint(DEBUG_TRACE, msg);
+    return;
+  }
+  // Otherwise, place the LED at the appropriate point in the array, and also recalculate slopes.
 
-    // Create our component emitter based on the prototype emitter, plus this one's particular address
-    std::shared_ptr<componentEmitter> newEmitter =
-      std::make_shared<componentEmitter>(componentEmitter(&emitter, localAddress, newAngle, 0));
+  // Create our component emitter based on the prototype emitter, plus this one's particular address
+  std::shared_ptr<componentEmitter> newEmitter =
+    std::make_shared<componentEmitter>(componentEmitter(&emitter, localAddress, newAngle, 0));
 
-    // Iterate through until finding the first location where the angle is bigger than the current value.
-    // TODO: Fix to use iterator
-    std::vector<componentEmitter>::iterator it = _colorEmitters.begin();
-    while((it != _colorEmitters.end()) && (*it->angle < newAngle)) {
-        it++;
-    }
-    // We will now either be in the correct slot in the vector, or at the end of the vector
-
-    // Insert the new emitter, set the pwm offset, set slope to zero pending recalc
-    _colorEmitters.insert(it, newEmitter);
-
-    sprintf(msg, "Added emitter %s at la %u", emitter.getName(), localAddress);
-    debugPrint(msg);
-
-    // And then recalculate all slopes except the last
-
-    for (std::vector<componentEmitter>::iterator it = _colorEmitters.begin();
-          it<_colorEmitters.end();
-          it++) {
-      componentEmitter nextEmitter;
-      // Slope is to the next emitter, except the last one wraps around to the first
-      if ((it != _colorEmitters.end()) && (next(it) == _colorEmitters.end())) {
-        nextEmitter = next(it);
-      } else {
-        nextEmitter = _colorEmitters.begin();
-      }
-
-      _colorEmitters[i]->slope = (_colorEmitters[nextEmitter]->emitter->getV() - _colorEmitters[i]->emitter->getV())
-        / (_colorEmitters[nextEmitter]->emitter->getU() - _colorEmitters[i]->emitter->getU());
-
-    }
+  // Iterate through until finding the first location where the angle is bigger than the current value.
+  // TODO: Fix to use iterator
+  std::vector<std::shared_ptr<componentEmitter>>::iterator it = _colorEmitters.begin();
+  while((it < _colorEmitters.end()) && ((*it)->angle < newAngle)) {
+      it++;
   }
 
+  // We will now either be in the correct slot in the vector, or at the end of the vector
+  // Insert the new emitter, set the pwm offset, set slope to zero pending recalc
+  _colorEmitters.insert(it, newEmitter);
 
-//  // For debugging, print the current array of angles.
-//  Serial.println("Current LED Angles");
-//  for (std::vector<float>::iterator i=_angle.begin(); i != _angle.end(); ++i) {
-//    Serial.println(*i, 5);
-//  }
-//  Serial.println("");
-//
-//  // For debugging, print the current array of slopes.
-//  Serial.println("Current LED Slopes");
-//  for (std::vector<float>::iterator i=_slope.begin(); i != _slope.end(); ++i) {
-//    Serial.println(*i, 5);
-//  }
-//  Serial.println("");
+  sprintf(msg, "Added emitter %s at la %u", emitter.getName(), localAddress);
+  debugPrint(DEBUG_TRACE, msg);
+
+  // And then recalculate all slopes
+  for (std::vector<std::shared_ptr<componentEmitter>>::iterator itThisEmitter = _colorEmitters.begin();
+        itThisEmitter < _colorEmitters.end();
+        ++itThisEmitter) {
+    std::shared_ptr<componentEmitter> spNextEmitter;
+    // Slope is to the next emitter, except the last one wraps around to the first
+    if (*itThisEmitter != _colorEmitters.back()) {
+      spNextEmitter = *(std::next(itThisEmitter));
+    } else {
+      spNextEmitter = *(_colorEmitters.begin());
+    }
+
+    // I hate this mix of iterators to shared pointers and shared pointers,
+    // but it works
+    (*itThisEmitter)->slope = (spNextEmitter->emitter->getV() - (*itThisEmitter)->emitter->getV())
+      / (spNextEmitter->emitter->getU() - (*itThisEmitter)->emitter->getU());
+
+  }
 }
 
 float CompositeModule::getAngle(int num) {
@@ -116,15 +100,20 @@ std::vector<outputEmitter> CompositeModule::Hue2EmitterPower(const HSIColor &HSI
 
   // Copy our color emitters with default power of zero
   std::vector<outputEmitter> emitterPowers;
-  for (unsigned int i = 0; i < _colorEmitters.size(); i++) {
-    emitterPowers.push_back(outputEmitter(_colorEmitters[i]->localAddress, 0.0f));
-    sprintf(msg,"CompositeModule::Hue2EmitterPower added emitterPower[%u] at la %u", i, _colorEmitters[i]->localAddress);
-    debugPrint(msg);
-    sprintf(msg,"CompositeModule::Hue2EmitterPower added emitterPower[%u] at la %u with power %f", i, emitterPowers[emitterPowers.size()-1].localAddress, emitterPowers[emitterPowers.size()-1].power);
-    debugPrint(msg);
+  for (std::vector<std::shared_ptr<componentEmitter>>::const_iterator itspEmitter = _colorEmitters.begin();
+      itspEmitter < _colorEmitters.end();
+      ++itspEmitter) {
+
+    outputEmitter o((*itspEmitter)->localAddress, 0.0f);
+
+    emitterPowers.push_back(o);
+    sprintf(msg,"CompositeModule::Hue2EmitterPower added emitterPower[%u] at la %u with power %f",
+            emitterPowers.size()-1, emitterPowers.back().localAddress,
+             emitterPowers.back().power);
+    debugPrint(DEBUG_INSANE, msg);
   }
 
-  //debugPrint("Allocated emitterPowers");
+  //debugPrint(DEBUG_TRACE, "Allocated emitterPowers");;
   unsigned int emitter1, emitter2;
 
   //char m[100];
@@ -156,8 +145,7 @@ std::vector<outputEmitter> CompositeModule::Hue2EmitterPower(const HSIColor &HSI
   }
 
   sprintf(msg, "Emitter 1: %u, Emitter 2: %u", emitter1, emitter2);
-  debugPrint("Found emitters");
-  debugPrint(msg);
+  debugPrint(DEBUG_TRACE, msg);
 
   // Get the ustar and vstar values for the target LEDs.
   float emitter1_ustar = _colorEmitters[emitter1]->emitter->getU() - _whiteEmitter.emitter->getU();
@@ -165,18 +153,26 @@ std::vector<outputEmitter> CompositeModule::Hue2EmitterPower(const HSIColor &HSI
   float emitter2_ustar = _colorEmitters[emitter2]->emitter->getU() - _whiteEmitter.emitter->getU();
   float emitter2_vstar = _colorEmitters[emitter2]->emitter->getV() - _whiteEmitter.emitter->getV();
 
+  sprintf(msg, "t: %f, e1u: %f, e1v: %f, e2u: %f, e2v: %f", tanH, emitter1_ustar,emitter1_vstar,emitter2_ustar,emitter2_vstar);
+  debugPrint(DEBUG_INSANE, msg);
+
   // Get the slope between LED1 and LED2.
   float slope = _colorEmitters[emitter1]->slope;
 
   float ustar = (emitter2_vstar - slope*emitter2_ustar)/(tanH - slope);
   float vstar = tanH/(slope - tanH) * (slope * emitter2_ustar - emitter2_vstar);
 
+  sprintf(msg, "s: %f, u: %f, v: %f", slope, ustar, vstar);
+  debugPrint(DEBUG_INSANE, msg);
+
+
   // Set the two selected colors.
   emitterPowers[emitter1].power = I * S * abs(ustar-emitter2_ustar)/abs(emitter2_ustar - emitter1_ustar);
   emitterPowers[emitter2].power = I * S * abs(ustar-emitter1_ustar)/abs(emitter2_ustar - emitter1_ustar);
 
-  sprintf(msg, "I: %3.2f S: %3.2f u: %3.2f v: %3.2f p1: %4.4f p2: %4.4f", I, S, ustar, vstar, emitterPowers[emitter1].power, emitterPowers[emitter2].power);
-  debugPrint(msg);
+  sprintf(msg, "I: %3.2f S: %3.2f u: %3.2f v: %3.2f p1: %.4f p2: %.4f", I, S,
+          ustar, vstar, emitterPowers.at(emitter1).power, emitterPowers.at(emitter2).power);
+  debugPrint(DEBUG_INSANE, msg);
 
   // Add white to the end, and set the power
   emitterPowers.push_back(outputEmitter(_whiteEmitter.localAddress, I * (1 - S)));

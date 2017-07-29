@@ -1,15 +1,27 @@
 #include "debug.h"
 
-void debugPrint(const char* text) {
-  if (debugOutputMode)
+void debugPrint(uint16_t level, const char* text) {
+  if (level >= debugOutputMode) {
     Serial.println(text);
+  }
 }
 
-bool getDebugOutput() {
+void debugPrintf(uint16_t level, const char* fmt, ...) {
+  if (level >=debugOutputMode) {
+    char buff[PRINTF_BUFFER_SIZE];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(buff, PRINTF_BUFFER_SIZE, fmt, args);
+    va_end(args);
+    Serial.println(buff);
+  }
+}
+
+uint16_t getDebugOutput() {
   return debugOutputMode;
 }
 
-void setDebugOutput(bool newMode) {
+void setDebugOutput(uint16_t newMode) {
   debugOutputMode = newMode;
 }
 

@@ -11,16 +11,26 @@
 void Serial_printf(const char* fmt, ...);
 
 #define debug_print(fmt, ...) \
-        do { if (DEBUG) Serial_printf("%s:%d:%s(): " fmt, __FILE__, \
+        do { if (DEBUG_LEVEL) Serial_printf("%s:%d:%s(): " fmt, __FILE__, \
                                 __LINE__, __func__, __VA_ARGS__); } while (0)
 
 #endif
 
-static bool debugOutputMode = true;
 
-void debugPrint(const char* text);
+enum DEBUG_LEVEL {
+  DEBUG_MANDATORY = 0,
+  DEBUG_ERROR = 1,
+  DEBUG_WARN = 2,
+  DEBUG_TRACE = 3,
+  DEBUG_INSANE = 4
+};
 
-void setDebugOutput(bool newMode);
-bool getDebugOutput();
+static uint16_t debugOutputMode = DEBUG_ERROR;
+
+void debugPrint(uint16_t level, const char* text);
+void debugPrintf(uint16_t level, const char* fmt, ...);
+
+void setDebugOutput(uint16_t newMode);
+uint16_t getDebugOutput();
 
 #endif

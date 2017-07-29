@@ -11,6 +11,7 @@
 #define COMPOSITEMODULE_H
 
 #include <vector>
+#include <math.h>
 #include "application.h"
 #include "emitter.h"
 #include "hsicolor.h"

@@ -146,7 +146,7 @@ void modeE131() {
 
 
 void setupDisplay() {
-  debugPrint("Setting up display");
+  debugPrint(DEBUG_TRACE, "Setting up display");;
   display.begin();
 
   display.fillScreen(BLACK);
@@ -155,17 +155,17 @@ void setupDisplay() {
   display.setTextSize(1.5);
   display.println("Starting...");
 
-  debugPrint("  Finished");
+  debugPrint(DEBUG_TRACE, "  Finished");;
 }
 
 void setupLEDs() {
-  debugPrint("Setting up outputs");
+  debugPrint(DEBUG_TRACE,"Setting up outputs");
   Wire.begin();                       // Wire must be started first
   Wire.setClock(400000);              // Supported baud rates are 100kHz, 400kHz, and 1000kHz
 
   mainOutput.init();
 
-  debugPrint("Setting up LEDs");
+  debugPrint(DEBUG_TRACE, "Setting up LEDs");
 
   LZ7.addWhiteEmitter(emitterLZ7white, 5);
   LZ7.addColorEmitter(emitterLZ7red, 0);
@@ -175,13 +175,13 @@ void setupLEDs() {
   LZ7.addColorEmitter(emitterLZ7blue, 2);
   LZ7.addColorEmitter(emitterLZ7violet, 6);
 
-  debugPrint("Setting up lamps");
+  debugPrint(DEBUG_TRACE, "Setting up lamps");
 
   std::for_each(allLights.begin(), allLights.end(), [&] (std::shared_ptr<HSILight> light) {
     light->begin();
   });
 
-  debugPrint("Done setting up LEDs");
+  debugPrint(DEBUG_TRACE, "Done setting up LEDs");
 }
 
 void setupControls() {
@@ -190,7 +190,6 @@ void setupControls() {
   modeButton.debounceTime   = 20;   // Debounce timer in ms
   modeButton.multiclickTime = 250;  // Time limit for multi clicks
   modeButton.longClickTime  = 750; // time until "held-down clicks" register
-
 }
 
 void setupSensors() {
@@ -198,7 +197,7 @@ void setupSensors() {
 }
 
 void setup(void) {
-  setDebugOutput(true);
+  setDebugOutput(DEBUG_TRACE);
   Serial.begin(9600);
   delay(5000);
 
@@ -210,7 +209,7 @@ void setup(void) {
     delayLoops++;
   }
   if (Serial)
-    debugPrint("Serial came up");
+    debugPrint(DEBUG_TRACE, "Serial came up");
 
   setupLEDs();
   setupControls();
@@ -362,7 +361,7 @@ void loopControlBrightness() {
   if (abs(brightnessChange) >= 0.002) {
     //char msg[100];
     //sprintf(msg,"New brightness: %f (change %f)",newBrightness,brightnessChange);
-    //debugPrint(msg);
+    //debugPrint(DEBUG_TRACE, msg);
     //displayMustUpdate = true;
     lightsMustUpdate = true;
     displayMustUpdate = true;
@@ -371,7 +370,7 @@ void loopControlBrightness() {
 }
 
 void particleDisconnect() {
-  debugPrint("particleDisconnect: start");
+  debugPrint(DEBUG_TRACE, "particleDisconnect: start");;
   if (!Particle.connected() && (particleDesiredState == PARTICLE_DISCONNECTED)) {
     // We're already not connected, and we want to be disconnected.
     particleCurrentState = PARTICLE_DISCONNECTED;
@@ -380,10 +379,10 @@ void particleDisconnect() {
     // We are either connected or in the process of connecting. Shut that down.
     Particle.disconnect();
     particleDesiredState = PARTICLE_DISCONNECTED;
-    debugPrint("particleDisconnect: disconnecting");
+    debugPrint(DEBUG_TRACE, "particleDisconnect: disconnecting");;
     return;
   }
-  debugPrint("particleDisconnect: end");
+  debugPrint(DEBUG_TRACE, "particleDisconnect: end");;
 }
 
 void particleConnect() {
@@ -392,7 +391,7 @@ void particleConnect() {
   if (Particle.connected()) {
     // We're already connected, thanks, but maybe the state wasn't updated
     particleCurrentState = PARTICLE_CONNECTED;
-    debugPrint("particleConnect: connected");
+    debugPrint(DEBUG_TRACE, "particleConnect: connected");;
     return;
   }
 
@@ -401,7 +400,7 @@ void particleConnect() {
     if ((millis() - connectionStartMillis) > PARTICLE_CONNECTION_TIMEOUT ) {
       // Timeout. Give up
       // TODO: build periodic reconnection attempt
-      debugPrint("Timed out connecting to Particle cloud");
+      debugPrint(DEBUG_TRACE, "Timed out connecting to Particle cloud");;
       particleDisconnect();
     }
     // Have not connected yet, but still within timeout
@@ -412,15 +411,15 @@ void particleConnect() {
   connectionStartMillis = millis();
   Particle.connect();
   particleDesiredState = PARTICLE_CONNECTED;
-  debugPrint("particleConnect: connecting");
+  debugPrint(DEBUG_TRACE, "particleConnect: connecting");;
 }
 
 void particleToggle() {
   if (particleDesiredState == PARTICLE_CONNECTED) {
-    debugPrint("particleToggle: disconnecting");
+    debugPrint(DEBUG_TRACE, "particleToggle: disconnecting");;
     particleDisconnect();
   } else {
-    debugPrint("particleToggle: connecting");
+    debugPrint(DEBUG_TRACE, "particleToggle: connecting");;
     particleConnect();
   }
 }
@@ -429,7 +428,7 @@ void particleProcess() {
   if (Particle.connected()) {
     if (particleCurrentState == PARTICLE_DISCONNECTED) {
       particleCurrentState = PARTICLE_CONNECTED;
-      debugPrint("particleProcess: connected");
+      debugPrint(DEBUG_TRACE, "particleProcess: connected");;
     }
     Particle.process();
     return;
@@ -452,20 +451,20 @@ void loopControls() {
   if (modeButton.clicks != 0) {
 
     if ( modeClicks == 1 ) {
-      debugPrint("One click");
+      debugPrint(DEBUG_TRACE, "One click");;
       currentMode = ((currentMode + 1) % modeCount);
       displayMustUpdate = true;
       lightsMustUpdate = true;
     }
 
     if ( modeClicks == 2 ) {
-      debugPrint("Two clicks");
+      debugPrint(DEBUG_TRACE, "Two clicks");;
       particleToggle();
       displayMustUpdate = true;
     }
 
     if ( modeClicks == -1 ) {
-      debugPrint("One long click");
+      debugPrint(DEBUG_TRACE, "One long click");;
       setDebugOutput(!getDebugOutput());
       displayMustUpdate = true;
     }
@@ -486,6 +485,6 @@ void loop() {
 }
 
 void connect() {
-  debugPrint("connect: connected");
+  debugPrint(DEBUG_TRACE, "connect: connected");;
   particleCurrentState = PARTICLE_CONNECTED;
 }

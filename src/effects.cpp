@@ -10,7 +10,7 @@ bool effectTest(std::vector<std::shared_ptr<HSILight>> lights, bool lightsMustUp
   counter = floor((millis() - firstChange) / millisPerColor);
 
   //sprintf(msg,"millis %d, firstchange %d, millisperColor %u, counter %d",millis(),firstChange,millisPerColor,counter);
-  //debugPrint(msg);
+  //debugPrint(DEBUG_TRACE, msg);
   if (lightsMustUpdate || (counter != lastCounter)) {
     std::for_each(lights.begin(), lights.end(), [&] (std::shared_ptr<HSILight> val) {
       val->debugOutput();
@@ -25,7 +25,7 @@ bool effectTest(std::vector<std::shared_ptr<HSILight>> lights, bool lightsMustUp
 
 bool effectRotate(std::vector<std::shared_ptr<HSILight>> lights, bool lightsMustUpdate) {
   return true;
-  
+
   const unsigned int millisPerHueRotation = 1000 * 60;
   const unsigned int millisPerSatRotation = millisPerHueRotation *2;
 
@@ -58,7 +58,7 @@ bool effectRotate(std::vector<std::shared_ptr<HSILight>> lights, bool lightsMust
   }
   char msg[30];
   sprintf(msg,"H: %3.0f (+ %3.3f, %lu) S: %3.2f I: 1.0", hue, hueToAdd, millisPassed, sat);
-  debugPrint(msg);
+  debugPrint(DEBUG_TRACE, msg);
   rotateColor.setHSI(hue, sat, 0.5f);
   std::for_each(lights.begin(), lights.end(), [&] (std::shared_ptr<HSILight> val) {
     val->setColor(rotateColor);
