@@ -31,9 +31,8 @@ bool OutputPCA9685::setEmitterPowers(const std::vector<outputEmitter>& emitterPo
   // in emitterPowers
 
   debugPrint(DEBUG_TRACE, "OutputPCA9685::setEmitterPowers start");;
-  char msg[100];
-  sprintf(msg,"  emitterPowers.size() == %u", emitterPowers.size());
-  debugPrint(DEBUG_TRACE, msg);
+
+  debugPrintf(DEBUG_INSANE, "  emitterPowers.size() == %u", emitterPowers.size());
 
   uint16_t pwms[emitterPowers.size()];
   uint16_t minAddress = UINT16_MAX;
@@ -45,8 +44,7 @@ bool OutputPCA9685::setEmitterPowers(const std::vector<outputEmitter>& emitterPo
     }
   }
 
-  sprintf(msg,"  minAddress == %u", minAddress);
-  debugPrint(DEBUG_TRACE, msg);
+  debugPrintf(DEBUG_INSANE, "  minAddress == %u", minAddress);
 
   for (uint16_t i = 0; i < emitterPowers.size(); i++) {
     if ((globalBrightness == 1.0f) && (emitterPowers[i].power == 1.0f)) {
@@ -54,8 +52,7 @@ bool OutputPCA9685::setEmitterPowers(const std::vector<outputEmitter>& emitterPo
     } else {
       powerTo9685 = (uint16_t)(4096.0f * globalBrightness * emitterPowers[i].power) & 0x0FFF;
     }
-    sprintf(msg,"  setting pwms[%u] to %u for i %u, la %u", emitterPowers[i].localAddress - minAddress, powerTo9685, i, emitterPowers[i].localAddress);
-    debugPrint(DEBUG_TRACE, msg);
+    debugPrintf(DEBUG_INSANE, "  setting pwms[%u] to %u for i %u, la %u", emitterPowers[i].localAddress - minAddress, powerTo9685, i, emitterPowers[i].localAddress);
     pwms[emitterPowers[i].localAddress - minAddress] = powerTo9685;
   }
   _pwm.setChannelsPWM(minAddress, emitterPowers.size(), pwms);
