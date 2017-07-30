@@ -21,8 +21,8 @@ void debugPrint(uint16_t level, const char *buffer) {
   }
 }
 
-void debugPrintf(uint16_t level, const char* fmt, ...) {
-  if (level >=debugOutputMode) {
+void debugPrintf(uint16_t level, const char *fmt, ...) {
+  if (level >= debugOutputMode) {
     char buff[PRINTF_BUFFER_SIZE];
     va_list args;
     va_start(args, fmt);
@@ -50,37 +50,37 @@ void getDebugLevelName(uint16_t level, char *buffer, size_t buffer_length) {
     case DEBUG_MANDATORY:
       strncpy(buffer, "Mandatory", buffer_length - 1);
       break;
-      case DEBUG_ERROR:
-        strncpy(buffer, "Error", buffer_length - 1);
-        break;
+    case DEBUG_ERROR:
+      strncpy(buffer, "Error  ", buffer_length - 1);
+      break;
 
-        case DEBUG_WARN:
-          strncpy(buffer, "Warning", buffer_length - 1);
-          break;
+    case DEBUG_WARN:
+      strncpy(buffer, "Warning", buffer_length - 1);
+      break;
 
-          case DEBUG_TRACE:
-            strncpy(buffer, "Trace", buffer_length - 1);
-            break;
+    case DEBUG_TRACE:
+      strncpy(buffer, "Trace", buffer_length - 1);
+      break;
 
-            case DEBUG_INSANE:
-              strncpy(buffer, "Insane", buffer_length - 1);
-              break;
+    case DEBUG_INSANE:
+      strncpy(buffer, "Insane", buffer_length - 1);
+      break;
 
-              default:
-                strncpy(buffer, "Unknown", buffer_length -1);
+    default:
+      strncpy(buffer, "Unknown", buffer_length - 1);
   }
-
 }
 
 #ifdef DEBUG_BUILD
 
-void Serial_printf(const char* fmt, ...) {
-   char buff[PRINTF_BUFFER_SIZE];
-   va_list args;
-   va_start(args, fmt);
-   vsnprintf(buff, PRINTF_BUFFER_SIZE, fmt, args);
-   va_end(args);
-   Serial.println(buff);
+void Serial_printf(const char *fmt, ...) {
+  char buff[PRINTF_BUFFER_SIZE];
+  va_list args;
+
+  va_start(args, fmt);
+  vsnprintf(buff, PRINTF_BUFFER_SIZE, fmt, args);
+  va_end(args);
+  Serial.println(buff);
 }
 
-#endif
+#endif // ifdef DEBUG_BUILD
