@@ -12,10 +12,16 @@ Luminous implementation on Particle
 - HSIColor: class to model colors in HSI; directly from TeensyLED
 
 ## Notes
-You only need one Emitter per *type* of light emitter. Likewise, only one CompositeModule per *type* of module.
+- You only need one Emitter per *type* of light emitter. Likewise, only one CompositeModule per *type* of module. It's the HSILights that represent actual lighting nodes; use one HSILight per addressable node.
 
-Use one HSILight per addressable module.
+- The global `globalBrightness` variable can be used as a blackout. All OutputInterfaces should scale the power for the emitters they are responsible for by `globalBrightness` before sending.
 
-The global `globalBrightness` variable can be used as a blackout. All OutputInterfaces should multiply the power for the emitters they are responsible for by `globalBrightness` before sending.
+- At present only the PCA9685 is supported for output, but it should be trivial to write a new outputinterface for direct pin output.
 
-At present only the PCA9685 is supported for output, but it should be trivial to write a new outputinterface for direct pin output.
+- Hue is represented in degrees; 0 = 360 = red.
+
+- Saturation is a float, with values between 0 and 1. Value 0 is fully saturated (most pure color), 1 is fully desaturated (white).
+
+- Inensity is a float, with values between 0 and 1. Value 0 is off, 1.0 is as bright as possible
+
+- The system does not currently understand differences in brightnesses between different Emitters or CompositeModules.
