@@ -1,5 +1,6 @@
 #include "application.h"
 SYSTEM_MODE(MANUAL);
+SYSTEM_THREAD(ENABLED);
 
 #include <math.h>
 
