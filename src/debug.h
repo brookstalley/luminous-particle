@@ -31,9 +31,9 @@ extern uint16_t debugOutputMode;
 void debugPrint(uint16_t level, const char* text);
 void debugPrintf(uint16_t level, const char* fmt, ...);
 
-void setDebugOutput(uint16_t newMode);
+void setDebugLevel(uint16_t newMode);
 
-uint16_t getDebugOutputLevel();
+uint16_t getDebugLevel();
 void getDebugLevelName(uint16_t level, char *buffer, size_t buffer_length);
 
 

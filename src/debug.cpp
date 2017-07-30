@@ -32,11 +32,11 @@ void debugPrintf(uint16_t level, const char* fmt, ...) {
   }
 }
 
-uint16_t getDebugOutputLevel() {
+uint16_t getDebugLevel() {
   return debugOutputMode;
 }
 
-void setDebugOutput(uint16_t newMode) {
+void setDebugLevel(uint16_t newMode) {
   // kind of cheesy way to support incrementing debugging levels
   if (newMode < END_OF_LIST) {
     debugOutputMode = newMode;

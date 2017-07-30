@@ -184,7 +184,7 @@ void setupSensors() {
 }
 
 void setup(void) {
-  setDebugOutput(DEBUG_TRACE);
+  setDebugLevel(DEBUG_TRACE);
   Serial.begin(9600);
   delay(100);
   debugPrint(DEBUG_MANDATORY,"Starting...");
@@ -255,20 +255,20 @@ void loopDisplay() {
     display.setTextColor(WHITE, BLACK);
 
     char debugName[12];
-    getDebugLevelName(getDebugOutputLevel(), debugName, sizeof(debugName));
+    getDebugLevelName(getDebugLevel(), debugName, sizeof(debugName));
 
     sprintf (lineData[0], "Running:    %s", TimeToString(millis()/1000));
     sprintf (lineData[1], "Mode:       %s", modes[currentMode].name);
     sprintf (lineData[2], "Brightness: %2.0f%%", globalBrightness * 100);
     sprintf (lineData[3], "Debug:      %s", debugName);
     strcpy (lineData[4], (particleCurrentState == PARTICLE_CONNECTED ?
-                          "Particle:   online " :
+                          "Particle:   online" :
                           "Particle:   offline"));
 
     strcpy (lineData[5], (particleDesiredState != particleCurrentState ?
                             (particleDesiredState == PARTICLE_CONNECTED ?
                               "  Connecting" : "  Disconnecting")
-                            : "              "));
+                            : ""));
 /*
     dtostrf(LEDTempCelsius, 2, 1, str_temp);
     snprintf (temperature, numChars, "Temp: %s c", str_temp);
@@ -286,28 +286,27 @@ void loopDisplay() {
         display.println(lineData[i]);
 
         // Determine how much we need to clear after the next text
-        uint16_t charsBeforeEOL = 11 + strlen(lineData[i]);
+        uint16_t charsBeforeEOL = strlen(lineData[i]);
 
         size_t lengthPrevious = strlen(lineDataPrevious[i]);
         size_t lengthNew = strlen(lineData[i]);
-
         if (lengthPrevious > lengthNew) {
-          display.fillRect(
-            (uint16_t)(charsBeforeEOL * charWidth),
-            (uint16_t)(i * lineHeight),
-            (uint16_t)(127 - ((lengthNew + 1) * charWidth)),
-            (uint16_t)lineHeight,
-            BLACK);
+          uint16_t left = charsBeforeEOL * charWidth;
+          uint16_t top = i * lineHeight;
+          uint16_t width = displayWidth - (lengthNew * charWidth);
+          uint16_t height = lineHeight;
+          display.fillRect(left, top, width, height, BLACK);
+          //setDebugLevel(DEBUG_INSANE); // because otherwise we won't see this output
+          //debugPrintf(DEBUG_INSANE, "updateDisplay: previous (%u) longer than new (%u). Filling %u,%u for w=%u, h=%u",
+          //            lengthPrevious, lengthNew, left, top, width, height);
         }
 
         // Save the new text for next time
         strcpy(lineDataPrevious[i],lineData[i]);
       }
     }
-
     lastUpdateMillis = millis();
     displayMustUpdate = false;
-
   }
 }
 
@@ -382,7 +381,7 @@ void loopControls() {
 
     if ( modeClicks == -1 ) {
       debugPrint(DEBUG_TRACE, "Long click: increment debugging");
-      setDebugOutput(debugOutputMode + 1);
+      setDebugLevel(getDebugLevel() + 1);
       displayMustUpdate = true;
     }
   }
