@@ -17,7 +17,7 @@ SYSTEM_THREAD(ENABLED);
 #include "compositemodule.h"
 #include "hsilight.h"
 #include "debug.h"
-#include "effects.h"
+#include "modes.h"
 #include "outputPCA9685.h"
 #include "particlefunctions.h"
 
@@ -87,7 +87,8 @@ Emitter emitterLZ7violet("LZ7-v", 0.35, 0.15, (float)30 / 30);
 CompositeModule LZ7;
 
 // Create a light that has an LZ7 module, on our main output at address 0
-
+// Eventually we'll have different groups of lights, so just make a group
+// of one because the various effects expect to operate on a group.
 std::vector<std::shared_ptr<HSILight> > allLights = {
   std::make_shared<HSILight>(HSILight("Light1", LZ7, mainOutput, (uint16_t)0))
 };
@@ -166,14 +167,12 @@ void setup(void) {
   setupSensors();
 }
 
-void effectOff()   {}
-
 void loopSensors() {}
 
 void loopInputs()  {}
 
 void loopLEDs() {
-  modes[currentMode].runPointer(allLights, lightsMustUpdate);
+  modes[currentMode]->run(allLights, lightsMustUpdate);
   lightsMustUpdate = false;
 }
 
@@ -214,7 +213,7 @@ void loopDisplay() {
     getDebugLevelName(getDebugLevel(), debugName, sizeof(debugName));
 
     sprintf(lineData[0], "Running:    %s", TimeToString(millis() / 1000));
-    sprintf(lineData[1], "Mode:       %s", modes[currentMode].name);
+    sprintf(lineData[1], "Mode:       %s", modes[currentMode]->getName());
     sprintf(lineData[2], "Brightness: %2.0f%%", globalBrightness * 100);
     sprintf(lineData[3], "Debug:      %s", debugName);
     strcpy(lineData[4], (particleCurrentState == PARTICLE_CONNECTED ?
@@ -334,7 +333,9 @@ void loopControls() {
   if (modeButton.clicks != 0) {
     if (modeClicks == 1) {
       debugPrint(DEBUG_TRACE, "Click: change mode");
-      currentMode       = ((currentMode + 1) % modeCount);
+      modes[currentMode]->end(allLights);
+      currentMode = ((currentMode + 1) % modeCount);
+      modes[currentMode]->start(allLights);
       displayMustUpdate = true;
       lightsMustUpdate  = true;
     }

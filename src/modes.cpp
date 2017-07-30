@@ -1,18 +1,18 @@
-#include "effects.h"
+#include "modes.h"
 
-const int modeCount = 4;
+const int modeCount = 3;
 
-luminousMode modes[modeCount] = {
-  { "Off",    startOff,    runOff,    endOff          },
-  { "Test",   startTest,   runTest,   endTest         },
-  { "Rotate", startRotate, runRotate, endRotate       },
-  { "E131",   startE131,   runE131,   endE131         }
+Mode *modes[modeCount] = {
+  new ModeOff("Off"),
+  new ModeTest("Test"),
+  new ModeRotate("Rotate"),
+
+  // new ModeE131("E131"),
 };
 
 uint16_t currentMode = 0;
 
-bool startOff(std::vector<std::shared_ptr<HSILight> >lights,
-              bool lightsMustUpdate) {
+bool ModeOff::start(std::vector<std::shared_ptr<HSILight> >lights) {
   debugPrintf(DEBUG_INSANE, "startOff: turning all lights off");
   std::for_each(lights.begin(), lights.end(), [&](std::shared_ptr<HSILight>light) {
     light->setColor(HSIColor(0, 0, 0));
@@ -21,23 +21,8 @@ bool startOff(std::vector<std::shared_ptr<HSILight> >lights,
   return true;
 }
 
-bool runOff(std::vector<std::shared_ptr<HSILight> >lights,
-            bool lightsMustUpdate) {
-  return true;
-}
-
-bool endOff(std::vector<std::shared_ptr<HSILight> >lights,
-            bool lightsMustUpdate) {
-  return true;
-}
-
-bool startTest(std::vector<std::shared_ptr<HSILight> >lights,
-               bool lightsMustUpdate) {
-  return true;
-}
-
-bool runTest(std::vector<std::shared_ptr<HSILight> >lights,
-             bool lightsMustUpdate) {
+bool ModeTest::run(std::vector<std::shared_ptr<HSILight> >lights,
+                   bool lightsMustUpdate) {
   const unsigned int   millisPerColor = 2000;
   static unsigned long firstChange    = millis();
   static unsigned int  counter        = 0;
@@ -60,18 +45,7 @@ bool runTest(std::vector<std::shared_ptr<HSILight> >lights,
   return true;
 }
 
-bool endTest(std::vector<std::shared_ptr<HSILight> >lights,
-             bool lightsMustUpdate) {
-  return true;
-}
-
-bool startRotate(std::vector<std::shared_ptr<HSILight> >lights,
-                 bool lightsMustUpdate) {
-  return true;
-}
-
-bool runRotate(std::vector<std::shared_ptr<HSILight> >lights,
-               bool lightsMustUpdate) {
+bool ModeRotate::run(std::vector<std::shared_ptr<HSILight> >lights, bool lightsMustUpdate) {
   return true;
 
   const unsigned int millisPerHueRotation = 1000 * 60;
@@ -112,25 +86,5 @@ bool runRotate(std::vector<std::shared_ptr<HSILight> >lights,
     val->setColor(rotateColor);
   });
 
-  return true;
-}
-
-bool endRotate(std::vector<std::shared_ptr<HSILight> >lights,
-               bool lightsMustUpdate) {
-  return true;
-}
-
-bool startE131(std::vector<std::shared_ptr<HSILight> >lights,
-               bool lightsMustUpdate) {
-  return true;
-}
-
-bool runE131(std::vector<std::shared_ptr<HSILight> >lights,
-             bool lightsMustUpdate) {
-  return true;
-}
-
-bool endE131(std::vector<std::shared_ptr<HSILight> >lights,
-             bool lightsMustUpdate) {
   return true;
 }
