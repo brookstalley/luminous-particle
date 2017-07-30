@@ -60,27 +60,6 @@ void modeE131();
 #define YELLOW          0xFFE0
 #define WHITE           0xFFFF
 
-
-////////////////////////// STRUCTS ///////////////////////////
-
-typedef void (*luminousFunctionPointer) ();
-
-typedef struct {
-  const char              name[10];
-  luminousFunctionPointer functionPointer;
-} luminousMode;
-
-const int modeCount = 4;
-
-luminousMode modes[modeCount] = {
-  { "Off",    modeOff    },
-  { "Test",   modeTest   },
-  { "Rotate", modeRotate },
-  { "E131",   modeE131   }
-};
-
-int currentMode = 0;
-
 ////////////////////////// GLOBALS ///////////////////////////
 
 float globalBrightness = 1.0f;
@@ -112,19 +91,6 @@ CompositeModule LZ7;
 std::vector<std::shared_ptr<HSILight> > allLights = {
   std::make_shared<HSILight>(HSILight(LZ7, mainOutput, (uint16_t)0))
 };
-
-//////////////// MODES ///////////////////////////////////
-void modeOff() {}
-
-void modeTest() {
-  effectTest(allLights, lightsMustUpdate);
-}
-
-void modeRotate() {
-  effectRotate(allLights, lightsMustUpdate);
-}
-
-void modeE131() {}
 
 ////////////////////////// MAIN ////////////////////////////
 
@@ -200,14 +166,14 @@ void setup(void) {
   setupSensors();
 }
 
-void effectOff() {}
+void effectOff()   {}
 
 void loopSensors() {}
 
-void loopInputs() {}
+void loopInputs()  {}
 
 void loopLEDs() {
-  modes[currentMode].functionPointer();
+  modes[currentMode].runPointer(allLights, lightsMustUpdate);
   lightsMustUpdate = false;
 }
 
@@ -308,13 +274,13 @@ void loopDisplay() {
 }
 
 void loopControlBrightness() {
-  static float brightness_EMA_a = 0.7;                               // initialization
-                                                                     // of EMA
-                                                                     // alpha
-  static int   brightness_EMA_S = 1023 - analogRead(BRIGHTNESS_PIN); // initialization
-                                                                     // of EMA S
-  static int   minBrightness    = 100;
-  static int   maxBrightness    = 900;
+  static float brightness_EMA_a = 0.7;                             // initialization
+                                                                   // of EMA
+                                                                   // alpha
+  static int brightness_EMA_S = 1023 - analogRead(BRIGHTNESS_PIN); // initialization
+                                                                   // of EMA S
+  static int minBrightness = 100;
+  static int maxBrightness = 900;
 
   int sensorValue = 1023 - analogRead(BRIGHTNESS_PIN);
 
