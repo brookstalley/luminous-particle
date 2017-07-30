@@ -1,7 +1,7 @@
 #include "application.h"
-#include <math.h>
+SYSTEM_MODE(MANUAL);
 
-#define DEBUG_MODE 1
+#include <math.h>
 
 ////////////////////////// INCLUDES ///////////////////////
 
@@ -17,21 +17,7 @@
 #include "debug.h"
 #include "effects.h"
 #include "outputPCA9685.h"
-
-////////////////////////// PARTICLE ///////////////////////
-
-SYSTEM_MODE(MANUAL);
-enum particleState {PARTICLE_DISCONNECTED, PARTICLE_CONNECTED};
-
-enum wifiState {WIFI_DISCONNECTED, WIFI_CONNECTED};
-
-particleState particleCurrentState = PARTICLE_DISCONNECTED;
-particleState particleDesiredState = PARTICLE_DISCONNECTED;
-
-wifiState wifiCurrentState = WIFI_DISCONNECTED;
-wifiState wifiDesiredState = WIFI_DISCONNECTED;
-
-#define PARTICLE_CONNECTION_TIMEOUT 30000
+#include "particlefunctions.h"
 
 ////////////////////////// DECLARATIONS ///////////////////
 
@@ -46,7 +32,7 @@ void modeE131();
 ///////////////////////// DEFINES /////////////////////////
 
 // Debugging
-#define PCA9685_ENABLE_DEBUG_OUTPUT
+#define DEBUG_BUILD
 
 // You can use any (4 or) 5 pins
 #define spi_pin_sclk A3
@@ -369,80 +355,7 @@ void loopControlBrightness() {
   globalBrightness = newBrightness;
 }
 
-void particleDisconnect() {
-  debugPrint(DEBUG_TRACE, "particleDisconnect: start");;
-  if (!Particle.connected() && (particleDesiredState == PARTICLE_DISCONNECTED)) {
-    // We're already not connected, and we want to be disconnected.
-    particleCurrentState = PARTICLE_DISCONNECTED;
-  }
-  if ((particleCurrentState == PARTICLE_CONNECTED) || (particleDesiredState == PARTICLE_CONNECTED)) {
-    // We are either connected or in the process of connecting. Shut that down.
-    Particle.disconnect();
-    particleDesiredState = PARTICLE_DISCONNECTED;
-    debugPrint(DEBUG_TRACE, "particleDisconnect: disconnecting");;
-    return;
-  }
-  debugPrint(DEBUG_TRACE, "particleDisconnect: end");;
-}
 
-void particleConnect() {
-  static unsigned long connectionStartMillis = 0;
-
-  if (Particle.connected()) {
-    // We're already connected, thanks, but maybe the state wasn't updated
-    particleCurrentState = PARTICLE_CONNECTED;
-    debugPrint(DEBUG_TRACE, "particleConnect: connected");;
-    return;
-  }
-
-  // We are not connected, but the desired state is to be connected
-  if (particleDesiredState == PARTICLE_CONNECTED) {
-    if ((millis() - connectionStartMillis) > PARTICLE_CONNECTION_TIMEOUT ) {
-      // Timeout. Give up
-      // TODO: build periodic reconnection attempt
-      debugPrint(DEBUG_TRACE, "Timed out connecting to Particle cloud");;
-      particleDisconnect();
-    }
-    // Have not connected yet, but still within timeout
-    return;
-  }
-
-  // We must be in PARTICLE_DISCONNECTED state, but someone called Connect()
-  connectionStartMillis = millis();
-  Particle.connect();
-  particleDesiredState = PARTICLE_CONNECTED;
-  debugPrint(DEBUG_TRACE, "particleConnect: connecting");;
-}
-
-void particleToggle() {
-  if (particleDesiredState == PARTICLE_CONNECTED) {
-    debugPrint(DEBUG_TRACE, "particleToggle: disconnecting");;
-    particleDisconnect();
-  } else {
-    debugPrint(DEBUG_TRACE, "particleToggle: connecting");;
-    particleConnect();
-  }
-}
-
-void particleProcess() {
-  if (Particle.connected()) {
-    if (particleCurrentState == PARTICLE_DISCONNECTED) {
-      particleCurrentState = PARTICLE_CONNECTED;
-      debugPrint(DEBUG_TRACE, "particleProcess: connected");;
-    }
-    Particle.process();
-    return;
-  }
-
-  if (particleCurrentState == PARTICLE_CONNECTED) {
-    // We think we're connected but Particle thinks otherwise
-    particleCurrentState = PARTICLE_DISCONNECTED;
-    if (particleDesiredState == PARTICLE_CONNECTED) {
-      // ...but we WANT to be connected, so try to reconnect
-      particleConnect();
-    }
-  }
-}
 
 void loopControls() {
   static int modeClicks = 0;

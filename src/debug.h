@@ -6,7 +6,7 @@
 
 #define PRINTF_BUFFER_SIZE 256
 
-#ifdef DEBUG
+#ifdef DEBUG_BUILD
 
 void Serial_printf(const char* fmt, ...);
 
@@ -25,7 +25,7 @@ enum DEBUG_LEVEL {
   DEBUG_INSANE = 4
 };
 
-static uint16_t debugOutputMode = DEBUG_ERROR;
+extern uint16_t debugOutputMode;
 
 void debugPrint(uint16_t level, const char* text);
 void debugPrintf(uint16_t level, const char* fmt, ...);

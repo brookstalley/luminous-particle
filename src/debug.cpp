@@ -1,5 +1,7 @@
 #include "debug.h"
 
+uint16_t debugOutputMode = DEBUG_ERROR;
+
 void debugPrint(uint16_t level, const char* text) {
   if (level >= debugOutputMode) {
     Serial.println(text);
@@ -25,7 +27,7 @@ void setDebugOutput(uint16_t newMode) {
   debugOutputMode = newMode;
 }
 
-#ifdef DEBUG
+#ifdef DEBUG_BUILD
 
 void Serial_printf(const char* fmt, ...) {
    char buff[PRINTF_BUFFER_SIZE];

@@ -91,7 +91,6 @@ std::vector<outputEmitter> CompositeModule::Hue2EmitterPower(const HSIColor &HSI
   float S = HSI.getSaturation();
   float I = HSI.getIntensity();
 
-  char msg[100];
   float tanH = tan(M_PI*fmod(H,360)/(float)180); // Get the tangent since we will use it often.
 
   // Copy our color emitters with default power of zero
@@ -108,18 +107,10 @@ std::vector<outputEmitter> CompositeModule::Hue2EmitterPower(const HSIColor &HSI
              emitterPowers.back().power);
   }
 
-  //debugPrint(DEBUG_TRACE, "Allocated emitterPowers");;
   unsigned int emitter1, emitter2;
-
-  //char m[100];
-  //sprintf(m, "emitterPowers: %u", emitterPowers.size());
-  //debugPrint(m);
-  //sprintf(m, "_colorEmitters: %u", _colorEmitters.size());
-  //debugPrint(m);
 
   // Check the range to determine which intersection to do.
   // For angle less than the smallest CIE hue or larger than the largest, special case.
-
 
   if ((H < _colorEmitters[0]->angle) || (H >= _colorEmitters[_colorEmitters.size()-1]->angle)) {
     // Then we're mixing the lowest angle LED with the highest angle LED.
