@@ -273,15 +273,11 @@ void loopDisplay() {
 }
 
 void loopControlBrightness() {
-  static float brightness_EMA_a = 0.7;                             // initialization
-                                                                   // of EMA
-                                                                   // alpha
-  static int brightness_EMA_S = 1023 - analogRead(BRIGHTNESS_PIN); // initialization
-                                                                   // of EMA S
-  static int minBrightness = 100;
-  static int maxBrightness = 900;
-
-  int sensorValue = 1023 - analogRead(BRIGHTNESS_PIN);
+  static float brightness_EMA_a = 0.7;
+  static int   brightness_EMA_S = 1023 - analogRead(BRIGHTNESS_PIN);
+  static int   minBrightness    = 100;
+  static int   maxBrightness    = 900;
+  int sensorValue               = 1023 - analogRead(BRIGHTNESS_PIN);
 
   if (sensorValue > maxBrightness) {
     maxBrightness = sensorValue;
@@ -309,12 +305,9 @@ void loopControlBrightness() {
   if (sensorValue > 1000) {
     sensorValue = sensorValue + (sensorValue - 1000) * 2;
   }
-  sensorValue = 100 * constrain(sensorValue, 0, 1023);
-
-  brightness_EMA_S = (brightness_EMA_a * sensorValue) +
-                     ((1 - brightness_EMA_a) * brightness_EMA_S); // run the EMA
-  float newBrightness = brightness_EMA_S / (1023.0 * 100);
-
+  sensorValue      = 100 * constrain(sensorValue, 0, 1023);
+  brightness_EMA_S = (brightness_EMA_a * sensorValue) + ((1 - brightness_EMA_a) * brightness_EMA_S);
+  float newBrightness    = brightness_EMA_S / (1023.0 * 100);
   float brightnessChange = newBrightness - globalBrightness;
 
   if (abs(brightnessChange) >= 0.002) {
@@ -333,9 +326,7 @@ void loopControls() {
   if (modeButton.clicks != 0) {
     if (modeClicks == 1) {
       debugPrint(DEBUG_TRACE, "Click: change mode");
-      modes[currentMode]->end(allLights);
-      currentMode = ((currentMode + 1) % modeCount);
-      modes[currentMode]->start(allLights);
+      nextMode();
       displayMustUpdate = true;
       lightsMustUpdate  = true;
     }

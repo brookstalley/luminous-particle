@@ -88,3 +88,9 @@ bool ModeRotate::run(std::vector<std::shared_ptr<HSILight> >lights, bool lightsM
 
   return true;
 }
+
+void nextMode() {
+  modes[currentMode]->end(allLights);
+  currentMode = ((currentMode + 1) % modeCount);
+  modes[currentMode]->start(allLights);
+}

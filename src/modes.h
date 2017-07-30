@@ -39,6 +39,8 @@ public:
            bool);
 };
 
+void nextMode();
+
 /*
    class ModeE131: Mode {
    public:
