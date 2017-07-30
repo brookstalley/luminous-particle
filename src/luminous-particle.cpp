@@ -185,7 +185,8 @@ void setupSensors() {
 void setup(void) {
   setDebugOutput(DEBUG_TRACE);
   Serial.begin(9600);
-  delay(5000);
+  delay(100);
+  debugPrint(DEBUG_MANDATORY,"Starting...");
 
   setupDisplay();
 
@@ -398,6 +399,6 @@ void loop() {
 }
 
 void connect() {
-  debugPrint(DEBUG_TRACE, "connect: connected");;
+  debugPrint(DEBUG_MANDATORY, "connect: Particle connection established");;
   particleCurrentState = PARTICLE_CONNECTED;
 }

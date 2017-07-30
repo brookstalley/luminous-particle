@@ -15,6 +15,7 @@ void particleDisconnect() {
   }
   if ((particleCurrentState == PARTICLE_CONNECTED) || (particleDesiredState == PARTICLE_CONNECTED)) {
     // We are either connected or in the process of connecting. Shut that down.
+    debugPrint(DEBUG_MANDATORY,"particleDisconnect: Disconnecting from Particle cloud");
     Particle.disconnect();
     particleDesiredState = PARTICLE_DISCONNECTED;
     debugPrint(DEBUG_TRACE, "particleDisconnect: disconnecting");;
@@ -49,7 +50,7 @@ void particleConnect() {
   connectionStartMillis = millis();
   Particle.connect();
   particleDesiredState = PARTICLE_CONNECTED;
-  debugPrint(DEBUG_TRACE, "particleConnect: connecting");;
+  debugPrint(DEBUG_MANDATORY, "particleConnect: Connecting to Particle cloud");;
 }
 
 void particleToggle() {
@@ -67,7 +68,7 @@ void particleProcess() {
     // If we don't know we're connected, change that
     if (particleCurrentState == PARTICLE_DISCONNECTED) {
       particleCurrentState = PARTICLE_CONNECTED;
-      debugPrint(DEBUG_TRACE, "particleProcess: connected");;
+      debugPrint(DEBUG_MANDATORY, "particleProcess: Particle connection established");;
     }
   } else {
     // We are not connected

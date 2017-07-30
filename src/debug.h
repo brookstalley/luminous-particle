@@ -3,6 +3,7 @@
 
 #include "Particle.h"
 #include <stdarg.h>
+#include "particlefunctions.h"
 
 #define PRINTF_BUFFER_SIZE 256
 

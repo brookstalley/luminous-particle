@@ -2,9 +2,22 @@
 
 uint16_t debugOutputMode = DEBUG_ERROR;
 
-void debugPrint(uint16_t level, const char* text) {
-  if (level >= debugOutputMode) {
-    Serial.println(text);
+void debugPrint(uint16_t level, const char *buffer) {
+  static const char *eventName = "debug";
+
+  // If it's of higher priority (lower number) than our current mode, ....
+  if (level <= debugOutputMode) {
+    // Always print to serial
+    Serial.println(buffer);
+
+    // If we're connected, and if it's a serious message, send to Particle
+    // Don't sent TRACE or INSANE messages because Particle is rate-limited
+    // to 1 message per second
+    if (Particle.connected()) {
+      if (level <= DEBUG_WARN) {
+        Particle.publish(eventName, buffer, 60, PRIVATE);
+      }
+    }
   }
 }
 
@@ -15,7 +28,7 @@ void debugPrintf(uint16_t level, const char* fmt, ...) {
     va_start(args, fmt);
     vsnprintf(buff, PRINTF_BUFFER_SIZE, fmt, args);
     va_end(args);
-    Serial.println(buff);
+    debugPrint(level, buff);
   }
 }
 
