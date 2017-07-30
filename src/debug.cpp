@@ -32,12 +32,44 @@ void debugPrintf(uint16_t level, const char* fmt, ...) {
   }
 }
 
-uint16_t getDebugOutput() {
+uint16_t getDebugOutputLevel() {
   return debugOutputMode;
 }
 
 void setDebugOutput(uint16_t newMode) {
-  debugOutputMode = newMode;
+  // kind of cheesy way to support incrementing debugging levels
+  if (newMode < END_OF_LIST) {
+    debugOutputMode = newMode;
+  } else {
+    debugOutputMode = DEBUG_MANDATORY;
+  }
+}
+
+void getDebugLevelName(uint16_t level, char *buffer, size_t buffer_length) {
+  switch (debugOutputMode) {
+    case DEBUG_MANDATORY:
+      strncpy(buffer, "Mandatory", buffer_length - 1);
+      break;
+      case DEBUG_ERROR:
+        strncpy(buffer, "Error", buffer_length - 1);
+        break;
+
+        case DEBUG_WARN:
+          strncpy(buffer, "Warning", buffer_length - 1);
+          break;
+
+          case DEBUG_TRACE:
+            strncpy(buffer, "Trace", buffer_length - 1);
+            break;
+
+            case DEBUG_INSANE:
+              strncpy(buffer, "Insane", buffer_length - 1);
+              break;
+
+              default:
+                strncpy(buffer, "Unknown", buffer_length -1);
+  }
+
 }
 
 #ifdef DEBUG_BUILD

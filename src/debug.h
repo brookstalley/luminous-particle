@@ -17,13 +17,13 @@ void Serial_printf(const char* fmt, ...);
 
 #endif
 
-
 enum DEBUG_LEVEL {
   DEBUG_MANDATORY = 0,
-  DEBUG_ERROR = 1,
-  DEBUG_WARN = 2,
-  DEBUG_TRACE = 3,
-  DEBUG_INSANE = 4
+  DEBUG_ERROR,
+  DEBUG_WARN,
+  DEBUG_TRACE,
+  DEBUG_INSANE,
+  END_OF_LIST
 };
 
 extern uint16_t debugOutputMode;
@@ -32,6 +32,9 @@ void debugPrint(uint16_t level, const char* text);
 void debugPrintf(uint16_t level, const char* fmt, ...);
 
 void setDebugOutput(uint16_t newMode);
-uint16_t getDebugOutput();
+
+uint16_t getDebugOutputLevel();
+void getDebugLevelName(uint16_t level, char *buffer, size_t buffer_length);
+
 
 #endif

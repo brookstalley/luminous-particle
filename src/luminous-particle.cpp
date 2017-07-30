@@ -254,19 +254,21 @@ void loopDisplay() {
   if (displayMustUpdate) {
     display.setTextColor(WHITE, BLACK);
 
+    char debugName[12];
+    getDebugLevelName(getDebugOutputLevel(), debugName, sizeof(debugName));
+
     sprintf (lineData[0], "Running:    %s", TimeToString(millis()/1000));
     sprintf (lineData[1], "Mode:       %s", modes[currentMode].name);
     sprintf (lineData[2], "Brightness: %2.0f%%", globalBrightness * 100);
-    strcpy (lineData[3], (getDebugOutput() ?
-                          "Debug:      serial" :
-                          "Debug:      off"));
+    sprintf (lineData[3], "Debug:      %s", debugName);
     strcpy (lineData[4], (particleCurrentState == PARTICLE_CONNECTED ?
-                          "Particle:   online" :
+                          "Particle:   online " :
                           "Particle:   offline"));
+
     strcpy (lineData[5], (particleDesiredState != particleCurrentState ?
                             (particleDesiredState == PARTICLE_CONNECTED ?
                               "  Connecting" : "  Disconnecting")
-                            : ""));
+                            : "              "));
 /*
     dtostrf(LEDTempCelsius, 2, 1, str_temp);
     snprintf (temperature, numChars, "Temp: %s c", str_temp);
@@ -366,21 +368,21 @@ void loopControls() {
   if (modeButton.clicks != 0) {
 
     if ( modeClicks == 1 ) {
-      debugPrint(DEBUG_TRACE, "One click");;
+      debugPrint(DEBUG_TRACE, "Click: change mode");
       currentMode = ((currentMode + 1) % modeCount);
       displayMustUpdate = true;
       lightsMustUpdate = true;
     }
 
     if ( modeClicks == 2 ) {
-      debugPrint(DEBUG_TRACE, "Two clicks");;
+      debugPrint(DEBUG_TRACE, "Double-click: toggle Particle cloud");
       particleToggle();
       displayMustUpdate = true;
     }
 
     if ( modeClicks == -1 ) {
-      debugPrint(DEBUG_TRACE, "One long click");;
-      setDebugOutput(!getDebugOutput());
+      debugPrint(DEBUG_TRACE, "Long click: increment debugging");
+      setDebugOutput(debugOutputMode + 1);
       displayMustUpdate = true;
     }
   }
