@@ -7,21 +7,27 @@
 #include "debug.h"
 
 class HSILight {
-  private:
-    const CompositeModule &_compositeModule;
-    OutputInterface &_interface;
-    const uint16_t _localAddress;
+private:
 
-    std::vector<outputEmitter> _emitterPowers;
+  const CompositeModule& _compositeModule;
+  OutputInterface& _interface;
+  const uint16_t   _localAddress;
+  const char *_name;
 
-    void setEmitters();
+  std::vector < outputEmitter > _emitterPowers;
 
-  public:
-    HSILight(const CompositeModule &compositemodule,  OutputInterface &interface, const uint16_t localAddress);
-    void begin();
-    void setColor(const HSIColor &color);
-    void getColor(const HSIColor*) const;
-    void setSingleEmitterOn(unsigned int index);
+  void setEmitters();
 
+public:
+
+  HSILight(const char *name,
+           const CompositeModule &compositemodule,
+           OutputInterface & interface,
+           const uint16_t localAddress);
+  void        begin();
+  void        setColor(const HSIColor& color);
+  void        getColor(const HSIColor *) const;
+  const char* getName(void) const;
+  void        setSingleEmitterOn(unsigned int index);
 };
-#endif
+#endif /* ifndef HSILIGHT_H */

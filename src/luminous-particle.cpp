@@ -89,7 +89,7 @@ CompositeModule LZ7;
 // Create a light that has an LZ7 module, on our main output at address 0
 
 std::vector<std::shared_ptr<HSILight> > allLights = {
-  std::make_shared<HSILight>(HSILight(LZ7, mainOutput, (uint16_t)0))
+  std::make_shared<HSILight>(HSILight("Light1", LZ7, mainOutput, (uint16_t)0))
 };
 
 ////////////////////////// MAIN ////////////////////////////
