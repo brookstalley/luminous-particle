@@ -1,4 +1,8 @@
 #include "particlefunctions.h"
+#include "luminous-particle.h"
+
+#include "Particle.h"
+
 #include <string>
 
 particleState particleCurrentState = PARTICLE_DISCONNECTED;
@@ -110,6 +114,7 @@ int particleFunctionBrightness(String command) {
 
   if ((brightness >= 0) && (brightness <= 100)) {
     globalBrightness = ((float)brightness / 100.0f);
+    lastBrightnessRemote = true;
     return 1;
   }
   return -1;

@@ -1,17 +1,4 @@
-#include "application.h"
-SYSTEM_MODE(MANUAL);
-SYSTEM_THREAD(ENABLED);
-
-#include <math.h>
-
-////////////////////////// INCLUDES ///////////////////////
-
-#include "Adafruit-GFX-library/Adafruit_GFX.h"
-#include "Adafruit_SSD1351_Photon.h"
-#include "clickButton/clickButton.h"
-
-// #include "E131/E131.h"
-
+#include "luminous-particle.h"
 #include "emitter.h"
 #include "hsicolor.h"
 #include "compositemodule.h"
@@ -21,34 +8,16 @@ SYSTEM_THREAD(ENABLED);
 #include "outputPCA9685.h"
 #include "particlefunctions.h"
 
-////////////////////////// DECLARATIONS ///////////////////
+#include "Adafruit-GFX-library/Adafruit_GFX.h"
+#include "Adafruit_SSD1351_Photon.h"
+#include "clickButton/clickButton.h"
 
-void setupDisplay();
-void setup(void);
-void loop();
-void modeOff();
-void modeTest();
-void modeRotate();
-void modeE131();
+#include "application.h"
 
-///////////////////////// DEFINES /////////////////////////
+#include <math.h>
 
-// Debugging
-#define DEBUG_BUILD
-
-// You can use any (4 or) 5 pins
-#define spi_pin_sclk A3
-#define spi_pin_mosi A5
-#define spi_pin_dc   D7
-#define spi_pin_cs   A2
-#define spi_pin_rst  D5
-
-#define i2c_pin_scl D1
-#define i2c_pin_sda D0
-
-#define TEMP_PIN A1
-#define BRIGHTNESS_PIN  A0
-#define MODE_BUTTON_PIN D4
+SYSTEM_MODE(MANUAL);
+SYSTEM_THREAD(ENABLED);
 
 // Color definitions
 #define BLACK           0x0000
@@ -63,6 +32,8 @@ void modeE131();
 ////////////////////////// GLOBALS ///////////////////////////
 
 float globalBrightness = 1.0f;
+bool lastBrightnessRemote = false;
+
 float LEDTempCelsius   = 20.0f;
 
 bool displayMustUpdate = false;
@@ -74,7 +45,6 @@ OutputPCA9685    mainOutput = OutputPCA9685(Wire, 0x40);
 ClickButton modeButton      = ClickButton(MODE_BUTTON_PIN, LOW,  CLICKBTN_PULLUP);
 
 // Shared lights
-
 Emitter emitterLZ7white("LZ7-w", 0.202531646, 0.469936709, (float)180 / 180);
 Emitter emitterLZ7red("LZ7-r", 0.5137017676, 0.5229440531, (float)78 / 78);
 Emitter emitterLZ7amber("LZ7-a", 0.3135687079, 0.5529418124, (float)60 / 60);
@@ -95,9 +65,8 @@ std::vector<std::shared_ptr<HSILight> > allLights = {
 
 ////////////////////////// MAIN ////////////////////////////
 
-
 void setupDisplay() {
-  debugPrint(DEBUG_TRACE, "Setting up display");;
+  debugPrint(DEBUG_TRACE, "setupDisplay: starting");
   display.begin();
 
   display.fillScreen(BLACK);
@@ -110,13 +79,11 @@ void setupDisplay() {
 }
 
 void setupLEDs() {
-  debugPrint(DEBUG_TRACE, "Setting up outputs");
+  debugPrint(DEBUG_TRACE, "setupLEDs: starting");
   Wire.begin();          // Wire must be started first
   Wire.setClock(400000); // Supported baud rates are 100kHz, 400kHz, and 1000kHz
 
   mainOutput.init();
-
-  debugPrint(DEBUG_TRACE, "Setting up LEDs");
 
   LZ7.addWhiteEmitter(emitterLZ7white, 5);
   LZ7.addColorEmitter(emitterLZ7red, 0);
@@ -126,13 +93,13 @@ void setupLEDs() {
   LZ7.addColorEmitter(emitterLZ7blue, 2);
   LZ7.addColorEmitter(emitterLZ7violet, 6);
 
-  debugPrint(DEBUG_TRACE, "Setting up lamps");
+  debugPrint(DEBUG_TRACE, "  setting up lamps");
 
   std::for_each(allLights.begin(), allLights.end(), [&](std::shared_ptr<HSILight>light) {
     light->begin();
   });
 
-  debugPrint(DEBUG_TRACE, "Done setting up LEDs");
+  debugPrint(DEBUG_TRACE, "  Finished");
 }
 
 void setupControls() {
@@ -148,23 +115,20 @@ void setupSensors() {}
 void setup(void) {
   setDebugLevel(DEBUG_TRACE);
   Serial.begin(9600);
-  delay(100);
-  debugPrint(DEBUG_MANDATORY, "Starting...");
-
-  setupDisplay();
-
+  // Give serial up to 3 seconds to come up
   int delayLoops = 0;
-
   while ((!Serial) && (delayLoops < 300)) {
     delay(10);
     delayLoops++;
   }
+  // No sense logging before we start serial or network
+  debugPrint(DEBUG_MANDATORY, "Starting...");
 
-  if (Serial) debugPrint(DEBUG_TRACE, "Serial came up");
-
+  setupDisplay();
   setupLEDs();
   setupControls();
   setupSensors();
+  debugPrint(DEBUG_TRACE, "  Finished");
 }
 
 void loopSensors() {}
@@ -225,15 +189,6 @@ void loopDisplay() {
                           "  Connecting" : "  Disconnecting")
                          : ""));
 
-    /*
-        dtostrf(LEDTempCelsius, 2, 1, str_temp);
-        snprintf (temperature, numChars, "Temp: %s c", str_temp);
-        display.drawStr(0,46,temperature);
-
-        display.sendBuffer();          // transfer internal memory to the
-           display
-     */
-
     for (uint8_t i = 0; i < linesToDisplay; i++) {
       // We always have 12 characters of label
       // So, clear the space from char 13 until the end (currently hardcoded at
@@ -255,12 +210,6 @@ void loopDisplay() {
           uint16_t width  = displayWidth - (lengthNew * charWidth);
           uint16_t height = lineHeight;
           display.fillRect(left, top, width, height, BLACK);
-
-          // setDebugLevel(DEBUG_INSANE); // because otherwise we won't see this
-          // output
-          // debugPrintf(DEBUG_INSANE, "updateDisplay: previous (%u) longer than
-          // new (%u). Filling %u,%u for w=%u, h=%u",
-          //            lengthPrevious, lengthNew, left, top, width, height);
         }
 
         // Save the new text for next time
@@ -277,19 +226,20 @@ void loopControlBrightness() {
   static int   brightness_EMA_S = 1023 - analogRead(BRIGHTNESS_PIN);
   static int   minBrightness    = 100;
   static int   maxBrightness    = 900;
+  static int   lastBrightness   = globalBrightness;
   int sensorValue               = 1023 - analogRead(BRIGHTNESS_PIN);
 
   if (sensorValue > maxBrightness) {
     maxBrightness = sensorValue;
   }
 
-  // record the minimum sensor value
   if (sensorValue < minBrightness) {
     minBrightness = sensorValue;
   }
 
   sensorValue = map(sensorValue, minBrightness, maxBrightness, 0, 1023);
 
+  // Fall off quickly at the bottom end, so it doesn't bounce on and off
   if (sensorValue < 25) {
     sensorValue = (sensorValue) / 2;
 
@@ -308,13 +258,20 @@ void loopControlBrightness() {
   sensorValue      = 100 * constrain(sensorValue, 0, 1023);
   brightness_EMA_S = (brightness_EMA_a * sensorValue) + ((1 - brightness_EMA_a) * brightness_EMA_S);
   float newBrightness    = brightness_EMA_S / (1023.0 * 100);
-  float brightnessChange = newBrightness - globalBrightness;
+  float brightnessChange = newBrightness - lastBrightness;
 
-  if (abs(brightnessChange) >= 0.002) {
-    lightsMustUpdate  = true;
-    displayMustUpdate = true;
+  // If brightness was last set from the network, we don't want potentiometer
+  // noise to immediately reverse it. So, if the last change was remote,
+  // require a 10% change to take control back locally
+  // (If the last change was local, only a 0.2% change is required)
+  if (!lastBrightnessRemote && (abs(brightnessChange) >= 0.002)) ||
+     (lastBrightnessRemote && (abs(brightnessChange) >= 0.1)) {
+       lastBrightnessRemote = false;
+       lastBrightness = newBrightness;
+       globalBrightness = newBrightness;
+       lightsMustUpdate  = true;
+       displayMustUpdate = true;
   }
-  globalBrightness = newBrightness;
 }
 
 void loopControls() {
