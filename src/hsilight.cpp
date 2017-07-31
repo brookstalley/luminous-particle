@@ -14,9 +14,7 @@ HSILight::HSILight(const char *name, const CompositeModule& compositeModule, Out
 
 void HSILight::begin() {
   _emitterPowers = _compositeModule.Hue2EmitterPower(HSIColor(0, 0, 0));
-  char msg[50];
-  sprintf(msg, "HSILight: begin (%u)", _emitterPowers.size());
-  debugPrint(DEBUG_TRACE, msg);
+  debugPrintf(DEBUG_TRACE, "HSILight: begin (%u)", _emitterPowers.size());
 
   for (unsigned int i = 0; i < _emitterPowers.size(); i++) {
     debugPrintf(DEBUG_INSANE, "HSILight: emitter %u la %u", i, _emitterPowers[i].localAddress);
@@ -29,7 +27,7 @@ void HSILight::setColor(const HSIColor& color)  {
 }
 
 void HSILight::setSingleEmitterOn(unsigned int index) {
-  debugPrintf(DEBUG_TRACE, "HSILight: Setting single emitter for index %u (%u)", index, _emitterPowers.size());
+  debugPrintf(DEBUG_INSANE, "HSILight: Setting single emitter for index %u (%u)", index, _emitterPowers.size());
 
   float thisEmitter = 0.0f;
 
@@ -43,7 +41,7 @@ void HSILight::setSingleEmitterOn(unsigned int index) {
 }
 
 void HSILight::setEmitters() {
-  debugPrint(DEBUG_TRACE, "HSILight: setting emitters");;
+  debugPrint(DEBUG_INSANE, "HSILight: setting emitters");;
   _interface.setEmitterPowers(_emitterPowers);
 }
 

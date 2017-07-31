@@ -37,7 +37,7 @@ bool ModeTest::run(std::vector<std::shared_ptr<HSILight> >lights,
   // debugPrint(DEBUG_TRACE, msg);
   if (lightsMustUpdate || (counter != lastCounter)) {
     std::for_each(lights.begin(), lights.end(), [&](std::shared_ptr<HSILight>val) {
-      debugPrintf(DEBUG_TRACE, "effectTest: %u on", counter);
+      debugPrintf(DEBUG_INSANE, "effectTest: %u on", counter);
       val->setSingleEmitterOn(counter);
     });
     lastCounter = counter;

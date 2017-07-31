@@ -2,17 +2,17 @@
 
 #define PCA9685_PWM_FULL 4096
 
-OutputPCA9685::OutputPCA9685(TwoWire &i2cbus, uint8_t i2caddress) :
+OutputPCA9685::OutputPCA9685(TwoWire& i2cbus, uint8_t i2caddress) :
   _i2cbus(i2cbus),
-  _i2caddress(i2caddress) {
-}
+  _i2caddress(i2caddress) {}
 
 bool OutputPCA9685::initImplementation() {
-  debugPrint(DEBUG_TRACE, "  resetDevices");;
+  debugPrint(DEBUG_TRACE, "OutputPCA9685::initImplementation");
+  debugPrint(DEBUG_INSANE, "  resetDevices");
   _pwm.resetDevices();
-  debugPrint(DEBUG_TRACE, "  init");;
+  debugPrint(DEBUG_INSANE, "  init");;
   _pwm.init(B000000, PCA9685_MODE_OUTPUT_ONACK | PCA9685_MODE_OUTPUT_TPOLE);
-  debugPrint(DEBUG_TRACE, "  setPWMFrequency");;
+  debugPrint(DEBUG_INSANE, "  setPWMFrequency");
   _pwm.setPWMFrequency(400);
   return true;
 }
@@ -30,7 +30,7 @@ bool OutputPCA9685::setEmitterPowers(const std::vector<outputEmitter>& emitterPo
   // assumes that the start address is the lowest localAddress
   // in emitterPowers
 
-  debugPrint(DEBUG_TRACE, "OutputPCA9685::setEmitterPowers start");;
+  debugPrint(DEBUG_INSANE, "OutputPCA9685::setEmitterPowers start");;
 
   debugPrintf(DEBUG_INSANE, "  emitterPowers.size() == %u", emitterPowers.size());
 
@@ -52,7 +52,12 @@ bool OutputPCA9685::setEmitterPowers(const std::vector<outputEmitter>& emitterPo
     } else {
       powerTo9685 = (uint16_t)(4096.0f * globalBrightness * emitterPowers[i].power) & 0x0FFF;
     }
-    debugPrintf(DEBUG_INSANE, "  setting pwms[%u] to %u for i %u, la %u", emitterPowers[i].localAddress - minAddress, powerTo9685, i, emitterPowers[i].localAddress);
+    debugPrintf(DEBUG_INSANE,
+                "  setting pwms[%u] to %u for i %u, la %u",
+                emitterPowers[i].localAddress - minAddress,
+                powerTo9685,
+                i,
+                emitterPowers[i].localAddress);
     pwms[emitterPowers[i].localAddress - minAddress] = powerTo9685;
   }
   _pwm.setChannelsPWM(minAddress, emitterPowers.size(), pwms);
