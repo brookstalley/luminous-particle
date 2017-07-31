@@ -58,6 +58,7 @@ void CompositeModule::addColorEmitter(const Emitter& emitter, uint16_t localAddr
 
   // Create our component emitter based on the prototype emitter, plus this
   // one's particular address
+  // TODO: This doesn't need to be a shared pointer. Only this class will ever use it.
   std::shared_ptr<componentEmitter> newEmitter =
     std::make_shared<componentEmitter>(componentEmitter(&emitter, localAddress, newAngle, 0));
 
