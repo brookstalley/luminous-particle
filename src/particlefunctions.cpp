@@ -1,4 +1,5 @@
 #include "particlefunctions.h"
+#include <string>
 
 particleState particleCurrentState = PARTICLE_DISCONNECTED;
 particleState particleDesiredState = PARTICLE_DISCONNECTED;
@@ -90,7 +91,7 @@ void particleProcess() {
 }
 
 int particleFunctionMode(String command) {
-  debugPrintf(DEBUG_MANDATORY, "particleFunctionMode: starting for command %s", command);
+  debugPrintf(DEBUG_TRACE, "particleFunctionMode: starting for command %s", command);
 
   for (uint16_t i = 0; i < modeCount; i++) {
     if (command == modes[i]->getName()) {
@@ -103,9 +104,21 @@ int particleFunctionMode(String command) {
   return -1;
 }
 
+int particleFunctionBrightness(String command) {
+  debugPrintf(DEBUG_MANDATORY, "particleFunctionBrightness: starting for command %s", command);
+  int brightness = command.toInt();
+
+  if ((brightness >= 0) && (brightness <= 100)) {
+    globalBrightness = ((float)brightness / 100.0f);
+    return 1;
+  }
+  return -1;
+}
+
 void particleSetupFunctions() {
   debugPrint(DEBUG_MANDATORY, "particleSetupFunctions: starting");
   Particle.function("mode", particleFunctionMode);
+  Particle.function("brigntness", particleFunctionBrightness);
 }
 
 void particleConnectionStarted() {
