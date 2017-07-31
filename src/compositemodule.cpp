@@ -19,7 +19,8 @@
 #include "hsicolor.h"
 #include "debug.h"
 
-#include "application.h"
+#include "Particle.h"
+
 #include <vector>
 #include <math.h>
 

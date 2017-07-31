@@ -1,4 +1,10 @@
 #include "outputpca9685.h"
+#include "luminous-particle.h"
+
+#include "emitter.h"
+#include "debug.h"
+
+#include <vector>
 
 #define PCA9685_PWM_FULL 4096
 

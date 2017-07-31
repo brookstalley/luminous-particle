@@ -1,9 +1,11 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
+#include "luminous-particle.h"
+
 #include "Particle.h"
+
 #include <stdarg.h>
-#include "particlefunctions.h"
 
 #define PRINTF_BUFFER_SIZE 256
 
@@ -26,8 +28,8 @@ enum DEBUG_LEVEL {
   END_OF_LIST
 };
 
-extern uint16_t debugOutputMode;
-
+//TODO: make debugPrint and debugPrintf into macros that don't produce
+//      code if DEBUG_BUILD is not defined
 void debugPrint(uint16_t level, const char* text);
 void debugPrintf(uint16_t level, const char* fmt, ...);
 

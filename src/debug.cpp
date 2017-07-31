@@ -1,4 +1,9 @@
 #include "debug.h"
+#include "luminous-particle.h"
+
+#include "particlefunctions.h"
+
+#include "Particle.h"
 
 uint16_t debugOutputMode = DEBUG_ERROR;
 

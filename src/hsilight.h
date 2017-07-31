@@ -4,6 +4,8 @@
 #include "compositemodule.h"
 #include "outputinterface.h"
 
+#include "Particle.h"
+
 class HSILight {
 private:
 

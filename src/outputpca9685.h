@@ -2,11 +2,12 @@
 #define OUTPUTPCA9685_H
 
 #include "outputinterface.h"
-#include "Particle.h"
-#include "debug.h"
-#include <vector>
-
 #include "PCA9685-Particle/PCA9685.h"
+#include "emitter.h"
+
+#include "Particle.h"
+
+#include <vector>
 
 class OutputPCA9685 : public OutputInterface {
   private:

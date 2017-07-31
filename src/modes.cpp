@@ -1,5 +1,14 @@
 #include "modes.h"
 
+#include "mode.h"
+#include "hsilight.h"
+#include "hsicolor.h"
+#include "debug.h"
+
+#include "Particle.h"
+
+#include <math.h>
+
 const int modeCount = 3;
 
 Mode *modes[modeCount] = {

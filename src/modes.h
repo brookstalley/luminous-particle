@@ -1,20 +1,21 @@
 #ifndef MODES_H
 #define MODES_H
 
-#include <math.h>
-#include <algorithm>
+#include "luminous-particle.h"
 
 #include "mode.h"
-#include "Particle.h"
 #include "hsilight.h"
 #include "hsicolor.h"
 #include "debug.h"
 
-extern const int modeCount;
+#include "Particle.h"
 
-extern Mode *modes[];
+#include <vector>
+#include <memory>
 
-extern uint16_t currentMode;
+const int modeCount;
+Mode *modes[];
+uint16_t currentMode;
 
 class ModeOff: public Mode {
 public:
