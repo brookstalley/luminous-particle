@@ -1,18 +1,17 @@
 #ifndef HSILIGHT_H
 #define HSILIGHT_H
 
-#include "hsicolor.h"
 #include "compositemodule.h"
 #include "outputinterface.h"
-#include "debug.h"
 
 class HSILight {
 private:
 
+  const char *_name;
   const CompositeModule& _compositeModule;
   OutputInterface& _interface;
   const uint16_t   _localAddress;
-  const char *_name;
+
 
   std::vector < outputEmitter > _emitterPowers;
 

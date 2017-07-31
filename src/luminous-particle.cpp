@@ -337,6 +337,11 @@ void loopControls() {
       displayMustUpdate = true;
     }
 
+    if (modeClicks == 3) {
+      debugPrint(DEBUG_TRACE, "Triple-click: setup particle functions");
+      particleSetupFunctions();
+    }
+
     if (modeClicks == -1) {
       debugPrint(DEBUG_TRACE, "Long click: increment debugging");
       setDebugLevel(getDebugLevel() + 1);
@@ -359,6 +364,5 @@ void loop() {
 }
 
 void connect() {
-  debugPrint(DEBUG_MANDATORY, "connect: Particle connection established");;
-  particleCurrentState = PARTICLE_CONNECTED;
+  particleConnectionStarted();
 }

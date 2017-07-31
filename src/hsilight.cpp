@@ -1,4 +1,8 @@
 #include "hsilight.h"
+#include "hsicolor.h"
+#include "compositemodule.h"
+#include "outputinterface.h"
+#include "debug.h"
 
 HSILight::HSILight(const char *name, const CompositeModule& compositeModule, OutputInterface& interface,
                    const uint16_t localAddress) :

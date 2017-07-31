@@ -1,10 +1,10 @@
 #ifndef MODE_H
 #define MODE_H
 
+#include "hsilight.h"
+
 #include <vector>
 #include <memory>
-
-#include "HSILight.h"
 
 class Mode {
 private:
