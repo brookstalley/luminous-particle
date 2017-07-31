@@ -12,6 +12,7 @@ I'm using my own forks of the Adafruit_GFX, Adafruit_SSD1351, clickButton, and P
 - OutputPCA9685: OutputInterface wrapper for the PCA9685 I2C PWM controller.
 - HSILight: a light fixture that has a CompositeModule in it and is addressable on an OutputInterface
 - HSIColor: class to model colors in HSI; directly from TeensyLED
+- Mode: base class that defines how lighting modes offer start, run, and end functions
 
 ## Current application
 Luminous expects a voltage-dividing potentiometer on A0 and a momentary switch on D4. The potentiometer sets global brightness for all LEDs. The mode button has a few functions:
@@ -19,6 +20,8 @@ Luminous expects a voltage-dividing potentiometer on A0 and a momentary switch o
 - Click: advance through modes (currently "off", "test", and "rotate")
 - Double-click: toggle Particle cloud connection (offline at boot)
 - Long click: advance through debugging levels
+
+Currently, a few sample modes are defined in `modes.cpp`: Off, Test, and Rotate. There are also utility functions to advance to the next mode and to set a mode by name or number. 
 
 ## Notes
 - You only need one Emitter per *type* of light emitter. Likewise, only one CompositeModule per *type* of module. It's the HSILights that represent actual lighting nodes; use one HSILight per addressable node.
