@@ -11,6 +11,7 @@
 #include "Adafruit-GFX-library/Adafruit_GFX.h"
 #include "Adafruit_SSD1351_Photon.h"
 #include "clickButton/clickButton.h"
+#include "ResponsiveAnalogRead/ResponsiveAnalogRead.h"
 
 #include "application.h"
 
@@ -40,10 +41,11 @@ bool displayMustUpdate = false;
 bool lightsMustUpdate  = false;
 
 ////////////////////////// Controllers and stuff
-Adafruit_SSD1351 display    = Adafruit_SSD1351(spi_pin_cs, spi_pin_dc, spi_pin_rst);
-OutputPCA9685    mainOutput = OutputPCA9685(Wire, 0x40);
-TemperatureAds1115  mainTemperature = TemperatureAds1115(Wire, 0x11); // TODO: fix address
-ClickButton modeButton      = ClickButton(MODE_BUTTON_PIN, LOW,  CLICKBTN_PULLUP);
+Adafruit_SSD1351 display(spi_pin_cs, spi_pin_dc, spi_pin_rst);
+OutputPCA9685    mainOutput(Wire, 0x40);
+TemperatureAds1115  mainTemperature(Wire, 0x48); // TODO: fix address
+ClickButton modeButton (MODE_BUTTON_PIN, LOW,  CLICKBTN_PULLUP);
+ResponsiveAnalogRead brightnessControl(BRIGHTNESS_PIN, true);
 
 // Shared lights
 Emitter emitterLZ7white("LZ7-w", 0.202531646, 0.469936709, (float)180 / 180);
@@ -111,6 +113,8 @@ void setupControls() {
   modeButton.debounceTime   = 20;  // Debounce timer in ms
   modeButton.multiclickTime = 250; // Time limit for multi clicks
   modeButton.longClickTime  = 750; // time until "held-down clicks" register
+  // Setup the brightness control
+  brightnessControl.enableEdgeSnap;
 }
 
 void setupSensors() {}
@@ -225,56 +229,19 @@ void loopDisplay() {
 }
 
 void loopControlBrightness() {
-  static float brightness_EMA_a = 0.7;
-  static int   brightness_EMA_S = 1023 - analogRead(BRIGHTNESS_PIN);
-  static int   minBrightness    = 100;
-  static int   maxBrightness    = 900;
-  static int   lastBrightness   = globalBrightness;
-  int sensorValue               = 1023 - analogRead(BRIGHTNESS_PIN);
+  if (!brightnessControl.hasChanged())
+    return;
 
-  if (sensorValue > maxBrightness) {
-    maxBrightness = sensorValue;
-  }
-
-  if (sensorValue < minBrightness) {
-    minBrightness = sensorValue;
-  }
-
-  sensorValue = map(sensorValue, minBrightness, maxBrightness, 0, 1023);
-
-  // Fall off quickly at the bottom end, so it doesn't bounce on and off
-  if (sensorValue < 25) {
-    sensorValue = (sensorValue) / 2;
-
-    if (sensorValue < 10) {
-      sensorValue = (sensorValue) / 4;
-
-      if (sensorValue < 5) {
-        sensorValue = 0;
-      }
-    }
-  }
-
-  if (sensorValue > 1000) {
-    sensorValue = sensorValue + (sensorValue - 1000) * 2;
-  }
-  sensorValue      = 100 * constrain(sensorValue, 0, 1023);
-  brightness_EMA_S = (brightness_EMA_a * sensorValue) + ((1 - brightness_EMA_a) * brightness_EMA_S);
-  float newBrightness    = brightness_EMA_S / (1023.0 * 100);
-  float brightnessChange = newBrightness - lastBrightness;
-
-  // If brightness was last set from the network, we don't want potentiometer
-  // noise to immediately reverse it. So, if the last change was remote,
-  // require a 10% change to take control back locally
-  // (If the last change was local, only a 0.2% change is required)
-  if (!lastBrightnessRemote && (abs(brightnessChange) >= 0.002)) ||
-     (lastBrightnessRemote && (abs(brightnessChange) >= 0.1)) {
-       lastBrightnessRemote = false;
-       lastBrightness = newBrightness;
-       globalBrightness = newBrightness;
-       lightsMustUpdate  = true;
-       displayMustUpdate = true;
-  }
+   globalBrightness = brightnessControl.getValue();
+   if (lastBrightnessRemote) {
+     // The previous change was remote, so reset that to local and
+     // update the sensitivity on the brightnessControl because the
+     // remote setter probably turned local sensitivity down.
+     lastBrightnessRemote = false;
+     brightnessControl.setActivityThreshold(4.0f);
+   }
+   lightsMustUpdate  = true;
+   displayMustUpdate = true;
 }
 
 void loopControls() {

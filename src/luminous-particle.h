@@ -27,6 +27,7 @@ extern float LEDTempCelsius   = 20.0f;
 extern bool displayMustUpdate = false;
 extern bool lightsMustUpdate  = false;
 
+ResponsiveAnalogRead brightnessControl;
 std::vector < std::shared_ptr < HSILight >> allLights;
 
 void setupDisplay();

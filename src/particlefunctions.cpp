@@ -113,6 +113,7 @@ int particleFunctionBrightness(String command) {
   if ((brightness >= 0) && (brightness <= 100)) {
     globalBrightness = ((float)brightness / 100.0f);
     lastBrightnessRemote = true;
+    brightnessControl.setActivityThreshold(8.0f);
     return 1;
   }
   return -1;
