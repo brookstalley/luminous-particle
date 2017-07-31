@@ -185,7 +185,11 @@ void loopDisplay() {
 
     sprintf(lineData[0], "Running:    %s", TimeToString(millis() / 1000));
     sprintf(lineData[1], "Mode:       %s", modes[currentMode]->getName());
-    sprintf(lineData[2], "Brightness: %2.0f%%", globalBrightness * 100);
+    if (lastBrightnessRemote) {
+      sprintf(lineData[2], "Brightness: %2.0f%%", globalBrightness * 100);
+    } else {
+      sprintf(lineData[2], "Brightness: [%2.0f%%]", globalBrightness * 100);
+    }
     sprintf(lineData[3], "Debug:      %s", debugName);
     strcpy(lineData[4], (particleCurrentState == PARTICLE_CONNECTED ?
                          "Particle:   online" :
