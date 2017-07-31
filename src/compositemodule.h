@@ -14,6 +14,8 @@
 #include "emitter.h"
 #include "hsicolor.h"
 
+#include "Particle.h"
+
 #include <vector>
 
 struct componentEmitter {

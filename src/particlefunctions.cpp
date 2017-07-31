@@ -1,6 +1,9 @@
 #include "particlefunctions.h"
 #include "luminous-particle.h"
 
+#include "debug.h"
+
+
 #include "Particle.h"
 
 #include <string>
@@ -96,16 +99,11 @@ void particleProcess() {
 
 int particleFunctionMode(String command) {
   debugPrintf(DEBUG_TRACE, "particleFunctionMode: starting for command %s", command);
-
-  for (uint16_t i = 0; i < modeCount; i++) {
-    if (command == modes[i]->getName()) {
-      modes[currentMode]->end(allLights);
-      currentMode = i;
-      modes[currentMode]->start(allLights);
-      return 1;
-    }
+  if (setModeByName(command)) {
+    return 1;
+  } else {
+    return -1;
   }
-  return -1;
 }
 
 int particleFunctionBrightness(String command) {

@@ -13,10 +13,6 @@
 #include <vector>
 #include <memory>
 
-const int modeCount;
-Mode *modes[];
-uint16_t currentMode;
-
 class ModeOff: public Mode {
 public:
 
@@ -41,6 +37,8 @@ public:
 };
 
 void nextMode();
+bool setModeByOrder(uint16_t modeNumber);
+bool setModeByName(String modeName);
 
 /*
    class ModeE131: Mode {

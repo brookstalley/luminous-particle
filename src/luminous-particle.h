@@ -19,13 +19,13 @@
 #define BRIGHTNESS_PIN  A0
 #define MODE_BUTTON_PIN D4
 
-float globalBrightness;
-bool lastBrightnessRemote;
+extern float globalBrightness = 1.0f;
+extern bool lastBrightnessRemote = false;
 
-float LEDTempCelsius;
+extern float LEDTempCelsius   = 20.0f;
 
-bool displayMustUpdate;
-bool lightsMustUpdate;
+extern bool displayMustUpdate = false;
+extern bool lightsMustUpdate  = false;
 
 std::vector < std::shared_ptr < HSILight >> allLights;
 

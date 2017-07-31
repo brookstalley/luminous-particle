@@ -99,6 +99,8 @@ void setupLEDs() {
     light->begin();
   });
 
+  debugPrint(DEBUG_TRACE, "  Setting initial mode");
+  setModeByNumber(0);
   debugPrint(DEBUG_TRACE, "  Finished");
 }
 

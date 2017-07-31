@@ -1,4 +1,5 @@
 #include "modes.h"
+#include "luminous-particle.h"
 
 #include "mode.h"
 #include "hsilight.h"
@@ -98,8 +99,36 @@ bool ModeRotate::run(std::vector<std::shared_ptr<HSILight> >lights, bool lightsM
   return true;
 }
 
+bool setModeByNumber(uint16_t modeNumber) {
+  if (modeNumber >= modeCount)
+    return false;
+
+  modes[currentMode]->end(allLights);
+  currentMode = modeNumber;
+  modes[currentMode]->start(allLights);
+  lightsMustUpdate = true;
+  displayMustUpdate = true;
+  return true;
+}
+
+bool setModeByName(String modeName) {
+  for(uint16_t i = 0; i < modeCount; i++) {
+    if (modes[i]->getName() == modeName) {
+      modes[currentMode]->end(allLights);
+      currentMode = i;
+      modes[currentMode]->start(allLights);
+      lightsMustUpdate = true;
+      displayMustUpdate = true;
+      return true;
+    }
+  }
+  return false;
+}
+
 void nextMode() {
   modes[currentMode]->end(allLights);
   currentMode = ((currentMode + 1) % modeCount);
   modes[currentMode]->start(allLights);
+  lightsMustUpdate = true;
+  displayMustUpdate = true;
 }

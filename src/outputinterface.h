@@ -1,7 +1,6 @@
 #ifndef OUTPUTINTERFACE_H
 #define OUTPUTINTERFACE_H
 
-#include "luminous-particle.h"
 #include "emitter.h"
 
 #include <vector>
