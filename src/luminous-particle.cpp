@@ -236,7 +236,7 @@ void loopControlBrightness() {
   if (!brightnessControl.hasChanged())
     return;
 
-   globalBrightness = brightnessControl.getValue();
+   globalBrightness = ((float)brightnessControl.getValue() / 1023.0f);
    if (lastBrightnessRemote) {
      // The previous change was remote, so reset that to local and
      // update the sensitivity on the brightnessControl because the
