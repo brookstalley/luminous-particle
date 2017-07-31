@@ -8,6 +8,7 @@
 
 #define PCA9685_PWM_FULL 4096
 
+// TODO: Move creation of the PCA9685 class here, and handle cases where multiple HSILights are on the same PCA9685
 OutputPCA9685::OutputPCA9685(TwoWire& i2cbus, uint8_t i2caddress) :
   _i2cbus(i2cbus),
   _i2caddress(i2caddress) {}

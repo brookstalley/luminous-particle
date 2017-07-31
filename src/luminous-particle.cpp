@@ -42,6 +42,7 @@ bool lightsMustUpdate  = false;
 ////////////////////////// Controllers and stuff
 Adafruit_SSD1351 display    = Adafruit_SSD1351(spi_pin_cs, spi_pin_dc, spi_pin_rst);
 OutputPCA9685    mainOutput = OutputPCA9685(Wire, 0x40);
+TemperatureAds1115  mainTemperature = TemperatureAds1115(Wire, 0x11); // TODO: fix address
 ClickButton modeButton      = ClickButton(MODE_BUTTON_PIN, LOW,  CLICKBTN_PULLUP);
 
 // Shared lights
@@ -53,14 +54,14 @@ Emitter emitterLZ7cyan("LZ7-c", 0.0306675939, 0.5170937486, (float)95 / 95);
 Emitter emitterLZ7blue("LZ7-b", 0.1747943747, 0.1117834986, (float)30 / 30);
 Emitter emitterLZ7violet("LZ7-v", 0.35, 0.15, (float)30 / 30);
 
-// Standard luminous node & wiring
-CompositeModule LZ7;
+// LEDEngin LZ7 that should be dimmed above 70c and turned off above 90c
+CompositeModule LZ7(70.f, 90.0f);
 
 // Create a light that has an LZ7 module, on our main output at address 0
 // Eventually we'll have different groups of lights, so just make a group
 // of one because the various effects expect to operate on a group.
 std::vector<std::shared_ptr<HSILight> > allLights = {
-  std::make_shared<HSILight>(HSILight("Light1", LZ7, mainOutput, (uint16_t)0))
+  std::make_shared<HSILight>(HSILight("Light1", LZ7, mainOutput, (uint16_t)0, mainTemperature, (uint16_t)0 ))
 };
 
 ////////////////////////// MAIN ////////////////////////////

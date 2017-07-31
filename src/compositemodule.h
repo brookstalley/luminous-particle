@@ -39,10 +39,12 @@ private:
 
   std::vector < std::shared_ptr < componentEmitter >> _colorEmitters;
   componentEmitter _whiteEmitter;
+  float _dimTemperature;
+  float _shutdownTemperature;
 
 public:
 
-  CompositeModule(void);
+  CompositeModule(float dimTemperature, float shutdownTemperature);
   void  addWhiteEmitter(const Emitter& white,
                         uint16_t localAddress);
   void  addColorEmitter(const Emitter& emitter,

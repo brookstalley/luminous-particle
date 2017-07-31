@@ -24,7 +24,9 @@
 #include <vector>
 #include <math.h>
 
-CompositeModule::CompositeModule()
+CompositeModule::CompositeModule(float dimTemperature, float shutdownTemperature) :
+_dimTemperature(dimTemperature),
+_shutdownTemperature(shutdownTemperature)
 {}
 
 void CompositeModule::addWhiteEmitter(const Emitter& white, uint16_t localAddress) {
