@@ -46,7 +46,7 @@ bool lightsMustUpdate  = false;
 ////////////////////////// Controllers and stuff
 Adafruit_SSD1351   display(spi_pin_cs, spi_pin_dc, spi_pin_rst);
 OutputPCA9685      mainOutput(Wire, 0x40);
-TemperatureAds1115 mainTemperature(Wire, 0x48); // TODO: fix address
+TemperatureAds1115 mainTemperature(Wire, 0x48, 10000, 10000, 25, 3950);
 ClickButton modeButton(MODE_BUTTON_PIN, LOW,  CLICKBTN_PULLUP);
 ResponsiveAnalogRead brightnessControl(BRIGHTNESS_PIN, true);
 
@@ -100,6 +100,8 @@ void setupLEDs() {
   LZ7.addColorEmitter(emitterLZ7violet, 6);
 
   debugPrint(DEBUG_TRACE, "  setting up lamps");
+
+  mainTemperature.begin();
 
   std::for_each(allLights.begin(), allLights.end(), [&](std::shared_ptr<HSILight>light) {
     light->begin();
