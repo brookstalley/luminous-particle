@@ -1,18 +1,23 @@
 # luminous-particle
 This is an LED lighting controller for the Particle Photon. Much of the color modeling and mixing in Luminous is derived from [TeesnyLED](https://github.com/saikoLED/TeensyLED) by Brian Neltner.
 
-Luminous is designed to compile locally using Particle Dev, and to boot and run offline. It can connect to the Particle cloud, but does not require the connection. If a device is connected to the cloud, `build.cmd` will compile and update the device. `build-dfu.cmd` will compile and flash using the DFU utility.
+Luminous is designed to compile locally using Particle Dev, and to boot and run offline. It can connect to the Particle cloud, but does not require the connection. If a device is connected to the cloud, `build.cmd` will compile locally and update the device using the cloud. `build-dfu.cmd` will compile locally and flash over USB using the DFU utility.
 
-I'm using my own forks of the Adafruit_GFX, Adafruit_SSD1351, clickButton, and PCA9695 libraries to address minor issues, compiling for Particle, and compiling offline.
+I'm using my own forks of the Adafruit_GFX, Adafruit_SSD1351, Adafruit_Ads1X15, clickButton, and PCA9695 libraries to address minor issues, compiling for Particle, and compiling offline.
 
 ## Object model
 - Emitter: a single emitter with a wavelength. Example: the red LED in a RGBW module.
 - CompositeModule: a light source that combines multiple emitters, with logic to return each Emitter's out level based on desired light output (currently just HSI). Example: LedEngin LZ4.
-- OutputInterface: generic interface to set emitter brightnesses.
-- OutputPCA9685: OutputInterface wrapper for the PCA9685 I2C PWM controller.
-- HSILight: a light fixture that has a CompositeModule in it and is addressable on an OutputInterface
 - HSIColor: class to model colors in HSI; directly from TeensyLED
 - Mode: base class that defines how lighting modes offer start, run, and end functions
+
+- HSILight: a light fixture that has a CompositeModule in it and is addressable on an OutputInterface
+
+- OutputInterface: base class for methods to set emitter brightnesses.
+- OutputPCA9685: derived from OutputInterface; wraps the PCA9685 I2C PWM controller.
+
+- TemperatureInterface: base class for temperature reading
+- TemperatureAds1115: derived from TemperatureInterface; wraps the Ads1115 I2C PWM controller.
 
 ## Current application
 Luminous expects a voltage-dividing potentiometer on A0 and a momentary switch on D4. The potentiometer sets global brightness for all LEDs. The mode button has a few functions:
@@ -21,7 +26,7 @@ Luminous expects a voltage-dividing potentiometer on A0 and a momentary switch o
 - Double-click: toggle Particle cloud connection (offline at boot)
 - Long click: advance through debugging levels
 
-Currently, a few sample modes are defined in `modes.cpp`: Off, Test, and Rotate. There are also utility functions to advance to the next mode and to set a mode by name or number. 
+Currently, a few sample modes are defined in `modes.cpp`: Off, Test, and Rotate. There are also utility functions to advance to the next mode and to set a mode by name or number.
 
 ## Notes
 - You only need one Emitter per *type* of light emitter. Likewise, only one CompositeModule per *type* of module. It's the HSILights that represent actual lighting nodes; use one HSILight per addressable node.
