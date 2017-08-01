@@ -1,6 +1,9 @@
 #ifndef LUMINOUS_PARTICLE_H
 #define LUMINOUS_PARTICLE_H
 
+#include "HSILight.h"
+#include "ResponsiveAnalogRead/ResponsiveAnalogRead.h"
+
 #include <vector>
 #include <memory>
 
@@ -19,16 +22,16 @@
 #define BRIGHTNESS_PIN  A0
 #define MODE_BUTTON_PIN D4
 
-extern float globalBrightness = 1.0f;
-extern bool lastBrightnessRemote = false;
+extern float globalBrightness;
+extern bool  lastBrightnessRemote;
 
-extern float LEDTempCelsius   = 20.0f;
+extern float LEDTempCelsius;
 
-extern bool displayMustUpdate = false;
-extern bool lightsMustUpdate  = false;
+extern bool displayMustUpdate;
+extern bool lightsMustUpdate;
 
-ResponsiveAnalogRead brightnessControl;
-std::vector < std::shared_ptr < HSILight >> allLights;
+extern ResponsiveAnalogRead brightnessControl;
+extern std::vector < std::shared_ptr < HSILight >> allLights;
 
 void setupDisplay();
 void setup(void);
@@ -38,4 +41,4 @@ void modeTest();
 void modeRotate();
 void modeE131();
 
-#endif
+#endif /* ifndef LUMINOUS_PARTICLE_H */

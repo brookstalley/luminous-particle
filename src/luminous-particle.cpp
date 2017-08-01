@@ -5,7 +5,9 @@
 #include "hsilight.h"
 #include "debug.h"
 #include "modes.h"
+
 #include "outputPCA9685.h"
+#include "temperatureAds1115.h"
 #include "particlefunctions.h"
 
 #include "Adafruit-GFX-library/Adafruit_GFX.h"
@@ -16,6 +18,7 @@
 #include "application.h"
 
 #include <math.h>
+#include <algorithm>
 
 SYSTEM_MODE(MANUAL);
 SYSTEM_THREAD(ENABLED);
@@ -32,19 +35,19 @@ SYSTEM_THREAD(ENABLED);
 
 ////////////////////////// GLOBALS ///////////////////////////
 
-float globalBrightness = 1.0f;
-bool lastBrightnessRemote = false;
+float globalBrightness     = 1.0f;
+bool  lastBrightnessRemote = false;
 
-float LEDTempCelsius   = 20.0f;
+float LEDTempCelsius = 20.0f;
 
 bool displayMustUpdate = false;
 bool lightsMustUpdate  = false;
 
 ////////////////////////// Controllers and stuff
-Adafruit_SSD1351 display(spi_pin_cs, spi_pin_dc, spi_pin_rst);
-OutputPCA9685    mainOutput(Wire, 0x40);
-TemperatureAds1115  mainTemperature(Wire, 0x48); // TODO: fix address
-ClickButton modeButton (MODE_BUTTON_PIN, LOW,  CLICKBTN_PULLUP);
+Adafruit_SSD1351   display(spi_pin_cs, spi_pin_dc, spi_pin_rst);
+OutputPCA9685      mainOutput(Wire, 0x40);
+TemperatureAds1115 mainTemperature(Wire, 0x48); // TODO: fix address
+ClickButton modeButton(MODE_BUTTON_PIN, LOW,  CLICKBTN_PULLUP);
 ResponsiveAnalogRead brightnessControl(BRIGHTNESS_PIN, true);
 
 // Shared lights
@@ -63,7 +66,7 @@ CompositeModule LZ7(70.f, 90.0f);
 // Eventually we'll have different groups of lights, so just make a group
 // of one because the various effects expect to operate on a group.
 std::vector<std::shared_ptr<HSILight> > allLights = {
-  std::make_shared<HSILight>(HSILight("Light1", LZ7, mainOutput, (uint16_t)0, mainTemperature, (uint16_t)0 ))
+  std::make_shared<HSILight>(HSILight("Light1", LZ7, mainOutput, (uint16_t)0, mainTemperature, (uint16_t)0))
 };
 
 ////////////////////////// MAIN ////////////////////////////
@@ -114,7 +117,7 @@ void setupControls() {
   modeButton.multiclickTime = 250; // Time limit for multi clicks
   modeButton.longClickTime  = 750; // time until "held-down clicks" register
   // Setup the brightness control
-  brightnessControl.enableEdgeSnap;
+  brightnessControl.enableEdgeSnap();
 }
 
 void setupSensors() {}
@@ -122,12 +125,15 @@ void setupSensors() {}
 void setup(void) {
   setDebugLevel(DEBUG_TRACE);
   Serial.begin(9600);
+
   // Give serial up to 3 seconds to come up
   int delayLoops = 0;
+
   while ((!Serial) && (delayLoops < 300)) {
     delay(10);
     delayLoops++;
   }
+
   // No sense logging before we start serial or network
   debugPrint(DEBUG_MANDATORY, "Starting...");
 
@@ -143,8 +149,7 @@ void loopSensors() {}
 void loopInputs()  {}
 
 void loopLEDs() {
-  modes[currentMode]->run(allLights, lightsMustUpdate);
-  lightsMustUpdate = false;
+  runCurrentMode();
 }
 
 char* TimeToString(unsigned long t)
@@ -184,7 +189,8 @@ void loopDisplay() {
     getDebugLevelName(getDebugLevel(), debugName, sizeof(debugName));
 
     sprintf(lineData[0], "Running:    %s", TimeToString(millis() / 1000));
-    sprintf(lineData[1], "Mode:       %s", modes[currentMode]->getName());
+    sprintf(lineData[1], "Mode:       %s", getCurrentModeName());
+
     if (lastBrightnessRemote) {
       sprintf(lineData[2], "Brightness: %2.0f%%", globalBrightness * 100);
     } else {
@@ -233,19 +239,19 @@ void loopDisplay() {
 }
 
 void loopControlBrightness() {
-  if (!brightnessControl.hasChanged())
-    return;
+  if (!brightnessControl.hasChanged()) return;
 
-   globalBrightness = ((float)brightnessControl.getValue() / 1023.0f);
-   if (lastBrightnessRemote) {
-     // The previous change was remote, so reset that to local and
-     // update the sensitivity on the brightnessControl because the
-     // remote setter probably turned local sensitivity down.
-     lastBrightnessRemote = false;
-     brightnessControl.setActivityThreshold(4.0f);
-   }
-   lightsMustUpdate  = true;
-   displayMustUpdate = true;
+  globalBrightness = ((float)brightnessControl.getValue() / 1023.0f);
+
+  if (lastBrightnessRemote) {
+    // The previous change was remote, so reset that to local and
+    // update the sensitivity on the brightnessControl because the
+    // remote setter probably turned local sensitivity down.
+    lastBrightnessRemote = false;
+    brightnessControl.setActivityThreshold(4.0f);
+  }
+  lightsMustUpdate  = true;
+  displayMustUpdate = true;
 }
 
 void loopControls() {

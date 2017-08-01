@@ -1,13 +1,15 @@
 #ifndef TEMPERATUREINTERFACE_H
 #define TEMPERATUREINTERFACE_H
 
+#include "Particle.h"
+
 class TemperatureInterface {
 public:
 
-  virtual bool getTemperature(uint16_t localAddress) = 0;
+  virtual float getTemperature(uint16_t localAddress) = 0;
 
-  virtual bool init()         = 0;
+  virtual bool  init() = 0;
 };
 
 
-#endif
+#endif /* ifndef TEMPERATUREINTERFACE_H */

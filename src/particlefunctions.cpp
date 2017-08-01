@@ -2,7 +2,7 @@
 #include "luminous-particle.h"
 
 #include "debug.h"
-
+#include "modes.h"
 
 #include "Particle.h"
 
@@ -99,11 +99,11 @@ void particleProcess() {
 
 int particleFunctionMode(String command) {
   debugPrintf(DEBUG_TRACE, "particleFunctionMode: starting for command %s", command);
+
   if (setModeByName(command)) {
     return 1;
-  } else {
-    return -1;
   }
+  return -1;
 }
 
 int particleFunctionBrightness(String command) {
@@ -111,7 +111,7 @@ int particleFunctionBrightness(String command) {
   int brightness = command.toInt();
 
   if ((brightness >= 0) && (brightness <= 100)) {
-    globalBrightness = ((float)brightness / 100.0f);
+    globalBrightness     = ((float)brightness / 100.0f);
     lastBrightnessRemote = true;
     brightnessControl.setActivityThreshold(8.0f);
     return 1;

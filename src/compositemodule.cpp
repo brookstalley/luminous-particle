@@ -25,18 +25,18 @@
 #include <math.h>
 
 CompositeModule::CompositeModule(float dimTemperature, float shutdownTemperature) :
-_dimTemperature(dimTemperature),
-_shutdownTemperature(shutdownTemperature)
+  _dimTemperature(dimTemperature),
+  _shutdownTemperature(shutdownTemperature)
 {}
 
-void CompositeModule::addWhiteEmitter(const Emitter& white, uint16_t localAddress) {
+void CompositeModule::addWhiteEmitter(const Emitter& white, uint16_t outputLocalAddress) {
   // slope and angle not relevant for white emitter
   // currently supports only one white emitter per composite module
-  _whiteEmitter = componentEmitter(&white, localAddress, 0.0f, 0.0f);
-  debugPrintf(DEBUG_INSANE, "Added white emitter %s at la %u", white.getName(), localAddress);
+  _whiteEmitter = componentEmitter(&white, outputLocalAddress, 0.0f, 0.0f);
+  debugPrintf(DEBUG_INSANE, "Added white emitter %s at la %u", white.getName(), outputLocalAddress);
 }
 
-void CompositeModule::addColorEmitter(const Emitter& emitter, uint16_t localAddress) {
+void CompositeModule::addColorEmitter(const Emitter& emitter, uint16_t outputLocalAddress) {
   // To figure out where to put it in the colorspace, calculate the angle from
   // the white point.
   float uEmitter = emitter.getU();
@@ -44,15 +44,16 @@ void CompositeModule::addColorEmitter(const Emitter& emitter, uint16_t localAddr
   float uWHITE   = _whiteEmitter.emitter->getU();
   float vWHITE   = _whiteEmitter.emitter->getV();
 
-  debugPrintf(DEBUG_TRACE, "CompositeModule::addColorEmitter %s at address %u", emitter.getName(), localAddress);
+  debugPrintf(DEBUG_TRACE, "CompositeModule::addColorEmitter %s at address %u", emitter.getName(), outputLocalAddress);
 
   float newAngle = fmod((180 / M_PI) * atan2((vEmitter - vWHITE), (uEmitter - uWHITE)) + 360, 360);
 
   if (_colorEmitters.empty()) {
     // If it is the first LED, simply place it in the array.
     // With only one LED, slope is undefined.
-    _colorEmitters.push_back(std::make_shared<componentEmitter>(componentEmitter(&emitter, localAddress, newAngle, 0)));
-    debugPrintf(DEBUG_INSANE, "Added emitter %s at la %u", emitter.getName(), localAddress);
+    _colorEmitters.push_back(std::make_shared<componentEmitter>(componentEmitter(&emitter, outputLocalAddress, newAngle,
+                                                                                 0)));
+    debugPrintf(DEBUG_INSANE, "Added emitter %s at la %u", emitter.getName(), outputLocalAddress);
     return;
   }
 
@@ -61,9 +62,10 @@ void CompositeModule::addColorEmitter(const Emitter& emitter, uint16_t localAddr
 
   // Create our component emitter based on the prototype emitter, plus this
   // one's particular address
-  // TODO: This doesn't need to be a shared pointer. Only this class will ever use it.
+  // TODO: This doesn't need to be a shared pointer. Only this class will ever
+  // use it.
   std::shared_ptr<componentEmitter> newEmitter =
-    std::make_shared<componentEmitter>(componentEmitter(&emitter, localAddress, newAngle, 0));
+    std::make_shared<componentEmitter>(componentEmitter(&emitter, outputLocalAddress, newAngle, 0));
 
   // Iterate through until finding the first location where the angle is bigger
   // than the current value.
@@ -80,7 +82,7 @@ void CompositeModule::addColorEmitter(const Emitter& emitter, uint16_t localAddr
   // recalc
   _colorEmitters.insert(it, newEmitter);
 
-  debugPrintf(DEBUG_INSANE, "Added emitter %s at la %u", emitter.getName(), localAddress);
+  debugPrintf(DEBUG_INSANE, "Added emitter %s at la %u", emitter.getName(), outputLocalAddress);
 
   // And then recalculate all slopes
   for (std::vector<std::shared_ptr<componentEmitter> >::iterator itThisEmitter = _colorEmitters.begin();
@@ -113,7 +115,8 @@ std::vector<outputEmitter>CompositeModule::Hue2EmitterPower(const HSIColor& HSI)
   float I = HSI.getIntensity();
 
   float tanH = tan(M_PI * fmod(H, 360) / (float)180); // Get the tangent since
-                                                      // we will use it often.
+
+  // we will use it often.
 
   // Copy our color emitters with default power of zero
   std::vector<outputEmitter> emitterPowers;
@@ -121,11 +124,11 @@ std::vector<outputEmitter>CompositeModule::Hue2EmitterPower(const HSIColor& HSI)
   for (std::vector<std::shared_ptr<componentEmitter> >::const_iterator itspEmitter = _colorEmitters.begin();
        itspEmitter < _colorEmitters.end();
        ++itspEmitter) {
-    outputEmitter o((*itspEmitter)->localAddress, 0.0f);
+    outputEmitter o((*itspEmitter)->outputLocalAddress, 0.0f);
 
     emitterPowers.push_back(o);
     debugPrintf(DEBUG_INSANE, "CompositeModule::Hue2EmitterPower added emitterPower[%u] at la %u with power %f",
-                emitterPowers.size() - 1, emitterPowers.back().localAddress,
+                emitterPowers.size() - 1, emitterPowers.back().outputLocalAddress,
                 emitterPowers.back().power);
   }
 
@@ -188,7 +191,7 @@ std::vector<outputEmitter>CompositeModule::Hue2EmitterPower(const HSIColor& HSI)
               ustar, vstar, emitterPowers.at(emitter1).power, emitterPowers.at(emitter2).power);
 
   // Add white to the end, and set the power
-  emitterPowers.push_back(outputEmitter(_whiteEmitter.localAddress, I * (1 - S)));
+  emitterPowers.push_back(outputEmitter(_whiteEmitter.outputLocalAddress, I * (1 - S)));
 
   //  // For debugging, print the actual output values.
   //  Serial.println("Target Hue of " + String(H) + " between LEDs " +

@@ -36,9 +36,11 @@ public:
            bool);
 };
 
-void nextMode();
-bool setModeByOrder(uint16_t modeNumber);
-bool setModeByName(String modeName);
+void        nextMode();
+bool        setModeByNumber(uint16_t modeNumber);
+bool        setModeByName(String modeName);
+void        runCurrentMode();
+const char* getCurrentModeName();
 
 /*
    class ModeE131: Mode {

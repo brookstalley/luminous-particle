@@ -9,6 +9,7 @@
 #include "Particle.h"
 
 #include <math.h>
+#include <algorithm>
 
 const int modeCount = 3;
 
@@ -100,24 +101,23 @@ bool ModeRotate::run(std::vector<std::shared_ptr<HSILight> >lights, bool lightsM
 }
 
 bool setModeByNumber(uint16_t modeNumber) {
-  if (modeNumber >= modeCount)
-    return false;
+  if (modeNumber >= modeCount) return false;
 
   modes[currentMode]->end(allLights);
   currentMode = modeNumber;
   modes[currentMode]->start(allLights);
-  lightsMustUpdate = true;
+  lightsMustUpdate  = true;
   displayMustUpdate = true;
   return true;
 }
 
 bool setModeByName(String modeName) {
-  for(uint16_t i = 0; i < modeCount; i++) {
+  for (uint16_t i = 0; i < modeCount; i++) {
     if (modes[i]->getName() == modeName) {
       modes[currentMode]->end(allLights);
       currentMode = i;
       modes[currentMode]->start(allLights);
-      lightsMustUpdate = true;
+      lightsMustUpdate  = true;
       displayMustUpdate = true;
       return true;
     }
@@ -129,6 +129,15 @@ void nextMode() {
   modes[currentMode]->end(allLights);
   currentMode = ((currentMode + 1) % modeCount);
   modes[currentMode]->start(allLights);
-  lightsMustUpdate = true;
+  lightsMustUpdate  = true;
   displayMustUpdate = true;
+}
+
+void runCurrentMode() {
+  modes[currentMode]->run(allLights, lightsMustUpdate);
+  lightsMustUpdate = false;
+}
+
+const char* getCurrentModeName() {
+  return modes[currentMode]->getName();
 }

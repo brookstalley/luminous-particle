@@ -3,6 +3,7 @@
 
 #include "compositemodule.h"
 #include "outputinterface.h"
+#include "temperatureinterface.h"
 
 #include "Particle.h"
 
@@ -27,8 +28,8 @@ public:
            const CompositeModule &compositemodule,
            OutputInterface & outputInterface,
            const uint16_t outputLocalAddress,
-          TemperatureInterface &temperatureInterface,
-          const uint16_t temperatureLocalAddress);
+           TemperatureInterface & temperatureInterface,
+           const uint16_t temperatureLocalAddress);
   void        begin();
   void        setColor(const HSIColor& color);
   void        getColor(const HSIColor *) const;

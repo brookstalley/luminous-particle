@@ -15,10 +15,10 @@
 
 struct outputEmitter {
   outputEmitter(uint8_t la, float pwr) {
-    localAddress = la;
-    power        = pwr;
+    outputLocalAddress = la;
+    power              = pwr;
   }
-  uint16_t localAddress;
+  uint16_t outputLocalAddress;
   float    power;
 };
 

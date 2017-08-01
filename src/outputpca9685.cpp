@@ -8,7 +8,8 @@
 
 #define PCA9685_PWM_FULL 4096
 
-// TODO: Move creation of the PCA9685 class here, and handle cases where multiple HSILights are on the same PCA9685
+// TODO: Move creation of the PCA9685 class here, and handle cases where
+// multiple HSILights are on the same PCA9685
 OutputPCA9685::OutputPCA9685(TwoWire& i2cbus, uint8_t i2caddress) :
   _i2cbus(i2cbus),
   _i2caddress(i2caddress) {}
@@ -46,8 +47,8 @@ bool OutputPCA9685::setEmitterPowers(const std::vector<outputEmitter>& emitterPo
   uint16_t powerTo9685;
 
   for (uint16_t i = 0; i < emitterPowers.size(); i++) {
-    if (emitterPowers[i].localAddress < minAddress) {
-      minAddress = emitterPowers[i].localAddress;
+    if (emitterPowers[i].outputLocalAddress < minAddress) {
+      minAddress = emitterPowers[i].outputLocalAddress;
     }
   }
 
@@ -61,11 +62,11 @@ bool OutputPCA9685::setEmitterPowers(const std::vector<outputEmitter>& emitterPo
     }
     debugPrintf(DEBUG_INSANE,
                 "  setting pwms[%u] to %u for i %u, la %u",
-                emitterPowers[i].localAddress - minAddress,
+                emitterPowers[i].outputLocalAddress - minAddress,
                 powerTo9685,
                 i,
-                emitterPowers[i].localAddress);
-    pwms[emitterPowers[i].localAddress - minAddress] = powerTo9685;
+                emitterPowers[i].outputLocalAddress);
+    pwms[emitterPowers[i].outputLocalAddress - minAddress] = powerTo9685;
   }
   _pwm.setChannelsPWM(minAddress, emitterPowers.size(), pwms);
   return true;
