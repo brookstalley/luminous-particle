@@ -14,6 +14,22 @@ HSILight::HSILight(const char *name, const CompositeModule& compositeModule,
   _outputLocalAddress(outputLocalAddress),
   _temperatureInterface(temperatureInterface),
   _temperatureLocalAddress(temperatureLocalAddress),
+  _localBrightness(1.0f),
+  _temperature(-1.0f)
+{}
+
+// Constructor with no temperature sensor; set the interface to nullptr,
+// and adddress to 0
+HSILight::HSILight(const char *name, const CompositeModule& compositeModule,
+                   OutputInterface& outputInterface, const uint16_t outputLocalAddress,
+                   ) :
+  _name(name),
+  _compositeModule(compositeModule),
+  _outputInterface(outputInterface),
+  _outputLocalAddress(outputLocalAddress),
+  _temperatureInterface(nullptr),
+  _temperatureLocalAddress(0),
+  _localBrightness(1.0f),
   _temperature(-1.0f)
 {}
 
@@ -46,14 +62,29 @@ void HSILight::setSingleEmitterOn(unsigned int index) {
 }
 
 void HSILight::setEmitters() {
-  debugPrint(DEBUG_INSANE, "HSILight: setting emitters");;
-  _outputInterface.setEmitterPowers(_emitterPowers);
+  debugPrint(DEBUG_INSANE, "HSILight: setting emitters");
+  float scaleFactor = globalBrightness * _localBrightness;
+  _outputInterface.setEmitterPowers(_emitterPowers, scaleFactor);
 }
 
 const char * HSILight::getName(void) const {
   return _name;
 }
 
-float HSILight::getTemperature(void) const {
+float HSILight::updateTemperature(void) {
+  if (_temperatureInterface == nullptr) return -1.0f;
+  _temperature = _temperatureInterface->getTemperature();
   return _temperature;
+}
+
+float HSILight::getTemperature(void) const {
+  if (_temperatureInterface != nullptr) {
+    if ((millis() - _tempertureUpdatedMillis) < TEMPERATURE_VALID_MILLIS) {
+      return _temperature;
+    } else {
+      return updateTemperature();
+    }
+  } else {
+    return -1.0f;
+  }
 }

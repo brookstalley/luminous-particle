@@ -9,25 +9,27 @@
 
 #include <vector>
 
-class OutputPCA9685 : public OutputInterface {
-  private:
-    TwoWire &_i2cbus;
-    PCA9685 _pwm;
-    uint8_t _i2caddress;
+class OutputPCA9685: public OutputInterface {
+private:
 
-    bool initImplementation();
-    bool sleepImplementation() const;
-    bool allOffImplementation() const;
+  TwoWire& _i2cbus;
+  PCA9685  _pwm;
+  uint8_t  _i2caddress;
 
-  public:
-    OutputPCA9685(TwoWire &i2cbus, uint8_t i2caddress);
+  bool initImplementation();
+  bool sleepImplementation() const;
+  bool allOffImplementation() const;
 
-    bool setEmitterPowers(const std::vector<outputEmitter>& emitters);
+public:
 
-    bool init();
-    bool sleep() const;
-    bool allOff() const;
+  OutputPCA9685(TwoWire & i2cbus, uint8_t i2caddress);
 
+  bool setEmitterPowers(const std::vector < outputEmitter >& emitters,
+                        float scaleFactor);
+
+  bool init();
+  bool sleep() const;
+  bool allOff() const;
 };
 
-#endif
+#endif /* ifndef OUTPUTPCA9685_H */

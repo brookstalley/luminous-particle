@@ -8,7 +8,8 @@
 class OutputInterface {
 public:
 
-  virtual bool setEmitterPowers(const std::vector < outputEmitter >& emitters) = 0;
+  virtual bool setEmitterPowers(const std::vector < outputEmitter >& emitters,
+                                float scaleFactor) = 0;
 
   virtual bool init()         = 0;
   virtual bool sleep() const  = 0;

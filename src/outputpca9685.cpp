@@ -33,14 +33,12 @@ bool OutputPCA9685::allOffImplementation() const {
   return true;
 }
 
-bool OutputPCA9685::setEmitterPowers(const std::vector<outputEmitter>& emitterPowers) {
+bool OutputPCA9685::setEmitterPowers(const std::vector<outputEmitter>& emitterPowers, float scaleFactor) {
   // Note that this does not support non-contiguous updates;
   // assumes that the start address is the lowest localAddress
   // in emitterPowers
 
-  debugPrint(DEBUG_INSANE, "OutputPCA9685::setEmitterPowers start");;
-
-  debugPrintf(DEBUG_INSANE, "  emitterPowers.size() == %u", emitterPowers.size());
+  debugPrint(DEBUG_INSANE, "OutputPCA9685::setEmitterPowers start. EmitterPowers.size() == %u", emitterPowers.size());
 
   uint16_t pwms[emitterPowers.size()];
   uint16_t minAddress = UINT16_MAX;
@@ -55,10 +53,10 @@ bool OutputPCA9685::setEmitterPowers(const std::vector<outputEmitter>& emitterPo
   debugPrintf(DEBUG_INSANE, "  minAddress == %u", minAddress);
 
   for (uint16_t i = 0; i < emitterPowers.size(); i++) {
-    if ((globalBrightness == 1.0f) && (emitterPowers[i].power == 1.0f)) {
+    if ((scaleFactor == 1.0f) && (emitterPowers[i].power == 1.0f)) {
       powerTo9685 = PCA9685_PWM_FULL;
     } else {
-      powerTo9685 = (uint16_t)(4096.0f * globalBrightness * emitterPowers[i].power) & 0x0FFF;
+      powerTo9685 = (uint16_t)(4096.0f * scaleFactor * emitterPowers[i].power) & 0x0FFF;
     }
     debugPrintf(DEBUG_INSANE,
                 "  setting pwms[%u] to %u for i %u, la %u",

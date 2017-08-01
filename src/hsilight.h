@@ -7,6 +7,8 @@
 
 #include "Particle.h"
 
+#define TEMPERATURE_VALID_MILLIS 1000
+
 class HSILight {
 private:
 
@@ -14,11 +16,14 @@ private:
   const CompositeModule& _compositeModule;
   OutputInterface& _outputInterface;
   const uint16_t   _outputLocalAddress;
-  TemperatureInterface& _temperatureInterface;
+  TemperatureInterface *_temperatureInterface;
   const uint16_t _temperatureLocalAddress;
 
   std::vector < outputEmitter > _emitterPowers;
+  float _localBrightness;
   float _temperature;
+
+  unsigned long _tempertureUpdatedMillis;
 
   void setEmitters();
 
@@ -30,6 +35,11 @@ public:
            const uint16_t outputLocalAddress,
            TemperatureInterface & temperatureInterface,
            const uint16_t temperatureLocalAddress);
+  HSILight(const char *name,
+           const CompositeModule &compositemodule,
+           OutputInterface & outputInterface,
+           const uint16_t outputLocalAddress,
+           );
   void        begin();
   void        setColor(const HSIColor& color);
   void        getColor(const HSIColor *) const;
