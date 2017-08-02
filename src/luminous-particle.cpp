@@ -173,7 +173,7 @@ void loopDisplay() {
   const uint8_t lineHeight               = 9;
   const uint8_t charWidth                = 6;
   const uint8_t charsPerLine             = floor(displayWidth / charWidth);
-  const uint8_t linesToDisplay           = 6;
+  const uint8_t maxLines                 = (dispalyHeight / lineHeight);
 
   static unsigned long lastUpdateMillis = 0;
 
@@ -188,27 +188,31 @@ void loopDisplay() {
     display.setTextColor(WHITE, BLACK);
 
     char debugName[12];
+    uint8_t currentLine = 0;
     getDebugLevelName(getDebugLevel(), debugName, sizeof(debugName));
 
-    sprintf(lineData[0], "Running:    %s", TimeToString(millis() / 1000));
-    sprintf(lineData[1], "Mode:       %s", getCurrentModeName());
+    sprintf(lineData[currentLine++], "Running:    %s", TimeToString(millis() / 1000));
+    sprintf(lineData[currentLine++], "Mode:       %s", getCurrentModeName());
 
     if (lastBrightnessRemote) {
-      sprintf(lineData[2], "Brightness: %2.0f%%", globalBrightness * 100);
+      sprintf(lineData[currentLine++], "Brightness: %2.0f%%", globalBrightness * 100);
     } else {
-      sprintf(lineData[2], "Brightness: [%2.0f%%]", globalBrightness * 100);
+      sprintf(lineData[currentLine++], "Brightness: [%2.0f%%]", globalBrightness * 100);
     }
-    sprintf(lineData[3], "Debug:      %s", debugName);
-    strcpy(lineData[4], (particleCurrentState == PARTICLE_CONNECTED ?
-                         "Particle:   online" :
-                         "Particle:   offline"));
 
-    strcpy(lineData[5], (particleDesiredState != particleCurrentState ?
-                         (particleDesiredState == PARTICLE_CONNECTED ?
-                          "  Connecting" : "  Disconnecting")
-                         : ""));
+    // Hack for now to show first temperature
+    sprintf(lineData[currentLine++],   "Temp:       %f", allLights[0]->getTemperature());
+    sprintf(lineData[currentLine++], "Debug:      %s", debugName);
+    strcpy(lineData[currentLine++], (particleCurrentState == PARTICLE_CONNECTED ?
+                                     "Particle:   online" :
+                                     "Particle:   offline"));
 
-    for (uint8_t i = 0; i < linesToDisplay; i++) {
+    strcpy(lineData[currentLine++], (particleDesiredState != particleCurrentState ?
+                                     (particleDesiredState == PARTICLE_CONNECTED ?
+                                      "  Connecting" : "  Disconnecting")
+                                     : ""));
+
+    for (uint8_t i = 0; i < currentLine; i++) {
       // We always have 12 characters of label
       // So, clear the space from char 13 until the end (currently hardcoded at
       // 128)
