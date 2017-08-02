@@ -82,7 +82,7 @@ void setupDisplay() {
   display.fillScreen(BLACK);
   display.setCursor(0, 5);
   display.setTextColor(WHITE);
-  display.setTextSize(1.5);
+  display.setTextSize(1);
   display.println("Starting...");
 
   debugPrint(DEBUG_TRACE, "  Finished");;
@@ -190,7 +190,6 @@ void loopDisplay() {
 
   if (!displayMustUpdate) return;
 
-  display.setTextColor(WHITE, BLACK);
 
   char debugName[12];
   uint8_t currentLine = 0;
@@ -216,6 +215,8 @@ void loopDisplay() {
                                    (particleDesiredState == PARTICLE_CONNECTED ?
                                     "  Connecting" : "  Disconnecting")
                                    : ""));
+
+  display.setTextColor(WHITE, BLACK);
 
   for (uint8_t i = 0; i < currentLine; i++) {
     // We always have 12 characters of label
@@ -254,9 +255,8 @@ void loopControlBrightness() {
   globalBrightness = ((float)brightnessControl.getValue() / 1023.0f);
 
   if (lastBrightnessRemote) {
-    // The previous change was remote, so reset that to local and
-    // update the sensitivity on the brightnessControl because the
-    // remote setter probably turned local sensitivity down.
+    // The previous change was remote; change the indicator and reset the
+    // sensitivity because the remote change turned it down
     lastBrightnessRemote = false;
     brightnessControl.setActivityThreshold(4.0f);
   }
