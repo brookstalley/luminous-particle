@@ -7,8 +7,8 @@
 #include "debug.h"
 
 HSILight::HSILight(const char *name, const CompositeModule& compositeModule,
-                   OutputInterface& outputInterface, const uint16_t outputLocalAddress,
-                   TemperatureInterface& temperatureInterface, const uint16_t temperatureLocalAddress) :
+                   std::shared_ptr<OutputInterface>outputInterface, const uint16_t outputLocalAddress,
+                   std::shared_ptr<TemperatureInterface>temperatureInterface, const uint16_t temperatureLocalAddress) :
   _name(name),
   _compositeModule(compositeModule),
   _outputInterface(outputInterface),
@@ -22,7 +22,7 @@ HSILight::HSILight(const char *name, const CompositeModule& compositeModule,
 // Constructor with no temperature sensor; set the interface to nullptr,
 // and adddress to 0
 HSILight::HSILight(const char *name, const CompositeModule& compositeModule,
-                   OutputInterface& outputInterface, const uint16_t outputLocalAddress
+                   std::shared_ptr<OutputInterface>outputInterface, const uint16_t outputLocalAddress
                    ) :
   _name(name),
   _compositeModule(compositeModule),
@@ -64,7 +64,7 @@ void HSILight::setSingleEmitterOn(unsigned int index) {
 void HSILight::setEmitters() {
   debugPrint(DEBUG_INSANE, "HSILight: setting emitters");
   float scaleFactor = globalBrightness * _localBrightness;
-  _outputInterface.setEmitterPowers(_emitterPowers, scaleFactor);
+  _outputInterface->setEmitterPowers(_emitterPowers, scaleFactor);
 }
 
 const char * HSILight::getName(void) const {

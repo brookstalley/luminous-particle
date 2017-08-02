@@ -44,11 +44,15 @@ bool displayMustUpdate = false;
 bool lightsMustUpdate  = false;
 
 ////////////////////////// Controllers and stuff
-Adafruit_SSD1351   display(spi_pin_cs, spi_pin_dc, spi_pin_rst);
-OutputPCA9685      mainOutput(Wire, 0x40);
-TemperatureAds1115 mainTemperature(Wire, 0x48, 10000, 10000, 25, 3950);
+Adafruit_SSD1351 display(spi_pin_cs, spi_pin_dc, spi_pin_rst);
 ClickButton modeButton(MODE_BUTTON_PIN, LOW,  CLICKBTN_PULLUP);
 ResponsiveAnalogRead brightnessControl(BRIGHTNESS_PIN, true);
+
+// Input and output devices
+
+std::shared_ptr<OutputPCA9685> mainOutput = std::make_shared<OutputPCA9685>(Wire, 0x40);
+std::shared_ptr<TemperatureAds1115> mainTemperature
+  = std::make_shared<TemperatureAds1115>(Wire, 0x48, 10000, 10000, 25, 3950);
 
 // Shared lights
 Emitter emitterLZ7white("LZ7-w", 0.202531646, 0.469936709, (float)180 / 180);
@@ -184,64 +188,64 @@ void loopDisplay() {
     displayMustUpdate = true;
   }
 
-  if (displayMustUpdate) {
-    display.setTextColor(WHITE, BLACK);
+  if (!displayMustUpdate) return;
 
-    char debugName[12];
-    uint8_t currentLine = 0;
-    getDebugLevelName(getDebugLevel(), debugName, sizeof(debugName));
+  display.setTextColor(WHITE, BLACK);
 
-    sprintf(lineData[currentLine++], "Running:    %s", TimeToString(millis() / 1000));
-    sprintf(lineData[currentLine++], "Mode:       %s", getCurrentModeName());
+  char debugName[12];
+  uint8_t currentLine = 0;
+  getDebugLevelName(getDebugLevel(), debugName, sizeof(debugName));
 
-    if (lastBrightnessRemote) {
-      sprintf(lineData[currentLine++], "Brightness: %2.0f%%", globalBrightness * 100);
-    } else {
-      sprintf(lineData[currentLine++], "Brightness: [%2.0f%%]", globalBrightness * 100);
-    }
+  sprintf(lineData[currentLine++], "Running:    %s", TimeToString(millis() / 1000));
+  sprintf(lineData[currentLine++], "Mode:       %s", getCurrentModeName());
 
-    // Hack for now to show first temperature
-    sprintf(lineData[currentLine++],   "Temp:       %f", allLights[0]->getTemperature());
-    sprintf(lineData[currentLine++], "Debug:      %s", debugName);
-    strcpy(lineData[currentLine++], (particleCurrentState == PARTICLE_CONNECTED ?
-                                     "Particle:   online" :
-                                     "Particle:   offline"));
-
-    strcpy(lineData[currentLine++], (particleDesiredState != particleCurrentState ?
-                                     (particleDesiredState == PARTICLE_CONNECTED ?
-                                      "  Connecting" : "  Disconnecting")
-                                     : ""));
-
-    for (uint8_t i = 0; i < currentLine; i++) {
-      // We always have 12 characters of label
-      // So, clear the space from char 13 until the end (currently hardcoded at
-      // 128)
-      if (strcmp(lineData[i], lineDataPrevious[i]) != 0) {
-        // Print our new text
-        display.setCursor(0, i * lineHeight);
-        display.println(lineData[i]);
-
-        // Determine how much we need to clear after the next text
-        uint16_t charsBeforeEOL = strlen(lineData[i]);
-
-        size_t lengthPrevious = strlen(lineDataPrevious[i]);
-        size_t lengthNew      = strlen(lineData[i]);
-
-        if (lengthPrevious > lengthNew) {
-          uint16_t left   = charsBeforeEOL * charWidth;
-          uint16_t top    = i * lineHeight;
-          uint16_t width  = displayWidth - (lengthNew * charWidth);
-          uint16_t height = lineHeight;
-          display.fillRect(left, top, width, height, BLACK);
-        }
-
-        // Save the new text for next time
-        strcpy(lineDataPrevious[i], lineData[i]);
-      }
-    }
-    lastUpdateMillis  = millis();
-    displayMustUpdate = false;
+  if (lastBrightnessRemote) {
+    sprintf(lineData[currentLine++], "Brightness: %2.0f%%", globalBrightness * 100);
+  } else {
+    sprintf(lineData[currentLine++], "Brightness: [%2.0f%%]", globalBrightness * 100);
   }
+
+  // Hack for now to show first temperature
+  sprintf(lineData[currentLine++],   "Temp:       %f", allLights[0]->getTemperature());
+  sprintf(lineData[currentLine++], "Debug:      %s", debugName);
+  strcpy(lineData[currentLine++], (particleCurrentState == PARTICLE_CONNECTED ?
+                                   "Particle:   online" :
+                                   "Particle:   offline"));
+
+  strcpy(lineData[currentLine++], (particleDesiredState != particleCurrentState ?
+                                   (particleDesiredState == PARTICLE_CONNECTED ?
+                                    "  Connecting" : "  Disconnecting")
+                                   : ""));
+
+  for (uint8_t i = 0; i < currentLine; i++) {
+    // We always have 12 characters of label
+    // So, clear the space from char 13 until the end (currently hardcoded at
+    // 128)
+    if (strcmp(lineData[i], lineDataPrevious[i]) != 0) {
+      // Print our new text
+      display.setCursor(0, i * lineHeight);
+      display.println(lineData[i]);
+
+      // Determine how much we need to clear after the next text
+      uint16_t charsBeforeEOL = strlen(lineData[i]);
+
+      size_t lengthPrevious = strlen(lineDataPrevious[i]);
+      size_t lengthNew      = strlen(lineData[i]);
+
+      if (lengthPrevious > lengthNew) {
+        uint16_t left   = charsBeforeEOL * charWidth;
+        uint16_t top    = i * lineHeight;
+        uint16_t width  = displayWidth - (lengthNew * charWidth);
+        uint16_t height = lineHeight;
+        display.fillRect(left, top, width, height, BLACK);
+      }
+
+      // Save the new text for next time
+      strcpy(lineDataPrevious[i], lineData[i]);
+    }
+  }
+  lastUpdateMillis  = millis();
+  displayMustUpdate = false;
 }
 
 void loopControlBrightness() {
@@ -297,6 +301,7 @@ void loopControls() {
 
 void loop() {
   // loopSensors();
+  particleProcess();
   loopControls();
 
   // loopInputs();

@@ -14,9 +14,9 @@ private:
 
   const char *_name;
   const CompositeModule& _compositeModule;
-  OutputInterface& _outputInterface;
-  const uint16_t   _outputLocalAddress;
-  TemperatureInterface& _temperatureInterface;
+  std::shared_ptr < OutputInterface > _outputInterface;
+  const uint16_t _outputLocalAddress;
+  std::shared_ptr < TemperatureInterface > _temperatureInterface;
   const uint16_t _temperatureLocalAddress;
 
   std::vector < outputEmitter > _emitterPowers;
@@ -31,13 +31,13 @@ public:
 
   HSILight(const char *name,
            const CompositeModule &compositemodule,
-           OutputInterface & outputInterface,
+           std::shared_ptr < OutputInterface > outputInterface,
            const uint16_t outputLocalAddress,
-           TemperatureInterface & temperatureInterface,
+           std::shared_ptr < TemperatureInterface > temperatureInterface,
            const uint16_t temperatureLocalAddress);
   HSILight(const char *name,
            const CompositeModule &compositemodule,
-           OutputInterface & outputInterface,
+           std::shared_ptr < OutputInterface > outputInterface,
            const uint16_t outputLocalAddress
            );
   void        begin();
