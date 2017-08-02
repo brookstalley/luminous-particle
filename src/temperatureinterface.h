@@ -8,7 +8,7 @@ public:
 
   virtual float getTemperature(uint16_t localAddress) = 0;
 
-  virtual bool  init() = 0;
+  virtual bool  begin() = 0;
 };
 
 

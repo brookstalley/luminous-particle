@@ -13,11 +13,13 @@ private:
   Adafruit_ADS1015 _adc;
   uint8_t _i2caddress;
 
-  uint16_t _seriesResistor     = seriesResistor;
-  uint16_t _adcMax             = adcMax;
-  uint16_t _thermistorNominal  = thermistorNominal;
-  uint16_t _temperatureNominal = temperatureNominal;
-  uint16_t _bCoef              = bCoef;
+  // Note that this class assumes all thermistors on the same ADC have the same
+  // characteristics
+  uint16_t _seriesResistor;
+  uint16_t _adcMax;
+  uint16_t _thermistorNominal;
+  uint16_t _temperatureNominal;
+  uint16_t _bCoef;
 
   bool beginImplementation();
 

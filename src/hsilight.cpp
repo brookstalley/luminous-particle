@@ -3,6 +3,7 @@
 #include "hsicolor.h"
 #include "compositemodule.h"
 #include "outputinterface.h"
+#include "temperatureinterface.h"
 #include "debug.h"
 
 HSILight::HSILight(const char *name, const CompositeModule& compositeModule,
@@ -27,7 +28,6 @@ HSILight::HSILight(const char *name, const CompositeModule& compositeModule,
   _compositeModule(compositeModule),
   _outputInterface(outputInterface),
   _outputLocalAddress(outputLocalAddress),
-  _temperatureInterface(nullptr),
   _temperatureLocalAddress(0),
   _localBrightness(1.0f),
   _temperature(-1.0f)
@@ -72,13 +72,13 @@ const char * HSILight::getName(void) const {
 }
 
 float HSILight::updateTemperature(void) {
-  if (_temperatureInterface == nullptr) return -1.0f;
-  _temperature = _temperatureInterface->getTemperature();
+  if (_temperatureInterface == NULL) return -1.0f;
+  _temperature = _temperatureInterface->getTemperature(_temperatureLocalAddress);
   return _temperature;
 }
 
-float HSILight::getTemperature(void) const {
-  if (_temperatureInterface != nullptr) {
+float HSILight::getTemperature(void) {
+  if (_temperatureInterface != NULL) {
     if ((millis() - _tempertureUpdatedMillis) < TEMPERATURE_VALID_MILLIS) {
       return _temperature;
     } else {

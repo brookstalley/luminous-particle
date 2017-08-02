@@ -16,7 +16,7 @@ private:
   const CompositeModule& _compositeModule;
   OutputInterface& _outputInterface;
   const uint16_t   _outputLocalAddress;
-  TemperatureInterface *_temperatureInterface;
+  TemperatureInterface& _temperatureInterface;
   const uint16_t _temperatureLocalAddress;
 
   std::vector < outputEmitter > _emitterPowers;
@@ -43,7 +43,8 @@ public:
   void        begin();
   void        setColor(const HSIColor& color);
   void        getColor(const HSIColor *) const;
-  float       getTemperature() const;
+  float       getTemperature();
+  float       updateTemperature();
   const char* getName(void) const;
   void        setSingleEmitterOn(unsigned int index);
 };
