@@ -38,7 +38,7 @@ public:
   HSILight(const char *name,
            const CompositeModule &compositemodule,
            OutputInterface & outputInterface,
-           const uint16_t outputLocalAddress,
+           const uint16_t outputLocalAddress
            );
   void        begin();
   void        setColor(const HSIColor& color);

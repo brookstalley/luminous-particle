@@ -21,7 +21,7 @@ HSILight::HSILight(const char *name, const CompositeModule& compositeModule,
 // Constructor with no temperature sensor; set the interface to nullptr,
 // and adddress to 0
 HSILight::HSILight(const char *name, const CompositeModule& compositeModule,
-                   OutputInterface& outputInterface, const uint16_t outputLocalAddress,
+                   OutputInterface& outputInterface, const uint16_t outputLocalAddress
                    ) :
   _name(name),
   _compositeModule(compositeModule),
