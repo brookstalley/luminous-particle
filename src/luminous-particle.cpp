@@ -47,6 +47,7 @@ bool lightsMustUpdate  = false;
 Adafruit_SSD1351 display(spi_pin_cs, spi_pin_dc, spi_pin_rst);
 ClickButton modeButton(MODE_BUTTON_PIN, LOW,  CLICKBTN_PULLUP);
 ResponsiveAnalogRead brightnessControl(BRIGHTNESS_PIN, true);
+E131 e131();
 
 // Input and output devices
 
@@ -128,6 +129,14 @@ void setupControls() {
 
 void setupSensors() {}
 
+void setupE131() {
+  debugPrint(DEBUG_TRACE, "setupE131: Starting");
+  waitUntil(WiFi.ready);
+  debugPrint(DEBUG_INSANE, "  wifi ready");
+  e131.begin();
+  debugPrintf(DEBUG_INSANE, "  server=%s:%d", WiFi.localIP().toString().c_str(), UDP_PORT);
+}
+
 void setup(void) {
   setDebugLevel(DEBUG_TRACE);
   Serial.begin(9600);
@@ -147,6 +156,7 @@ void setup(void) {
   setupLEDs();
   setupControls();
   setupSensors();
+  SetupE131();
   debugPrint(DEBUG_TRACE, "  Finished");
 }
 
@@ -299,10 +309,16 @@ void loopControls() {
   loopControlBrightness();
 }
 
+void loopE131() {
+  uint16_t packetCount = e131.parsePacket();
+}
+
 void loop() {
   // loopSensors();
   particleProcess();
   loopControls();
+  particleProcess();
+  loopE131();
 
   // loopInputs();
   loopLEDs();
