@@ -17,8 +17,7 @@ Mode *modes[modeCount] = {
   new ModeOff("Off"),
   new ModeTest("Test"),
   new ModeRotate("Rotate"),
-
-  // new ModeE131("E131"),
+  new ModeE131("E131"),
 };
 
 uint16_t currentMode = 0;
@@ -99,6 +98,32 @@ bool ModeRotate::run(std::vector<std::shared_ptr<HSILight> >lights, bool lightsM
 
   return true;
 }
+
+bool ModeE131::start(std::vector<std::shared_ptr<HSILight> >lights) {
+  // TODO: ensure data and lights are initialized to off
+  // TODO: send signal?
+  return true;
+}
+
+bool ModeE131::run(std::vector<std::shared_ptr<HSILight> >lights,
+                   bool lightsMustUpdate) {
+  // TODO: checksum data to see if it changed
+
+  debugPrint(DEBUG_INSANE, "effectModeE131: starting");
+
+  if (lightsMustUpdate) {
+    std::for_each(lights.begin(), lights.end(), [&](std::shared_ptr<HSILight>val) {
+      debugPrintf(DEBUG_INSANE, "effectModeE131: %u on", counter);
+      val->setColorFromE131();
+    });
+    lastCounter = counter;
+  }
+}
+
+bool ModeE131::end(std::vector<std::shared_ptr<HSILight> >lights
+
+// TODO: send signal?
+                   )
 
 bool setModeByNumber(uint16_t modeNumber) {
   if (modeNumber >= modeCount) return false;

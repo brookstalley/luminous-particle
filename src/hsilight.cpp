@@ -6,13 +6,20 @@
 #include "temperatureinterface.h"
 #include "debug.h"
 
+// Constructor with no temperature sensor; set the interface to nullptr,
+// and adddress to 0
 HSILight::HSILight(const char *name, const CompositeModule& compositeModule,
                    std::shared_ptr<OutputInterface>outputInterface, const uint16_t outputLocalAddress,
-                   std::shared_ptr<TemperatureInterface>temperatureInterface, const uint16_t temperatureLocalAddress) :
+                   const E131& e131, const uint16_t e131LocalAddress,
+                   std::shared_ptr<TemperatureInterface>temperatureInterface,
+                   const uint16_t temperatureLocalAddress
+                   ) :
   _name(name),
   _compositeModule(compositeModule),
   _outputInterface(outputInterface),
   _outputLocalAddress(outputLocalAddress),
+  _e131(e131),
+  _e131LocalAddress(e131LocalAddress),
   _temperatureInterface(temperatureInterface),
   _temperatureLocalAddress(temperatureLocalAddress),
   _localBrightness(1.0f),
@@ -22,12 +29,16 @@ HSILight::HSILight(const char *name, const CompositeModule& compositeModule,
 // Constructor with no temperature sensor; set the interface to nullptr,
 // and adddress to 0
 HSILight::HSILight(const char *name, const CompositeModule& compositeModule,
-                   std::shared_ptr<OutputInterface>outputInterface, const uint16_t outputLocalAddress
+                   std::shared_ptr<OutputInterface>outputInterface, const uint16_t outputLocalAddress,
+                   const uint16_t e131LocalAddress, const E131& e131
                    ) :
   _name(name),
   _compositeModule(compositeModule),
   _outputInterface(outputInterface),
   _outputLocalAddress(outputLocalAddress),
+  _e131(e131),
+  _e131LocalAddress(e131LocalAddress),
+  _temperatureInterface(nullptr),
   _temperatureLocalAddress(0),
   _localBrightness(1.0f),
   _temperature(-1.0f)
@@ -45,6 +56,16 @@ void HSILight::begin() {
 void HSILight::setColor(const HSIColor& color)  {
   _emitterPowers = _compositeModule.Hue2EmitterPower(color);
   setEmitters();
+}
+
+void HSILight::setColorFromE131() {
+  HSIColor color(
+    twoBytesToFloat(_e131->data[_e131LocalAddress]),
+    twoBytesToFloat(_e131->data[_e131LocalAddress + 2]),
+    twoBytesToFloat(_e131->data[_e131LocalAddress + 4])
+    );
+
+  val->setColor(color);
 }
 
 void HSILight::setSingleEmitterOn(unsigned int index) {
@@ -71,6 +92,10 @@ const char * HSILight::getName(void) const {
   return _name;
 }
 
+void HSILight::setTemperatureInterface(std::shared_ptr<TemperatureInterface>temperatureInterface) {
+  _temperatureInterface = temperatureInterface;
+}
+
 float HSILight::updateTemperature(void) {
   if (_temperatureInterface == NULL) return -1.0f;
   _temperature = _temperatureInterface->getTemperature(_temperatureLocalAddress);
@@ -87,4 +112,8 @@ float HSILight::getTemperature(void) {
   } else {
     return -1.0f;
   }
+}
+
+float twoBytesToFloat(uint8_t *buf) {
+  return (float)(buf[0] | buf[1] << 8) / 65535.0f;
 }

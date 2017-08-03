@@ -71,7 +71,7 @@ CompositeModule LZ7(70.f, 90.0f);
 // Eventually we'll have different groups of lights, so just make a group
 // of one because the various effects expect to operate on a group.
 std::vector<std::shared_ptr<HSILight> > allLights = {
-  std::make_shared<HSILight>(HSILight("Light1", LZ7, mainOutput, (uint16_t)0, mainTemperature, (uint16_t)0))
+  std::make_shared<HSILight>(HSILight("Light1", LZ7, mainOutput, (uint16_t)0, e131, mainTemperature, (uint16_t)0))
 };
 
 ////////////////////////// MAIN ////////////////////////////
