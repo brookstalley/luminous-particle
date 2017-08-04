@@ -191,7 +191,7 @@ void setupNetwork() {
 	     i++) {
 		waitFor(WiFi.connected(), 1000);
 
-		if (WiFi.connected()) {
+		if (WiFi.ready()) {
 			wifiCurrentState = WIFI_CONNECTED;
 			debugPrintf("  connected");
 			return;
@@ -392,7 +392,7 @@ void loopControls() {
 
 void loopE131() {
 	if (wifiCurrentState == WIFI_CONNECTED) {
-		if (!WiFi.Connected()) {
+		if (!WiFi.ready()) {
 			wifiCurrentState = WIFI_DISCONNECTED;
 			debugPrint(DEBUG_ERROR, "loopE131: WiFi not connected");
 			return;
