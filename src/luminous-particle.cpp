@@ -5,6 +5,7 @@
 #include "hsilight.h"
 #include "debug.h"
 #include "modes.h"
+#include "credentials.h"
 
 #include "outputPCA9685.h"
 #include "temperatureAds1115.h"
@@ -71,7 +72,8 @@ CompositeModule LZ7(70.f, 90.0f);
 // Eventually we'll have different groups of lights, so just make a group
 // of one because the various effects expect to operate on a group.
 std::vector<std::shared_ptr<HSILight> > allLights = {
-  std::make_shared<HSILight>(HSILight("Light1",        LZ7,        mainOutput,        (uint16_t)0,        mainUniverse,
+  std::make_shared<HSILight>(HSILight("Light1",        LZ7,
+                                      mainOutput,      (uint16_t)0,     mainUniverse,
                                       (uint16_t)0,
                                       mainTemperature,
                                       (uint16_t)0))
@@ -134,11 +136,17 @@ void setupSensors() {}
 
 void setupE131() {
   debugPrint(DEBUG_TRACE, "setupE131: Starting");
-  waitUntil(WiFi.ready);
-  debugPrint(DEBUG_INSANE, "  wifi ready");
+
+  if (!WiFi.Connected()) {
+    wifiCurrentState = PARTICLE_DISCONNECTED;
+    debugPrint(DEBUG_ERROR, "setupE131: WiFi not connected");
+    return;
+  }
   mainUniverse->begin();
   debugPrintf(DEBUG_INSANE, "  server=%s", WiFi.localIP().toString().c_str());
 }
+
+void setupNetwork() {}
 
 void setup(void) {
   setDebugLevel(DEBUG_TRACE);
@@ -156,6 +164,7 @@ void setup(void) {
   debugPrint(DEBUG_MANDATORY, "Starting...");
 
   setupDisplay();
+  setupNetwork();
   setupLEDs();
   setupControls();
   setupSensors();
@@ -314,7 +323,14 @@ void loopControls() {
 }
 
 void loopE131() {
-  uint16_t packetCount = mainUniverse->parsePacket();
+  if (wifiCurrentState == PARTICLE_CONNECTED) {
+    if (!WiFi.Connected()) {
+      wifiCurrentState = PARTICLE_DISCONNECTED;
+      debugPrint(DEBUG_ERROR, "loopE131: WiFi not connected");
+      return;
+    }
+    uint16_t packetCount = mainUniverse->parsePacket();
+  }
 }
 
 void loop() {
