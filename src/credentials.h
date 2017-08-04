@@ -1,10 +1,10 @@
-***REMOVED***
-***REMOVED***
+#ifndef CREDENTIALS_H
+#define CREDENTIALS_H
 
-***REMOVED***
-***REMOVED***
+// Installation-specific credentials
+// Should not be checked in to git
 
-const String wifiNetwork  = "your_network";
-const String wifiPassword = "your_password";
+const String wifiNetwork  = "illuminati";
+const String wifiPassword = "!!!menow";
 
-***REMOVED***
+#endif /* ifndef CREDENTIALS_H */
