@@ -146,7 +146,27 @@ void setupE131() {
   debugPrintf(DEBUG_INSANE, "  server=%s", WiFi.localIP().toString().c_str());
 }
 
-void setupNetwork() {}
+void setupNetwork() {
+  debugPrint(DEBUG_TRACE, "setupNetwork: starting");
+  WiFi.disconnect();
+  wifiCurrentState = PARTICLE_DISCONNECTED;
+  WiFi.clearCredentials();
+  WiFi.setCredentials(wifiNetwork, wifiPassword);
+  WiFi.connect();
+  debugPrint(DEBUG_TRACE, "  connecting to %s with password %s", wifiNetwork, wifiPassword);
+
+  for (uint16_t i = 0; (wifiCurrentState != PARTICLE_CONNECTED) && (i < 10); i++) {
+    waitFor(WiFi.connected(), 1000);
+
+    if (WiFi.connected()) {
+      wifiCurrentState = PARTICLE_CONNECTED;
+      debugPrintf("  connected");
+      return;
+    } else {
+      debugPrintf(DEBUG_TRACE, "  waiting for connection (%u)", i);
+    }
+  }
+}
 
 void setup(void) {
   setDebugLevel(DEBUG_TRACE);
