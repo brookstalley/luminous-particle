@@ -1,3 +1,24 @@
+//*********************************************************
+//
+// Luminous
+// Copyright 2017 Brooks Talley
+//
+// Portions derived from TeensyLED, copyright 2015 Brian Neltner
+//
+// Luminous is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Luminous is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+//
+//**********************************************************
 #include "luminous-particle.h"
 #include "emitter.h"
 #include "hsicolor.h"
@@ -37,7 +58,7 @@ SYSTEM_THREAD(ENABLED);
 ////////////////////////// GLOBALS ///////////////////////////
 
 float globalBrightness     = 1.0f;
-bool  lastBrightnessRemote = false;
+bool lastBrightnessRemote = false;
 
 float LEDTempCelsius = 20.0f;
 
@@ -45,15 +66,18 @@ bool displayMustUpdate = false;
 bool lightsMustUpdate  = false;
 
 ////////////////////////// Controllers and stuff
-Adafruit_SSD1351     display(spi_pin_cs, spi_pin_dc, spi_pin_rst);
-ClickButton          modeButton(MODE_BUTTON_PIN, LOW,  CLICKBTN_PULLUP);
+Adafruit_SSD1351 display(spi_pin_cs, spi_pin_dc, spi_pin_rst);
+ClickButton modeButton(MODE_BUTTON_PIN, LOW,  CLICKBTN_PULLUP);
 ResponsiveAnalogRead brightnessControl(BRIGHTNESS_PIN, true);
 
 // Input and output devices
 
-std::shared_ptr<OutputPCA9685>      mainOutput = std::make_shared<OutputPCA9685>(Wire, 0x40);
+std::shared_ptr<OutputPCA9685> mainOutput =
+	std::make_shared<OutputPCA9685>(Wire, 0x40);
+
 std::shared_ptr<TemperatureAds1115> mainTemperature
-  = std::make_shared<TemperatureAds1115>(Wire, 0x48, 10000, 10000, 25, 3950);
+        = std::make_shared<TemperatureAds1115>(Wire, 0x48, 10000, 10000, 25, 3950);
+
 std::shared_ptr<E131> mainUniverse = std::make_shared<E131>();
 
 // Shared lights
@@ -72,301 +96,320 @@ CompositeModule LZ7(70.f, 90.0f);
 // Eventually we'll have different groups of lights, so just make a group
 // of one because the various effects expect to operate on a group.
 std::vector<std::shared_ptr<HSILight> > allLights = {
-  std::make_shared<HSILight>(HSILight("Light1",        LZ7,
-                                      mainOutput,      (uint16_t)0,     mainUniverse,
-                                      (uint16_t)0,
-                                      mainTemperature,
-                                      (uint16_t)0))
+	std::make_shared<HSILight>(
+		HSILight("Light1", LZ7, mainOutput,
+		         (uint16_t)0,
+		         mainUniverse,
+		         (uint16_t)0,
+		         mainTemperature, (uint16_t)0)
+		)
 };
 
 ////////////////////////// MAIN ////////////////////////////
 
 void setupDisplay() {
-  debugPrint(DEBUG_TRACE, "setupDisplay: starting");
-  display.begin();
+	debugPrint(DEBUG_TRACE, "setupDisplay: starting");
+	display.begin();
 
-  display.fillScreen(BLACK);
-  display.setCursor(0, 5);
-  display.setTextColor(WHITE);
-  display.setTextSize(1);
-  display.println("Starting...");
+	display.fillScreen(BLACK);
+	display.setCursor(0, 5);
+	display.setTextColor(WHITE);
+	display.setTextSize(1);
+	display.println("Starting...");
 
-  debugPrint(DEBUG_TRACE, "  Finished");;
+	debugPrint(DEBUG_TRACE, "  Finished");
 }
 
 void setupLEDs() {
-  debugPrint(DEBUG_TRACE, "setupLEDs: starting");
-  Wire.begin();          // Wire must be started first
-  Wire.setClock(400000); // Supported baud rates are 100kHz, 400kHz, and 1000kHz
+	debugPrint(DEBUG_TRACE, "setupLEDs: starting");
+	Wire.begin();    // Wire must be started first
+	Wire.setClock(400000); // Supported baud rates are 100kHz, 400kHz, and 1000kHz
 
-  mainOutput->init();
+	mainOutput->init();
 
-  LZ7.addWhiteEmitter(emitterLZ7white, 5);
-  LZ7.addColorEmitter(emitterLZ7red, 0);
-  LZ7.addColorEmitter(emitterLZ7amber, 3);
-  LZ7.addColorEmitter(emitterLZ7green, 1);
-  LZ7.addColorEmitter(emitterLZ7cyan, 4);
-  LZ7.addColorEmitter(emitterLZ7blue, 2);
-  LZ7.addColorEmitter(emitterLZ7violet, 6);
+	LZ7.addWhiteEmitter(emitterLZ7white, 5);
+	LZ7.addColorEmitter(emitterLZ7red,    0);
+	LZ7.addColorEmitter(emitterLZ7amber,  3);
+	LZ7.addColorEmitter(emitterLZ7green,  1);
+	LZ7.addColorEmitter(emitterLZ7cyan,   4);
+	LZ7.addColorEmitter(emitterLZ7blue,   2);
+	LZ7.addColorEmitter(emitterLZ7violet, 6);
 
-  debugPrint(DEBUG_TRACE, "  setting up lamps");
+	debugPrint(DEBUG_TRACE, "  setting up lamps");
 
-  mainTemperature->begin();
+	mainTemperature->begin();
 
-  std::for_each(allLights.begin(), allLights.end(), [&](std::shared_ptr<HSILight>light) {
-    light->begin();
-  });
+	std::for_each(allLights.begin(), allLights.end(),
+	              [&](std::shared_ptr<HSILight>light) {
+		light->begin();
+	});
 
-  debugPrint(DEBUG_TRACE, "  Setting initial mode");
-  setModeByNumber(0);
-  debugPrint(DEBUG_TRACE, "  Finished");
+	debugPrint(DEBUG_TRACE, "  Setting initial mode");
+	setModeByNumber(0);
+	debugPrint(DEBUG_TRACE, "  Finished");
 }
 
 void setupControls() {
-  // Setup the first button with an internal pull-up :
-  pinMode(MODE_BUTTON_PIN, INPUT_PULLUP);
-  modeButton.debounceTime   = 20;  // Debounce timer in ms
-  modeButton.multiclickTime = 250; // Time limit for multi clicks
-  modeButton.longClickTime  = 750; // time until "held-down clicks" register
-  // Setup the brightness control
-  brightnessControl.enableEdgeSnap();
+	// Setup the first button with an internal pull-up :
+	pinMode(MODE_BUTTON_PIN, INPUT_PULLUP);
+	modeButton.debounceTime   = 20;// Debounce timer in ms
+	modeButton.multiclickTime = 250; // Time limit for multi clicks
+	modeButton.longClickTime  = 750;// time until "held-down clicks" register
+	// Setup the brightness control
+	lastBrightnessRemote = false;
+	brightnessControl.enableEdgeSnap();
 }
 
-void setupSensors() {}
+void setupSensors() {
+}
 
 void setupE131() {
-  debugPrint(DEBUG_TRACE, "setupE131: Starting");
+	debugPrint(DEBUG_TRACE, "setupE131: Starting");
 
-  if (!WiFi.Connected()) {
-    wifiCurrentState = PARTICLE_DISCONNECTED;
-    debugPrint(DEBUG_ERROR, "setupE131: WiFi not connected");
-    return;
-  }
-  mainUniverse->begin();
-  debugPrintf(DEBUG_INSANE, "  server=%s", WiFi.localIP().toString().c_str());
+	if (!WiFi.Connected()) {
+		wifiCurrentState = PARTICLE_DISCONNECTED;
+		debugPrint(DEBUG_ERROR, "setupE131: WiFi not connected");
+		return;
+	}
+	mainUniverse->begin();
+	debugPrintf(DEBUG_INSANE, "  server=%s", WiFi.localIP().toString().c_str());
 }
 
 void setupNetwork() {
-  debugPrint(DEBUG_TRACE, "setupNetwork: starting");
-  WiFi.disconnect();
-  wifiCurrentState = PARTICLE_DISCONNECTED;
-  WiFi.clearCredentials();
-  WiFi.setCredentials(wifiNetwork, wifiPassword);
-  WiFi.connect();
-  debugPrint(DEBUG_TRACE, "  connecting to %s with password %s", wifiNetwork, wifiPassword);
+	debugPrint(DEBUG_TRACE, "setupNetwork: starting");
+	WiFi.disconnect();
+	wifiCurrentState = PARTICLE_DISCONNECTED;
+	WiFi.clearCredentials();
+	WiFi.setCredentials(wifiNetwork, wifiPassword);
+	WiFi.connect();
+	debugPrint(DEBUG_TRACE,
+	           "  connecting to %s with password %s",
+	           wifiNetwork,
+	           wifiPassword);
 
-  for (uint16_t i = 0; (wifiCurrentState != PARTICLE_CONNECTED) && (i < 10); i++) {
-    waitFor(WiFi.connected(), 1000);
+	for (uint16_t i = 0; (wifiCurrentState != PARTICLE_CONNECTED) && (i < 10);
+	     i++) {
+		waitFor(WiFi.connected(), 1000);
 
-    if (WiFi.connected()) {
-      wifiCurrentState = PARTICLE_CONNECTED;
-      debugPrintf("  connected");
-      return;
-    } else {
-      debugPrintf(DEBUG_TRACE, "  waiting for connection (%u)", i);
-    }
-  }
+		if (WiFi.connected()) {
+			wifiCurrentState = PARTICLE_CONNECTED;
+			debugPrintf("  connected");
+			return;
+		} else {
+			debugPrintf(DEBUG_TRACE, "  waiting for connection (%u)", i);
+		}
+	}
 }
 
 void setup(void) {
-  setDebugLevel(DEBUG_TRACE);
-  Serial.begin(9600);
+	setDebugLevel(DEBUG_TRACE);
+	Serial.begin(9600);
 
-  // Give serial up to 3 seconds to come up
-  int delayLoops = 0;
+	// Give serial up to 3 seconds to come up
+	int delayLoops = 0;
 
-  while ((!Serial) && (delayLoops < 300)) {
-    delay(10);
-    delayLoops++;
-  }
+	while ((!Serial) && (delayLoops < 300)) {
+		delay(10);
+		delayLoops++;
+	}
 
-  // No sense logging before we start serial or network
-  debugPrint(DEBUG_MANDATORY, "Starting...");
+	// No sense logging before we start serial or network
+	debugPrint(DEBUG_MANDATORY, "Starting...");
 
-  setupDisplay();
-  setupNetwork();
-  setupLEDs();
-  setupControls();
-  setupSensors();
-  setupE131();
-  debugPrint(DEBUG_TRACE, "  Finished");
+	setupDisplay();
+	setupNetwork();
+	setupLEDs();
+	setupControls();
+	setupSensors();
+	setupE131();
+	debugPrint(DEBUG_TRACE, "  Finished");
 }
 
-void loopSensors() {}
+void loopSensors() {
+}
 
-void loopInputs()  {}
+void loopInputs()  {
+}
 
 void loopLEDs() {
-  runCurrentMode();
+	runCurrentMode();
 }
 
 char* TimeToString(unsigned long t)
 {
-  static char str[12];
-  long        h = t / 3600;
+	static char str[12];
+	long h = t / 3600;
 
-  t = t % 3600;
-  int m = t / 60;
-  int s = t % 60;
-  sprintf(str, "%02ld:%02d:%02d", h, m, s);
-  return str;
+	t = t % 3600;
+	int m = t / 60;
+	int s = t % 60;
+	sprintf(str, "%02ld:%02d:%02d", h, m, s);
+	return str;
 }
 
 void loopDisplay() {
-  // Assumes monospace fonts
-  const uint8_t displayWidth             = 128;
-  const uint8_t displayHeight            = 128;
-  const unsigned long maxUpdateLagMillis = 500;
-  const uint8_t       lineHeight         = 9;
-  const uint8_t       charWidth          = 6;
-  const uint8_t       charsPerLine       = floor(displayWidth / charWidth);
-  const uint8_t       maxLines           = (displayHeight / lineHeight);
+	// Assumes monospace fonts
+	const uint8_t displayWidth             = 128;
+	const uint8_t displayHeight            = 128;
+	const unsigned long maxUpdateLagMillis = 500;
+	const uint8_t lineHeight         = 9;
+	const uint8_t charWidth          = 6;
+	const uint8_t charsPerLine       = floor(displayWidth / charWidth);
+	const uint8_t maxLines           = (displayHeight / lineHeight);
 
-  static unsigned long lastUpdateMillis = 0;
+	static unsigned long lastUpdateMillis = 0;
 
-  static char lineData[maxLines][charsPerLine + 1]         = {};
-  static char lineDataPrevious[maxLines][charsPerLine + 1] = {};
+	static char lineData[maxLines][charsPerLine + 1]         = {};
+	static char lineDataPrevious[maxLines][charsPerLine + 1] = {};
 
-  if (millis() - lastUpdateMillis > maxUpdateLagMillis) {
-    displayMustUpdate = true;
-  }
+	if (millis() - lastUpdateMillis > maxUpdateLagMillis) {
+		displayMustUpdate = true;
+	}
 
-  if (!displayMustUpdate) return;
+	if (!displayMustUpdate) return;
 
 
-  char    debugName[12];
-  uint8_t currentLine = 0;
-  getDebugLevelName(getDebugLevel(), debugName, sizeof(debugName));
+	char debugName[12];
+	uint8_t currentLine = 0;
+	getDebugLevelName(getDebugLevel(), debugName, sizeof(debugName));
 
-  sprintf(lineData[currentLine++], "Running:    %s", TimeToString(millis() / 1000));
-  sprintf(lineData[currentLine++], "Mode:       %s", getCurrentModeName());
+	sprintf(lineData[currentLine++], "Running:    %s",
+	        TimeToString(millis() / 1000));
+	sprintf(lineData[currentLine++], "Mode:       %s", getCurrentModeName());
 
-  if (lastBrightnessRemote) {
-    sprintf(lineData[currentLine++], "Brightness: %2.0f%%", globalBrightness * 100);
-  } else {
-    sprintf(lineData[currentLine++], "Brightness: [%2.0f%%]", globalBrightness * 100);
-  }
+	if (lastBrightnessRemote) {
+		sprintf(lineData[currentLine++], "Brightness: %2.0f%%",
+		        globalBrightness * 100);
+	} else {
+		sprintf(lineData[currentLine++],
+		        "Brightness: [%2.0f%%]",
+		        globalBrightness * 100);
+	}
 
-  // Hack for now to show first temperature
-  sprintf(lineData[currentLine++],   "Temp:       %f", allLights[0]->getTemperature());
-  sprintf(lineData[currentLine++], "Debug:      %s", debugName);
-  strcpy(lineData[currentLine++], (particleCurrentState == PARTICLE_CONNECTED ?
-                                   "Particle:   online" :
-                                   "Particle:   offline"));
+	// Hack for now to show first temperature
+	sprintf(lineData[currentLine++],
+	        "Temp:       %f",
+	        allLights[0]->getTemperature());
+	sprintf(lineData[currentLine++], "Debug:      %s", debugName);
+	strcpy(lineData[currentLine++], (particleCurrentState == PARTICLE_CONNECTED ?
+	                                 "Particle:   online" :
+	                                 "Particle:   offline"));
 
-  strcpy(lineData[currentLine++], (particleDesiredState != particleCurrentState ?
-                                   (particleDesiredState == PARTICLE_CONNECTED ?
-                                    "  Connecting" : "  Disconnecting")
-                                   : ""));
+	strcpy(lineData[currentLine++], (particleDesiredState != particleCurrentState ?
+	                                 (particleDesiredState == PARTICLE_CONNECTED ?
+	                                  "  Connecting" : "  Disconnecting")
+					 : ""));
 
-  display.setTextColor(WHITE, BLACK);
+	display.setTextColor(WHITE, BLACK);
 
-  for (uint8_t i = 0; i < currentLine; i++) {
-    // We always have 12 characters of label
-    // So, clear the space from char 13 until the end (currently hardcoded at
-    // 128)
-    if (strcmp(lineData[i], lineDataPrevious[i]) != 0) {
-      // Print our new text
-      display.setCursor(0, i * lineHeight);
-      display.println(lineData[i]);
+	for (uint8_t i = 0; i < currentLine; i++) {
+		// We always have 12 characters of label
+		// So, clear the space from char 13 until the end (currently hardcoded at
+		// 128)
+		if (strcmp(lineData[i], lineDataPrevious[i]) != 0) {
+			// Print our new text
+			display.setCursor(0, i * lineHeight);
+			display.println(lineData[i]);
 
-      // Determine how much we need to clear after the next text
-      uint16_t charsBeforeEOL = strlen(lineData[i]);
+			// Determine how much we need to clear after the next text
+			uint16_t charsBeforeEOL = strlen(lineData[i]);
 
-      size_t lengthPrevious = strlen(lineDataPrevious[i]);
-      size_t lengthNew      = strlen(lineData[i]);
+			size_t lengthPrevious = strlen(lineDataPrevious[i]);
+			size_t lengthNew      = strlen(lineData[i]);
 
-      if (lengthPrevious > lengthNew) {
-        uint16_t left   = charsBeforeEOL * charWidth;
-        uint16_t top    = i * lineHeight;
-        uint16_t width  = displayWidth - (lengthNew * charWidth);
-        uint16_t height = lineHeight;
-        display.fillRect(left, top, width, height, BLACK);
-      }
+			if (lengthPrevious > lengthNew) {
+				uint16_t left   = charsBeforeEOL * charWidth;
+				uint16_t top    = i * lineHeight;
+				uint16_t width  = displayWidth - (lengthNew * charWidth);
+				uint16_t height = lineHeight;
+				display.fillRect(left, top, width, height, BLACK);
+			}
 
-      // Save the new text for next time
-      strcpy(lineDataPrevious[i], lineData[i]);
-    }
-  }
-  lastUpdateMillis  = millis();
-  displayMustUpdate = false;
+			// Save the new text for next time
+			strcpy(lineDataPrevious[i], lineData[i]);
+		}
+	}
+	lastUpdateMillis  = millis();
+	displayMustUpdate = false;
 }
 
 void loopControlBrightness() {
-  if (!brightnessControl.hasChanged()) return;
+	if (!brightnessControl.hasChanged()) return;
 
-  globalBrightness = ((float)brightnessControl.getValue() / 1023.0f);
+	globalBrightness = ((float)brightnessControl.getValue() / 1023.0f);
 
-  if (lastBrightnessRemote) {
-    // The previous change was remote; change the indicator and reset the
-    // sensitivity because the remote change turned it down
-    lastBrightnessRemote = false;
-    brightnessControl.setActivityThreshold(4.0f);
-  }
-  lightsMustUpdate  = true;
-  displayMustUpdate = true;
+	if (lastBrightnessRemote) {
+		// The previous change was remote; change the indicator and reset the
+		// sensitivity because the remote change turned it down
+		lastBrightnessRemote = false;
+		brightnessControl.setActivityThreshold(4.0f);
+	}
+	lightsMustUpdate  = true;
+	displayMustUpdate = true;
 }
 
 void loopControls() {
-  static int modeClicks = 0;
+	static int modeClicks = 0;
 
-  modeButton.Update();
-  modeClicks = modeButton.clicks;
+	modeButton.Update();
+	modeClicks = modeButton.clicks;
 
-  if (modeButton.clicks != 0) {
-    if (modeClicks == 1) {
-      debugPrint(DEBUG_TRACE, "Click: change mode");
-      nextMode();
-      displayMustUpdate = true;
-      lightsMustUpdate  = true;
-    }
+	if (modeButton.clicks != 0) {
+		if (modeClicks == 1) {
+			debugPrint(DEBUG_TRACE, "Click: change mode");
+			nextMode();
+			displayMustUpdate = true;
+			lightsMustUpdate  = true;
+		}
 
-    if (modeClicks == 2) {
-      debugPrint(DEBUG_TRACE, "Double-click: toggle Particle cloud");
-      particleToggle();
-      displayMustUpdate = true;
-    }
+		if (modeClicks == 2) {
+			debugPrint(DEBUG_TRACE, "Double-click: toggle Particle cloud");
+			particleToggle();
+			displayMustUpdate = true;
+		}
 
-    if (modeClicks == 3) {
-      debugPrint(DEBUG_TRACE, "Triple-click: setup particle functions");
-      particleSetupFunctions();
-    }
+		if (modeClicks == 3) {
+			debugPrint(DEBUG_TRACE, "Triple-click: setup particle functions");
+			particleSetupFunctions();
+		}
 
-    if (modeClicks == -1) {
-      debugPrint(DEBUG_TRACE, "Long click: increment debugging");
-      setDebugLevel(getDebugLevel() + 1);
-      displayMustUpdate = true;
-    }
-  }
+		if (modeClicks == -1) {
+			debugPrint(DEBUG_TRACE, "Long click: increment debugging");
+			setDebugLevel(getDebugLevel() + 1);
+			displayMustUpdate = true;
+		}
+	}
 
-  loopControlBrightness();
+	loopControlBrightness();
 }
 
 void loopE131() {
-  if (wifiCurrentState == PARTICLE_CONNECTED) {
-    if (!WiFi.Connected()) {
-      wifiCurrentState = PARTICLE_DISCONNECTED;
-      debugPrint(DEBUG_ERROR, "loopE131: WiFi not connected");
-      return;
-    }
-    uint16_t packetCount = mainUniverse->parsePacket();
-  }
+	if (wifiCurrentState == PARTICLE_CONNECTED) {
+		if (!WiFi.Connected()) {
+			wifiCurrentState = PARTICLE_DISCONNECTED;
+			debugPrint(DEBUG_ERROR, "loopE131: WiFi not connected");
+			return;
+		}
+		uint16_t packetCount = mainUniverse->parsePacket();
+	}
+
+	// TODO: Reconnect logic?
 }
 
 void loop() {
-  // loopSensors();
-  particleProcess();
-  loopControls();
-  particleProcess();
-  loopE131();
+	// loopSensors();
+	particleProcess();
+	loopControls();
+	particleProcess();
+	loopE131();
 
-  // loopInputs();
-  loopLEDs();
-  particleProcess();
-  loopDisplay();
-  particleProcess();
+	// loopInputs();
+	loopLEDs();
+	particleProcess();
+	loopDisplay();
+	particleProcess();
 }
 
 void connect() {
-  particleConnectionStarted();
+	particleConnectionStarted();
 }

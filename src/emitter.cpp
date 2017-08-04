@@ -1,34 +1,48 @@
 //*********************************************************
 //
-// CIE Light Library
-// Copyright Brooks Talley 2017
+// Luminous
+// Copyright 2017 Brooks Talley
 //
-// This is a derivative work based on Brian
-// Neltner's TeensyLED Controller Library:
-// https://github.com/saikoLED/TeensyLED
+// Portions derived from TeensyLED, copyright 2015 Brian Neltner
+//
+// Luminous is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Luminous is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+//
+//**********************************************************
+
 
 #include "Emitter.h"
 
 Emitter::Emitter(const char *name, float u, float v, float maxvalue) :
-  _u(u),
-  _v(v),
-  _maxvalue(maxvalue),
-  _name(name)
+	_u(u),
+	_v(v),
+	_maxvalue(maxvalue),
+	_name(name)
 {
 }
 
 float Emitter::getU(void) const {
-  return _u;
+	return _u;
 }
 
 float Emitter::getV(void) const {
-  return _v;
+	return _v;
 }
 
 float Emitter::getMax(void) const {
-  return _maxvalue;
+	return _maxvalue;
 }
 
 const char * Emitter::getName(void) const {
-  return _name;
+	return _name;
 }
