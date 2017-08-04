@@ -178,7 +178,7 @@ void setupE131() {
 void setupNetwork() {
 	debugPrint(DEBUG_TRACE, "setupNetwork: starting");
 	WiFi.disconnect();
-	wifiCurrentState = PARTICLE_DISCONNECTED;
+	wifiCurrentState = WIFI_DISCONNECTED;
 	WiFi.clearCredentials();
 	WiFi.setCredentials(wifiNetwork, wifiPassword);
 	WiFi.connect();
@@ -187,12 +187,12 @@ void setupNetwork() {
 	           wifiNetwork,
 	           wifiPassword);
 
-	for (uint16_t i = 0; (wifiCurrentState != PARTICLE_CONNECTED) && (i < 10);
+	for (uint16_t i = 0; (wifiCurrentState != WIFI_CONNECTED) && (i < 10);
 	     i++) {
 		waitFor(WiFi.connected(), 1000);
 
 		if (WiFi.connected()) {
-			wifiCurrentState = PARTICLE_CONNECTED;
+			wifiCurrentState = WIFI_CONNECTED;
 			debugPrintf("  connected");
 			return;
 		} else {
@@ -384,9 +384,9 @@ void loopControls() {
 }
 
 void loopE131() {
-	if (wifiCurrentState == PARTICLE_CONNECTED) {
+	if (wifiCurrentState == WIFI_CONNECTED) {
 		if (!WiFi.Connected()) {
-			wifiCurrentState = PARTICLE_DISCONNECTED;
+			wifiCurrentState = WIFI_DISCONNECTED;
 			debugPrint(DEBUG_ERROR, "loopE131: WiFi not connected");
 			return;
 		}
