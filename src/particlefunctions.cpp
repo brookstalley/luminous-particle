@@ -12,8 +12,6 @@ particleState particleCurrentState = PARTICLE_DISCONNECTED;
 particleState particleDesiredState = PARTICLE_DISCONNECTED;
 
 wifiState wifiCurrentState = WIFI_DISCONNECTED;
-wifiState wifiDesiredState = WIFI_DISCONNECTED;
-
 
 void particleDisconnect() {
   debugPrint(DEBUG_TRACE, "particleDisconnect: start");;
