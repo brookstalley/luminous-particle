@@ -34,6 +34,8 @@ particleState particleDesiredState = PARTICLE_DISCONNECTED;
 
 wifiState wifiCurrentState = WIFI_DISCONNECTED;
 
+LEDStatus luminousBooting(RGB_COLOR_BLUE, LED_PATTERN_BLINK, LED_SPEED_FAST, LED_PRIORITY_IMPORTANT);
+
 void particleDisconnect() {
 	debugPrint(DEBUG_TRACE, "particleDisconnect: start");;
 
@@ -140,7 +142,7 @@ int particleFunctionBrightness(String command) {
 
 void particleSetupFunctions() {
 	debugPrint(DEBUG_MANDATORY, "particleSetupFunctions: starting");
-	Particle.function("mode", particleFunctionMode);
+	Particle.function("mode",       particleFunctionMode);
 	Particle.function("brigntness", particleFunctionBrightness);
 }
 

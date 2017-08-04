@@ -24,6 +24,8 @@
 
 #define PARTICLE_CONNECTION_TIMEOUT 30000
 
+#include "Particle.h"
+
 enum particleState { PARTICLE_DISCONNECTED, PARTICLE_CONNECTED };
 
 enum wifiState { WIFI_DISCONNECTED, WIFI_CONNECTED };
@@ -32,6 +34,8 @@ extern particleState particleCurrentState;
 extern particleState particleDesiredState;
 
 extern particleState wifiCurrentState;
+extern LEDstatus luminousBooting;
+
 
 void particleProcess();
 void particleConnect();

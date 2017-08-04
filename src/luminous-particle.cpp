@@ -202,6 +202,7 @@ void setupNetwork() {
 }
 
 void setup(void) {
+	luminousBooting.setActive(true);
 	setDebugLevel(DEBUG_TRACE);
 	Serial.begin(9600);
 
@@ -215,6 +216,7 @@ void setup(void) {
 
 	// No sense logging before we start serial or network
 	debugPrint(DEBUG_MANDATORY, "Starting...");
+	luminousBooting.setActive(false);
 
 	setupDisplay();
 	setupNetwork();
