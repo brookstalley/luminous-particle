@@ -291,6 +291,13 @@ void loopDisplay() {
 	        "Temp:       %f",
 	        allLights[0]->getTemperature());
 	sprintf(lineData[currentLine++], "Debug:      %s", debugName);
+
+	if (wifiCurrentState == WIFI_CONNECTED) {
+		sprintf(lineData[currentLine++], "WiFi:       %s", WiFi.SSID());
+	} else {
+		strcpy(lineData[currentLine++], "WiFi:       offline");
+	}
+
 	strcpy(lineData[currentLine++], (particleCurrentState == PARTICLE_CONNECTED ?
 	                                 "Particle:   online" :
 	                                 "Particle:   offline"));
