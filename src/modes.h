@@ -36,6 +36,16 @@ public:
            bool);
 };
 
+class ModeE131: public Mode {
+public:
+
+  using Mode::Mode;
+  bool      start(std::vector < std::shared_ptr < HSILight >>);
+  bool      run(std::vector < std::shared_ptr < HSILight >>,
+                bool);
+  bool      end(std::vector < std::shared_ptr < HSILight >>);
+};
+
 void        nextMode();
 bool        setModeByNumber(uint16_t modeNumber);
 bool        setModeByName(String modeName);

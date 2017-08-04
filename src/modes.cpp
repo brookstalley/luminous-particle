@@ -11,13 +11,13 @@
 #include <math.h>
 #include <algorithm>
 
-const int modeCount = 3;
+const int modeCount = 4;
 
 Mode *modes[modeCount] = {
   new ModeOff("Off"),
   new ModeTest("Test"),
   new ModeRotate("Rotate"),
-  new ModeE131("E131"),
+  new ModeE131("E131")
 };
 
 uint16_t currentMode = 0;
@@ -66,9 +66,9 @@ bool ModeRotate::run(std::vector<std::shared_ptr<HSILight> >lights, bool lightsM
   static double hue = 0.0f;
   static double sat = 1.0f;
 
-  static signed int satDir        = -1;
+  static signed int    satDir     = -1;
   static unsigned long lastMillis = millis();
-  static HSIColor rotateColor;
+  static HSIColor      rotateColor;
 
   unsigned long nowMillis = millis();
 
@@ -111,19 +111,16 @@ bool ModeE131::run(std::vector<std::shared_ptr<HSILight> >lights,
 
   debugPrint(DEBUG_INSANE, "effectModeE131: starting");
 
-  if (lightsMustUpdate) {
-    std::for_each(lights.begin(), lights.end(), [&](std::shared_ptr<HSILight>val) {
-      debugPrintf(DEBUG_INSANE, "effectModeE131: %u on", counter);
-      val->setColorFromE131();
-    });
-    lastCounter = counter;
-  }
+  std::for_each(lights.begin(), lights.end(), [&](std::shared_ptr<HSILight>val) {
+    // debugPrintf(DEBUG_INSANE, "effectModeE131: %u on", counter);
+    val->setColorFromE131();
+  });
+  return true;
 }
 
-bool ModeE131::end(std::vector<std::shared_ptr<HSILight> >lights
-
-// TODO: send signal?
-                   )
+bool ModeE131::end(std::vector<std::shared_ptr<HSILight> >lights) {
+  // TODO: send signal?
+}
 
 bool setModeByNumber(uint16_t modeNumber) {
   if (modeNumber >= modeCount) return false;

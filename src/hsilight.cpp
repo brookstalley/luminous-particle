@@ -10,7 +10,7 @@
 // and adddress to 0
 HSILight::HSILight(const char *name, const CompositeModule& compositeModule,
                    std::shared_ptr<OutputInterface>outputInterface, const uint16_t outputLocalAddress,
-                   const E131& e131, const uint16_t e131LocalAddress,
+                   const std::shared_ptr<E131>e131, const uint16_t e131LocalAddress,
                    std::shared_ptr<TemperatureInterface>temperatureInterface,
                    const uint16_t temperatureLocalAddress
                    ) :
@@ -30,7 +30,7 @@ HSILight::HSILight(const char *name, const CompositeModule& compositeModule,
 // and adddress to 0
 HSILight::HSILight(const char *name, const CompositeModule& compositeModule,
                    std::shared_ptr<OutputInterface>outputInterface, const uint16_t outputLocalAddress,
-                   const uint16_t e131LocalAddress, const E131& e131
+                   const std::shared_ptr<E131>e131, const uint16_t e131LocalAddress
                    ) :
   _name(name),
   _compositeModule(compositeModule),
@@ -60,12 +60,12 @@ void HSILight::setColor(const HSIColor& color)  {
 
 void HSILight::setColorFromE131() {
   HSIColor color(
-    twoBytesToFloat(_e131->data[_e131LocalAddress]),
-    twoBytesToFloat(_e131->data[_e131LocalAddress + 2]),
-    twoBytesToFloat(_e131->data[_e131LocalAddress + 4])
+    twoBytesToFloat(&_e131->data[_e131LocalAddress]),
+    twoBytesToFloat(&_e131->data[_e131LocalAddress + 2]),
+    twoBytesToFloat(&_e131->data[_e131LocalAddress + 4])
     );
 
-  val->setColor(color);
+  setColor(color);
 }
 
 void HSILight::setSingleEmitterOn(unsigned int index) {

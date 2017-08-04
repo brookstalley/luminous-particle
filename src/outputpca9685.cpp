@@ -38,7 +38,7 @@ bool OutputPCA9685::setEmitterPowers(const std::vector<outputEmitter>& emitterPo
   // assumes that the start address is the lowest localAddress
   // in emitterPowers
 
-  debugPrint(DEBUG_INSANE, "OutputPCA9685::setEmitterPowers start. EmitterPowers.size() == %u", emitterPowers.size());
+  debugPrintf(DEBUG_INSANE, "OutputPCA9685::setEmitterPowers start. EmitterPowers.size() == %u", emitterPowers.size());
 
   uint16_t pwms[emitterPowers.size()];
   uint16_t minAddress = UINT16_MAX;

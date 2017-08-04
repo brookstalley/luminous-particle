@@ -44,16 +44,16 @@ bool displayMustUpdate = false;
 bool lightsMustUpdate  = false;
 
 ////////////////////////// Controllers and stuff
-Adafruit_SSD1351 display(spi_pin_cs, spi_pin_dc, spi_pin_rst);
-ClickButton modeButton(MODE_BUTTON_PIN, LOW,  CLICKBTN_PULLUP);
+Adafruit_SSD1351     display(spi_pin_cs, spi_pin_dc, spi_pin_rst);
+ClickButton          modeButton(MODE_BUTTON_PIN, LOW,  CLICKBTN_PULLUP);
 ResponsiveAnalogRead brightnessControl(BRIGHTNESS_PIN, true);
-E131 e131();
 
 // Input and output devices
 
-std::shared_ptr<OutputPCA9685> mainOutput = std::make_shared<OutputPCA9685>(Wire, 0x40);
+std::shared_ptr<OutputPCA9685>      mainOutput = std::make_shared<OutputPCA9685>(Wire, 0x40);
 std::shared_ptr<TemperatureAds1115> mainTemperature
   = std::make_shared<TemperatureAds1115>(Wire, 0x48, 10000, 10000, 25, 3950);
+std::shared_ptr<E131> mainUniverse = std::make_shared<E131>();
 
 // Shared lights
 Emitter emitterLZ7white("LZ7-w", 0.202531646, 0.469936709, (float)180 / 180);
@@ -71,7 +71,10 @@ CompositeModule LZ7(70.f, 90.0f);
 // Eventually we'll have different groups of lights, so just make a group
 // of one because the various effects expect to operate on a group.
 std::vector<std::shared_ptr<HSILight> > allLights = {
-  std::make_shared<HSILight>(HSILight("Light1", LZ7, mainOutput, (uint16_t)0, e131, mainTemperature, (uint16_t)0))
+  std::make_shared<HSILight>(HSILight("Light1",        LZ7,        mainOutput,        (uint16_t)0,        mainUniverse,
+                                      (uint16_t)0,
+                                      mainTemperature,
+                                      (uint16_t)0))
 };
 
 ////////////////////////// MAIN ////////////////////////////
@@ -94,7 +97,7 @@ void setupLEDs() {
   Wire.begin();          // Wire must be started first
   Wire.setClock(400000); // Supported baud rates are 100kHz, 400kHz, and 1000kHz
 
-  mainOutput.init();
+  mainOutput->init();
 
   LZ7.addWhiteEmitter(emitterLZ7white, 5);
   LZ7.addColorEmitter(emitterLZ7red, 0);
@@ -106,7 +109,7 @@ void setupLEDs() {
 
   debugPrint(DEBUG_TRACE, "  setting up lamps");
 
-  mainTemperature.begin();
+  mainTemperature->begin();
 
   std::for_each(allLights.begin(), allLights.end(), [&](std::shared_ptr<HSILight>light) {
     light->begin();
@@ -133,8 +136,8 @@ void setupE131() {
   debugPrint(DEBUG_TRACE, "setupE131: Starting");
   waitUntil(WiFi.ready);
   debugPrint(DEBUG_INSANE, "  wifi ready");
-  e131.begin();
-  debugPrintf(DEBUG_INSANE, "  server=%s:%d", WiFi.localIP().toString().c_str(), UDP_PORT);
+  mainUniverse->begin();
+  debugPrintf(DEBUG_INSANE, "  server=%s", WiFi.localIP().toString().c_str());
 }
 
 void setup(void) {
@@ -156,7 +159,7 @@ void setup(void) {
   setupLEDs();
   setupControls();
   setupSensors();
-  SetupE131();
+  setupE131();
   debugPrint(DEBUG_TRACE, "  Finished");
 }
 
@@ -171,7 +174,7 @@ void loopLEDs() {
 char* TimeToString(unsigned long t)
 {
   static char str[12];
-  long h = t / 3600;
+  long        h = t / 3600;
 
   t = t % 3600;
   int m = t / 60;
@@ -183,16 +186,17 @@ char* TimeToString(unsigned long t)
 void loopDisplay() {
   // Assumes monospace fonts
   const uint8_t displayWidth             = 128;
+  const uint8_t displayHeight            = 128;
   const unsigned long maxUpdateLagMillis = 500;
-  const uint8_t lineHeight               = 9;
-  const uint8_t charWidth                = 6;
-  const uint8_t charsPerLine             = floor(displayWidth / charWidth);
-  const uint8_t maxLines                 = (dispalyHeight / lineHeight);
+  const uint8_t       lineHeight         = 9;
+  const uint8_t       charWidth          = 6;
+  const uint8_t       charsPerLine       = floor(displayWidth / charWidth);
+  const uint8_t       maxLines           = (displayHeight / lineHeight);
 
   static unsigned long lastUpdateMillis = 0;
 
-  static char lineData[linesToDisplay][charsPerLine + 1]         = {};
-  static char lineDataPrevious[linesToDisplay][charsPerLine + 1] = {};
+  static char lineData[maxLines][charsPerLine + 1]         = {};
+  static char lineDataPrevious[maxLines][charsPerLine + 1] = {};
 
   if (millis() - lastUpdateMillis > maxUpdateLagMillis) {
     displayMustUpdate = true;
@@ -201,7 +205,7 @@ void loopDisplay() {
   if (!displayMustUpdate) return;
 
 
-  char debugName[12];
+  char    debugName[12];
   uint8_t currentLine = 0;
   getDebugLevelName(getDebugLevel(), debugName, sizeof(debugName));
 
@@ -310,7 +314,7 @@ void loopControls() {
 }
 
 void loopE131() {
-  uint16_t packetCount = e131.parsePacket();
+  uint16_t packetCount = mainUniverse->parsePacket();
 }
 
 void loop() {

@@ -21,7 +21,7 @@ TemperatureAds1115::TemperatureAds1115(TwoWire& i2cbus,
   _adcMax(4095),
   _thermistorNominal(thermistorNominal),
   _temperatureNominal(temperatureNominal),
-  _bCoef(bcoef) {}
+  _bCoef(bCoef) {}
 
 bool TemperatureAds1115::beginImplementation() {
   {
@@ -34,7 +34,7 @@ bool TemperatureAds1115::beginImplementation() {
     _adc.startContinuous_SingleEnded(3);
 
     // make sure it has enough time before someone starts asking it for readings
-    delay_ms(10);
+    delay(10);
 
     // ads.startContinuous_SingleEnded(1);
     // ads.startContinuous_SingleEnded(2);
@@ -62,5 +62,5 @@ float TemperatureAds1115::getTemperature(uint16_t temperatureLocalAddress) {
 }
 
 bool TemperatureAds1115::begin() {
-  return initImplementation();
+  return beginImplementation();
 }

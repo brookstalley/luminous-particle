@@ -18,7 +18,7 @@ private:
   const CompositeModule& _compositeModule;
   std::shared_ptr < OutputInterface > _outputInterface;
   const uint16_t _outputLocalAddress;
-  const E131   & _e131;
+  const std::shared_ptr < E131 > _e131;
   const uint16_t _e131LocalAddress;
   std::shared_ptr < TemperatureInterface > _temperatureInterface;
   const uint16_t _temperatureLocalAddress;
@@ -37,7 +37,7 @@ public:
            const CompositeModule &compositemodule,
            std::shared_ptr < OutputInterface > outputInterface,
            const uint16_t outputLocalAddress,
-           const E131 e131,
+           const std::shared_ptr < E131 > e131,
            const uint16_t e131LocalAddress, // TODO: Add multiple universe
                                             // support
            std::shared_ptr < TemperatureInterface > temperatureInterface,
@@ -47,7 +47,7 @@ public:
            const CompositeModule &compositemodule,
            std::shared_ptr < OutputInterface > outputInterface,
            const uint16_t outputLocalAddress,
-           const E131 e131,
+           const std::shared_ptr < E131 > e131,
            const uint16_t e131LocalAddress); // TODO: Add multiple universe
                                              // support
 
@@ -62,4 +62,8 @@ public:
   const char* getName(void) const;
   void        setSingleEmitterOn(unsigned int index);
 };
+
+// Stray, but this seems a reasonable place for it
+float twoBytesToFloat(uint8_t *buf);
+
 #endif /* ifndef HSILIGHT_H */
