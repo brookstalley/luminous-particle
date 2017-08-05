@@ -158,6 +158,7 @@ void setupControls() {
 	// Setup the brightness control
 	lastBrightnessRemote = false;
 	brightnessControl.enableEdgeSnap();
+	brightnessControl.setAnalogResolution(4096);
 }
 
 void setupSensors() {
@@ -282,11 +283,11 @@ void loopDisplay() {
 	sprintf(lineData[currentLine++], "Mode:       %s", getCurrentModeName());
 
 	if (lastBrightnessRemote) {
-		sprintf(lineData[currentLine++], "Brightness: %2.0f%%",
+		sprintf(lineData[currentLine++], "Brightness: [%2.0f%%]",
 		        globalBrightness * 100);
 	} else {
 		sprintf(lineData[currentLine++],
-		        "Brightness: [%2.0f%%]",
+		        "Brightness: %2.0f%%",
 		        globalBrightness * 100);
 	}
 
@@ -345,9 +346,10 @@ void loopDisplay() {
 }
 
 void loopControlBrightness() {
+	brightnessControl.update();
 	if (!brightnessControl.hasChanged()) return;
 
-	globalBrightness = ((float)brightnessControl.getValue() / 1023.0f);
+	globalBrightness = ((float)(4095 - brightnessControl.getValue()) / 4095.0f);
 
 	if (lastBrightnessRemote) {
 		// The previous change was remote; change the indicator and reset the
