@@ -11,10 +11,11 @@ I'm using my own forks of the Adafruit_GFX, Adafruit_SSD1351, Adafruit_Ads1X15, 
 - HSIColor: class to model colors in HSI; directly from TeensyLED
 - Mode: base class that defines how lighting modes offer start, run, and end functions
 
-- HSILight: a light fixture that has a CompositeModule in it and is addressable on an OutputInterface
-
 - OutputInterface: base class for methods to set emitter brightnesses.
 - OutputPCA9685: derived from OutputInterface; wraps the PCA9685 I2C PWM controller.
+- E131: A fork with minor changes to accomodate Luminous' debugging mechanism.
+
+- HSILight: a light fixture that has a CompositeModule in it and is addressable on an OutputInterface. Optionally has a TemperatureInterface to monitor temperature. Optionally has an E131 to receive commands. Currently only supports 16-bit HSI mode.
 
 - TemperatureInterface: base class for temperature reading
 - TemperatureAds1115: derived from TemperatureInterface; wraps the Ads1115 I2C PWM controller.
@@ -42,3 +43,5 @@ Currently, a few sample modes are defined in `modes.cpp`: Off, Test, and Rotate.
 - Intensity is a float, with values between 0 and 1. Value 0 is off, 1.0 is as bright as possible
 
 - The system does not currently understand differences in brightnesses between different Emitters or CompositeModules; the same HSI on a 3W RGBW led will be much brighter than on a 150ma RGBW led.
+
+- In order for Wifi / E131 to work, you'll need to copy credentials.h.example to credentials.h and update it with your network's SSID and password. The `.gitignore` file is already configured to not commit/push that file.
