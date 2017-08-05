@@ -83,20 +83,6 @@ void HSILight::setColor(const HSIColor& color)  {
 	setEmitters();
 }
 
-void HSILight::setColorFromE131() {
-	uint32_t currentE131PacketCount = _e131->stats.num_packets;
-	if (currentE131PacketCount != _lastE131PacketCount) {
-		HSIColor color(
-			twoBytesToFloat(&_e131->data[_e131LocalAddress]),
-			twoBytesToFloat(&_e131->data[_e131LocalAddress + 2]),
-			twoBytesToFloat(&_e131->data[_e131LocalAddress + 4])
-			);
-		debugPrintf(DEBUG_TRACE, "e131 data for %s: (%4.4f, %4.4f, %4.4f)", _name, color.getHue(), color.getSaturation(), color.getIntensity());
-		setColor(color);
-		_lastE131PacketCount = currentE131PacketCount;
-	}
-}
-
 void HSILight::setSingleEmitterOn(unsigned int index) {
 	debugPrintf(DEBUG_INSANE, "HSILight: Setting single emitter for index %u (%u)", index, _emitterPowers.size());
 
@@ -121,6 +107,14 @@ const char * HSILight::getName(void) const {
 	return _name;
 }
 
+std::shared_ptr<E131> HSILight::getE131() const {
+	return _e131;
+}
+
+const uint16_t HSILight::getE131LocalAddress() const {
+	return _e131LocalAddress;
+}
+
 void HSILight::setTemperatureInterface(std::shared_ptr<TemperatureInterface>temperatureInterface) {
 	_temperatureInterface = temperatureInterface;
 }
@@ -141,8 +135,4 @@ float HSILight::getTemperature(void) {
 	} else {
 		return -1.0f;
 	}
-}
-
-float twoBytesToFloat(uint8_t *buf) {
-	return (float)(buf[0] | buf[1] << 8) / 65535.0f;
 }

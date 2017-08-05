@@ -133,7 +133,28 @@ bool ModeE131::run(std::vector<std::shared_ptr<HSILight> >lights,
 
 	std::for_each(lights.begin(), lights.end(), [&](std::shared_ptr<HSILight>val) {
 		// debugPrintf(DEBUG_INSANE, "effectModeE131: %u on", counter);
-		val->setColorFromE131();
+		const std::shared_ptr <E131> e131 = val->getE131();
+		const uint8_t *e131data = e131->data;
+
+		const uint16_t e131LocalAddress = val->getE131LocalAddress();
+
+		// uint32_t currentE131PacketCount = e131->stats.num_packets;
+		uint16_t redraw = (e131data[e131LocalAddress + 0] | (e131data[e131LocalAddress + 1] << 8));
+		uint16_t greenraw = (e131data[e131LocalAddress + 2] | (e131data[e131LocalAddress + 3] << 8));
+		uint16_t blueraw = (e131data[e131LocalAddress + 4] | (e131data[e131LocalAddress+ 5] << 8));
+		debugPrintf(DEBUG_TRACE, "e131 rgb for %s: (%u, %u, %u)", val->getName(), redraw, greenraw, blueraw);
+
+		HSIColor *color = new HSIColor();
+		color->setRGB(
+			twoBytesToFloat(&e131data[e131LocalAddress]),
+			twoBytesToFloat(&e131data[e131LocalAddress + 2]),
+			twoBytesToFloat(&e131data[e131LocalAddress + 4])
+			);
+		debugPrintf(DEBUG_TRACE, "e131 data for %s: (%4.4f, %4.4f, %4.4f)", val->getName(), color->getHue(), color->getSaturation(), color->getIntensity());
+		val->setColor(*color);
+		//_lastE131PacketCount = currentE131PacketCount;
+		//val->setColorFromE131();
+
 	});
 	return true;
 }
@@ -183,4 +204,9 @@ void runCurrentMode() {
 
 const char* getCurrentModeName() {
 	return modes[currentMode]->getName();
+}
+
+
+float twoBytesToFloat(const uint8_t *buf) {
+	return (float)(buf[0] | buf[1] << 8) / 65535.0f;
 }

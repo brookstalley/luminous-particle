@@ -127,9 +127,7 @@ std::vector<outputEmitter>CompositeModule::Hue2EmitterPower(const HSIColor& HSI)
 	float S = HSI.getSaturation();
 	float I = HSI.getIntensity();
 
-	float tanH = tan(M_PI * fmod(H, 360) / (float)180); // Get the tangent since
-
-	// we will use it often.
+	float tanH = tan(M_PI * fmod(H, 360) / (float)180); // Get the tangent since we will use it often.
 
 	// Copy our color emitters with default power of zero
 	std::vector<outputEmitter> emitterPowers;

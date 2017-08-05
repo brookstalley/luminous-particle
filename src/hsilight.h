@@ -76,17 +76,16 @@ public:
 
 	void        begin();
 	void        setColor(const HSIColor& color);
-	void        setColorFromE131();
 	void        getColor(const HSIColor *) const;
 	void        setTemperatureInterface(std::shared_ptr < TemperatureInterface > temperatureInterface);
-
+	std::shared_ptr<E131> getE131() const;
+	const uint16_t getE131LocalAddress() const;
 	float       getTemperature();
 	float       updateTemperature();
 	const char* getName(void) const;
 	void        setSingleEmitterOn(unsigned int index);
 };
 
-// Stray, but this seems a reasonable place for it
-float twoBytesToFloat(uint8_t *buf);
+
 
 #endif /* ifndef HSILIGHT_H */

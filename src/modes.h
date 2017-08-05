@@ -72,15 +72,8 @@ bool        setModeByNumber(uint16_t modeNumber);
 bool        setModeByName(String modeName);
 void        runCurrentMode();
 const char* getCurrentModeName();
+// Stray, but this seems a reasonable place for it
+float twoBytesToFloat(const uint8_t *buf);
 
-/*
-   class ModeE131: Mode {
-   public:
 
-   bool start(std::vector < std::shared_ptr < HSILight >>);
-   bool run(std::vector < std::shared_ptr < HSILight >>,
-           bool);
-   bool end(std::vector < std::shared_ptr < HSILight >>)
-   }
- */
 #endif /* ifndef MODES_H */
