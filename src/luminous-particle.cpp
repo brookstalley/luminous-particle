@@ -178,7 +178,7 @@ void setupE131() {
 void setupNetwork() {
 	debugPrint(DEBUG_TRACE, "setupNetwork: starting");
 	WiFi.disconnect();
-	wifiCurrentState = PARTICLE_DISCONNECTED;
+	wifiCurrentState = WIFI_DISCONNECTED;
 	WiFi.clearCredentials();
 	WiFi.setCredentials(wifiNetwork, wifiPassword);
 	WiFi.connect();
@@ -187,12 +187,12 @@ void setupNetwork() {
 	           wifiNetwork,
 	           wifiPassword);
 
-	for (uint16_t i = 0; (wifiCurrentState != PARTICLE_CONNECTED) && (i < 10);
+	for (uint16_t i = 0; (wifiCurrentState != WIFI_CONNECTED) && (i < 10);
 	     i++) {
 		waitFor(WiFi.connected(), 1000);
 
-		if (WiFi.connected()) {
-			wifiCurrentState = PARTICLE_CONNECTED;
+		if (WiFi.ready()) {
+			wifiCurrentState = WIFI_CONNECTED;
 			debugPrintf("  connected");
 			return;
 		} else {
@@ -202,6 +202,7 @@ void setupNetwork() {
 }
 
 void setup(void) {
+	luminousBooting.setActive(true);
 	setDebugLevel(DEBUG_TRACE);
 	Serial.begin(9600);
 
@@ -215,6 +216,7 @@ void setup(void) {
 
 	// No sense logging before we start serial or network
 	debugPrint(DEBUG_MANDATORY, "Starting...");
+	luminousBooting.setActive(false);
 
 	setupDisplay();
 	setupNetwork();
@@ -291,6 +293,13 @@ void loopDisplay() {
 	        "Temp:       %f",
 	        allLights[0]->getTemperature());
 	sprintf(lineData[currentLine++], "Debug:      %s", debugName);
+
+	if (wifiCurrentState == WIFI_CONNECTED) {
+		sprintf(lineData[currentLine++], "WiFi:       %s", WiFi.SSID());
+	} else {
+		strcpy(lineData[currentLine++], "WiFi:       offline");
+	}
+
 	strcpy(lineData[currentLine++], (particleCurrentState == PARTICLE_CONNECTED ?
 	                                 "Particle:   online" :
 	                                 "Particle:   offline"));
@@ -384,9 +393,9 @@ void loopControls() {
 }
 
 void loopE131() {
-	if (wifiCurrentState == PARTICLE_CONNECTED) {
-		if (!WiFi.Connected()) {
-			wifiCurrentState = PARTICLE_DISCONNECTED;
+	if (wifiCurrentState == WIFI_CONNECTED) {
+		if (!WiFi.ready()) {
+			wifiCurrentState = WIFI_DISCONNECTED;
 			debugPrint(DEBUG_ERROR, "loopE131: WiFi not connected");
 			return;
 		}
