@@ -26,7 +26,7 @@
 
 #include "Particle.h"
 
-uint16_t debugOutputMode = DEBUG_ERROR;
+uint16_t debugOutputMode = DEBUG_TRACE;
 
 void debugPrint(uint16_t level, const char *buffer) {
 	static const char *eventName = "debug";
@@ -77,7 +77,7 @@ void getDebugLevelName(uint16_t level, char *buffer, size_t buffer_length) {
 		strncpy(buffer, "Mandatory", buffer_length - 1);
 		break;
 	case DEBUG_ERROR:
-		strncpy(buffer, "Error  ", buffer_length - 1);
+		strncpy(buffer, "Error  ",   buffer_length - 1);
 		break;
 
 	case DEBUG_WARN:

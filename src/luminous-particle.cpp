@@ -166,8 +166,8 @@ void setupSensors() {
 void setupE131() {
 	debugPrint(DEBUG_TRACE, "setupE131: Starting");
 
-	if (!WiFi.Connected()) {
-		wifiCurrentState = PARTICLE_DISCONNECTED;
+	if (!WiFi.ready()) {
+		wifiCurrentState = WIFI_DISCONNECTED;
 		debugPrint(DEBUG_ERROR, "setupE131: WiFi not connected");
 		return;
 	}
@@ -177,26 +177,28 @@ void setupE131() {
 
 void setupNetwork() {
 	debugPrint(DEBUG_TRACE, "setupNetwork: starting");
+	WiFi.on();
 	WiFi.disconnect();
 	wifiCurrentState = WIFI_DISCONNECTED;
 	WiFi.clearCredentials();
-	WiFi.setCredentials(wifiNetwork, wifiPassword);
+	// SSID and password are stored in credentials.h
+	WiFi.setCredentials(WIFI_SSID, WIFI_PASSWORD);
 	WiFi.connect();
-	debugPrint(DEBUG_TRACE,
-	           "  connecting to %s with password %s",
-	           wifiNetwork,
-	           wifiPassword);
+	debugPrintf(DEBUG_TRACE,
+	            "  connecting to %s with password %s",
+	            WIFI_SSID,
+	            WIFI_PASSWORD);
 
 	for (uint16_t i = 0; (wifiCurrentState != WIFI_CONNECTED) && (i < 10);
 	     i++) {
-		waitFor(WiFi.connected(), 1000);
+		waitFor(WiFi.ready, 1000);
 
 		if (WiFi.ready()) {
 			wifiCurrentState = WIFI_CONNECTED;
-			debugPrintf("  connected");
+			debugPrint(DEBUG_TRACE, "  connected");
 			return;
 		} else {
-			debugPrintf(DEBUG_TRACE, "  waiting for connection (%u)", i);
+			debugPrintf(DEBUG_TRACE, "  waiting for connection to %s:%s (%u)", WIFI_SSID, WIFI_PASSWORD, i);
 		}
 	}
 }
@@ -290,7 +292,7 @@ void loopDisplay() {
 
 	// Hack for now to show first temperature
 	sprintf(lineData[currentLine++],
-	        "Temp:       %f",
+	        "Temp:       %3.0f",
 	        allLights[0]->getTemperature());
 	sprintf(lineData[currentLine++], "Debug:      %s", debugName);
 

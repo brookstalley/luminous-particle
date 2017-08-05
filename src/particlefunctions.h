@@ -33,8 +33,8 @@ enum wifiState { WIFI_DISCONNECTED, WIFI_CONNECTED };
 extern particleState particleCurrentState;
 extern particleState particleDesiredState;
 
-extern particleState wifiCurrentState;
-extern LEDstatus luminousBooting;
+extern wifiState wifiCurrentState;
+extern LEDStatus luminousBooting;
 
 
 void particleProcess();
