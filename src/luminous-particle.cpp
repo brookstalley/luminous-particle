@@ -36,6 +36,7 @@
 #include "Adafruit_SSD1351_Photon.h"
 #include "clickButton/clickButton.h"
 #include "ResponsiveAnalogRead/ResponsiveAnalogRead.h"
+#include "E131/E131.h"
 
 #include "application.h"
 
@@ -173,7 +174,16 @@ void setupE131() {
 		return;
 	}
 	mainUniverse->begin();
-	debugPrintf(DEBUG_INSANE, "  server=%s", WiFi.localIP().toString().c_str());
+	// It is insane that the following line does not compile.
+	//debugPrintf(DEBUG_TRACE, "  server=%s:%u", WiFi.localIP(), mainUniverse->getUdpPort());
+	IPAddress localAddr = WiFi.localIP();
+	byte oct1 = localAddr[0];
+	byte oct2 = localAddr[1];
+	byte oct3 = localAddr[2];
+	byte oct4 = localAddr[3];
+	char ipChars[16];
+	sprintf(ipChars, "%d.%d.%d.%d", oct1, oct2, oct3, oct4);
+	debugPrintf(DEBUG_TRACE, "  server=%s", ipChars);
 }
 
 void setupNetwork() {
@@ -199,6 +209,7 @@ void setupNetwork() {
 			debugPrint(DEBUG_TRACE, "  connected");
 			return;
 		} else {
+
 			debugPrintf(DEBUG_TRACE, "  waiting for connection to %s:%s (%u)", WIFI_SSID, WIFI_PASSWORD, i);
 		}
 	}

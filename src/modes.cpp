@@ -141,6 +141,7 @@ bool ModeE131::run(std::vector<std::shared_ptr<HSILight> >lights,
 
 bool ModeE131::end(std::vector<std::shared_ptr<HSILight> >lights) {
 	// TODO: send signal?
+	return true;
 }
 
 bool setModeByNumber(uint16_t modeNumber) {
