@@ -48,6 +48,8 @@ private:
 	float _localBrightness;
 	float _temperature;
 
+	uint32_t _lastE131PacketCount;
+
 	unsigned long _tempertureUpdatedMillis;
 
 	void setEmitters();

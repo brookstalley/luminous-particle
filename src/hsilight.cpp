@@ -70,6 +70,7 @@ HSILight::HSILight(const char *name, const CompositeModule& compositeModule,
 
 void HSILight::begin() {
 	_emitterPowers = _compositeModule.Hue2EmitterPower(HSIColor(0, 0, 0));
+	_lastE131PacketCount = 0;
 	debugPrintf(DEBUG_TRACE, "HSILight: begin (%u)", _emitterPowers.size());
 
 	for (unsigned int i = 0; i < _emitterPowers.size(); i++) {
@@ -83,13 +84,17 @@ void HSILight::setColor(const HSIColor& color)  {
 }
 
 void HSILight::setColorFromE131() {
-	HSIColor color(
-		twoBytesToFloat(&_e131->data[_e131LocalAddress]),
-		twoBytesToFloat(&_e131->data[_e131LocalAddress + 2]),
-		twoBytesToFloat(&_e131->data[_e131LocalAddress + 4])
-		);
-
-	setColor(color);
+	uint32_t currentE131PacketCount = _e131->stats.num_packets;
+	if (currentE131PacketCount != _lastE131PacketCount) {
+		HSIColor color(
+			twoBytesToFloat(&_e131->data[_e131LocalAddress]),
+			twoBytesToFloat(&_e131->data[_e131LocalAddress + 2]),
+			twoBytesToFloat(&_e131->data[_e131LocalAddress + 4])
+			);
+		debugPrintf(DEBUG_TRACE, "e131 data for %s: (%4.4f, %4.4f, %4.4f)", _name, color.getHue(), color.getSaturation(), color.getIntensity());
+		setColor(color);
+		_lastE131PacketCount = currentE131PacketCount;
+	}
 }
 
 void HSILight::setSingleEmitterOn(unsigned int index) {

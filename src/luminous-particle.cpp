@@ -200,7 +200,7 @@ void setupNetwork() {
 	            WIFI_SSID,
 	            WIFI_PASSWORD);
 
-	for (uint16_t i = 0; (wifiCurrentState != WIFI_CONNECTED) && (i < 10);
+	for (uint16_t i = 0; (wifiCurrentState != WIFI_CONNECTED) && (i < 30);
 	     i++) {
 		waitFor(WiFi.ready, 1000);
 

@@ -128,7 +128,6 @@ bool ModeE131::start(std::vector<std::shared_ptr<HSILight> >lights) {
 
 bool ModeE131::run(std::vector<std::shared_ptr<HSILight> >lights,
                    bool lightsMustUpdate) {
-	// TODO: checksum data to see if it changed
 
 	debugPrint(DEBUG_INSANE, "effectModeE131: starting");
 
