@@ -27,7 +27,7 @@
 #include "mode.h"
 #include "hsilight.h"
 #include "hsicolor.h"
-#include "debug.h"
+#include "ldebug.h"
 
 #include "Particle.h"
 

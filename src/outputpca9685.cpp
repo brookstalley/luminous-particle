@@ -23,7 +23,7 @@
 #include "luminous-particle.h"
 
 #include "emitter.h"
-#include "debug.h"
+#include "ldebug.h"
 
 #include <vector>
 
@@ -37,7 +37,7 @@ OutputPCA9685::OutputPCA9685(TwoWire& i2cbus, uint8_t i2caddress) :
 }
 
 bool OutputPCA9685::initImplementation() {
-	debugPrint(DEBUG_TRACE, "OutputPCA9685::initImplementation");
+	debugPrint(DEBUG_TRACE,  "OutputPCA9685::initImplementation");
 	debugPrint(DEBUG_INSANE, "  resetDevices");
 	_pwm.resetDevices();
 	debugPrint(DEBUG_INSANE, "  init");;
@@ -60,7 +60,9 @@ bool OutputPCA9685::setEmitterPowers(const std::vector<outputEmitter>& emitterPo
 	// assumes that the start address is the lowest localAddress
 	// in emitterPowers
 
-	debugPrintf(DEBUG_INSANE, "OutputPCA9685::setEmitterPowers start. EmitterPowers.size() == %u", emitterPowers.size());
+	debugPrintf(DEBUG_INSANE,
+	            "OutputPCA9685::setEmitterPowers start. EmitterPowers.size() == %u, scale %f",
+	            emitterPowers.size(), scaleFactor);
 
 	uint16_t pwms[emitterPowers.size()];
 	uint16_t minAddress = UINT16_MAX;

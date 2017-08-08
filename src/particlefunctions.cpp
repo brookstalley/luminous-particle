@@ -22,7 +22,7 @@
 #include "particlefunctions.h"
 #include "luminous-particle.h"
 
-#include "debug.h"
+#include "ldebug.h"
 #include "modes.h"
 
 #include "Particle.h"

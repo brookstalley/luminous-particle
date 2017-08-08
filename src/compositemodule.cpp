@@ -29,7 +29,7 @@
 
 #include "emitter.h"
 #include "hsicolor.h"
-#include "debug.h"
+#include "ldebug.h"
 
 #include "Particle.h"
 
@@ -170,7 +170,7 @@ std::vector<outputEmitter>CompositeModule::Hue2EmitterPower(const HSIColor& HSI)
 		emitter2 = i;
 	}
 
-	debugPrintf(DEBUG_INSANE, "Emitter 1: %u, Emitter 2: %u", emitter1, emitter2);
+	debugPrintf(DEBUG_INSANE, "Hue %f: Emitter 1: %u, Emitter 2: %u", H, emitter1, emitter2);
 
 	// Get the ustar and vstar values for the target LEDs.
 	float emitter1_ustar = _colorEmitters[emitter1]->emitter->getU() - _whiteEmitter.emitter->getU();
@@ -195,14 +195,27 @@ std::vector<outputEmitter>CompositeModule::Hue2EmitterPower(const HSIColor& HSI)
 	debugPrintf(DEBUG_INSANE, "s: %f, u: %f, v: %f", slope, ustar, vstar);
 
 	// Set the two selected colors.
-	emitterPowers[emitter1].power = I * S * abs(ustar - emitter2_ustar) / abs(emitter2_ustar - emitter1_ustar);
-	emitterPowers[emitter2].power = I * S * abs(ustar - emitter1_ustar) / abs(emitter2_ustar - emitter1_ustar);
 
-	debugPrintf(DEBUG_INSANE, "I: %3.2f S: %3.2f u: %3.2f v: %3.2f p1: %.4f p2: %.4f", I, S,
-	            ustar, vstar, emitterPowers.at(emitter1).power, emitterPowers.at(emitter2).power);
+	// Calculate separately because abs() is a goddamned macro that returns
+	// goddamned integers which goddamned breaks
+	float nom1 = fabs(ustar - emitter2_ustar);
+	float nom2 = fabs(ustar - emitter1_ustar);
+	float denom = fabs(emitter2_ustar - emitter1_ustar);
+
+	emitterPowers[emitter1].power = I * S * nom1 / denom;
+	emitterPowers[emitter2].power = I * S * nom2 / denom;
+
+	debugPrintf(DEBUG_INSANE, "I: %3.2f S: %3.2f u: %f v: %f n1: %f d: %f p1: %f p2: %f", I, S,
+	            ustar, vstar, nom1, denom, emitterPowers[emitter1].power, emitterPowers[emitter2].power);
 
 	// Add white to the end, and set the power
 	emitterPowers.push_back(outputEmitter(_whiteEmitter.outputLocalAddress, I * (1 - S)));
+
+	/*
+	   for (unsigned int i = 0; i < emitterPowers.size(); i++) {
+	        debugPrintf(DEBUG_TRACE, "  emitter %u power %f", i, emitterPowers[i].power);
+	   }
+	 */
 
 	//  // For debugging, print the actual output values.
 	//  Serial.println("Target Hue of " + String(H) + " between LEDs " +

@@ -24,7 +24,7 @@
 #include <math.h>
 #include "hsicolor.h"
 
-#include "debug.h"
+#include "ldebug.h"
 
 HSIColor::HSIColor(float hue, float saturation, float intensity) {
 	setHue(hue);

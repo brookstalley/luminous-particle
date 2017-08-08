@@ -19,7 +19,7 @@
 // along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 //
 //**********************************************************
-#include "debug.h"
+#include "ldebug.h"
 #include "luminous-particle.h"
 
 #include "particlefunctions.h"

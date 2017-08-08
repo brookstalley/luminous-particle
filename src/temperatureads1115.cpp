@@ -21,7 +21,7 @@
 //**********************************************************
 #include "temperatureads1115.h"
 #include "temperatureinterface.h"
-#include "debug.h"
+#include "ldebug.h"
 #include "Particle.h"
 
 #include "Adafruit_ADS1X15/Adafruit_ADS1015.h"

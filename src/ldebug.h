@@ -1,8 +1,3 @@
-#ifndef DEBUG_H
-#define DEBUG_H
-
-#include "luminous-particle.h"
-
 //*********************************************************
 //
 // Luminous
@@ -24,21 +19,15 @@
 // along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 //
 //**********************************************************
+
+// Do not try to change this file to debug.h, or use DEBUG_H as the
+// include guard. It will make you very unhappy.
+#ifndef LUMINOUS_DEBUG_H
+#define LUMINOUS_DEBUG_H
+
 #include "Particle.h"
 
-#include <stdarg.h>
-
 #define PRINTF_BUFFER_SIZE 256
-
-#ifdef DEBUG_BUILD
-
-void Serial_printf(const char* fmt, ...);
-
-#define debug_print(fmt, ...) \
-	do { if (DEBUG_LEVEL) Serial_printf("%s:%d:%s(): " fmt, __FILE__, \
-		                            __LINE__, __func__, __VA_ARGS__); } while (0)
-
-#endif
 
 enum DEBUG_LEVEL {
 	DEBUG_MANDATORY = 0,
@@ -48,6 +37,19 @@ enum DEBUG_LEVEL {
 	DEBUG_INSANE,
 	END_OF_LIST
 };
+
+#ifdef DEBUG_BUILD
+
+#include <stdarg.h>
+
+void Serial_printf(const char* fmt, ...);
+
+#define debug_print(fmt, ...) \
+	do { if (DEBUG_LEVEL) Serial_printf("%s:%d:%s(): " fmt, __FILE__, \
+		                            __LINE__, __func__, __VA_ARGS__); } while (0)
+
+#endif
+
 
 //TODO: make debugPrint and debugPrintf into macros that don't produce
 //      code if DEBUG_BUILD is not defined

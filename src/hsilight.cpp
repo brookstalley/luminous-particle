@@ -22,11 +22,13 @@
 
 #include "hsilight.h"
 
+#include "luminous-particle.h"
+
 #include "hsicolor.h"
 #include "compositemodule.h"
 #include "outputinterface.h"
 #include "temperatureinterface.h"
-#include "debug.h"
+#include "ldebug.h"
 
 // Constructor with no temperature sensor; set the interface to nullptr,
 // and adddress to 0
@@ -80,6 +82,11 @@ void HSILight::begin() {
 
 void HSILight::setColor(const HSIColor& color)  {
 	_emitterPowers = _compositeModule.Hue2EmitterPower(color);
+	/*
+	      for (unsigned int i = 0; i < _emitterPowers.size(); i++) {
+	              debugPrintf(DEBUG_INSANE, "HSILight: emitter %u power %f", i, _emitterPowers[i].power);
+	      }
+	 */
 	setEmitters();
 }
 

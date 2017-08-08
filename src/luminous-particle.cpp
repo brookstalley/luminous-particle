@@ -24,7 +24,7 @@
 #include "hsicolor.h"
 #include "compositemodule.h"
 #include "hsilight.h"
-#include "debug.h"
+#include "ldebug.h"
 #include "modes.h"
 #include "credentials.h"
 
@@ -101,7 +101,7 @@ std::vector<std::shared_ptr<HSILight> > allLights = {
 		HSILight("Light1", LZ7, mainOutput,
 		         (uint16_t)0,
 		         mainUniverse,
-		         (uint16_t)0,
+		         (uint16_t)1,
 		         mainTemperature, (uint16_t)0)
 		)
 };
