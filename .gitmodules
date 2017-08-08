@@ -16,3 +16,6 @@
 [submodule "lib/Adafruit_ADS1X15"]
 	path = lib/Adafruit_ADS1X15
 	url = https://github.com/brookstalley/Adafruit_ADS1X15.git
+[submodule "lib/E131"]
+	path = lib/E131
+	url = https://github.com/brookstalley/E131.git

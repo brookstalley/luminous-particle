@@ -24,7 +24,6 @@
 
 #include "HSILight.h"
 #include "ResponsiveAnalogRead/ResponsiveAnalogRead.h"
-#include "E131/E131.h"
 
 #include <vector>
 #include <memory>

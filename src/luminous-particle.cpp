@@ -173,7 +173,7 @@ void setupE131() {
 		debugPrint(DEBUG_ERROR, "setupE131: WiFi not connected");
 		return;
 	}
-	mainUniverse->begin();
+	mainUniverse->begin(10);
 	// It is insane that the following line does not compile.
 	//debugPrintf(DEBUG_TRACE, "  server=%s:%u", WiFi.localIP(), mainUniverse->getUdpPort());
 	IPAddress localAddr = WiFi.localIP();
@@ -414,7 +414,8 @@ void loopE131() {
 			debugPrint(DEBUG_ERROR, "loopE131: WiFi not connected");
 			return;
 		}
-		uint16_t packetCount = mainUniverse->parsePacket();
+		uint16_t dataCount = mainUniverse->parsePacket();
+		debugPrintf(DEBUG_INSANE, "loopE131: got %u packets", dataCount);
 	}
 
 	// TODO: Reconnect logic?
@@ -426,8 +427,7 @@ void loop() {
 	loopControls();
 	particleProcess();
 	loopE131();
-
-	// loopInputs();
+	particleProcess();
 	loopLEDs();
 	particleProcess();
 	loopDisplay();
