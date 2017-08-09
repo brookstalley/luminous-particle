@@ -129,54 +129,37 @@ std::vector<outputEmitter>CompositeModule::Hue2EmitterPower(const HSIColor& HSI)
 
 	float tanH = tan(M_PI * fmod(H, 360) / (float)180); // Get the tangent since we will use it often.
 
-	// Copy our color emitters with default power of zero
-	std::vector<outputEmitter> emitterPowers;
-
-	for (std::vector<std::shared_ptr<componentEmitter> >::const_iterator itspEmitter = _colorEmitters.begin();
-	     itspEmitter < _colorEmitters.end();
-	     ++itspEmitter) {
-		outputEmitter o((*itspEmitter)->outputLocalAddress, 0.0f);
-
-		emitterPowers.push_back(o);
-		debugPrintf(DEBUG_INSANE, "CompositeModule::Hue2EmitterPower added emitterPower[%u] at la %u with power %f",
-		            emitterPowers.size() - 1, emitterPowers.back().outputLocalAddress,
-		            emitterPowers.back().power);
-	}
-
-	unsigned int emitter1, emitter2;
+	std::shared_ptr<componentEmitter> emitter1;
+	std::shared_ptr<componentEmitter> emitter2;
 
 	// Check the range to determine which intersection to do.
 	// For angle less than the smallest CIE hue or larger than the largest,
 	// special case.
 
-	if ((H < _colorEmitters[0]->angle) || (H >= _colorEmitters[_colorEmitters.size() - 1]->angle)) {
-		// Then we're mixing the lowest angle LED with the highest angle LED.
-		emitter1 = _colorEmitters.size() - 1;
-		emitter2 = 0;
+	std::shared_ptr<componentEmitter>::iterator it;
+	it = std::find_if(_colorEmitters.begin(), _colorEmitters.end(),
+	                  [H](const std::shared_ptr<componentEmitter> e) -> bool {
+		return e->angle < H;
+	});
+
+	// If it is the last emitter, wrap around to use last:first
+	// If no match was found, H is less than the first; also use last:first
+	if ((it == _colorEmitters.end()) || ((it + 1) == _colorEmitters.end())) {
+		emitter1 = _colorEmitters.back();
+		emitter2 = _colorEmitters.front();
 	} else {
-		// Iterate through the angles until we find an LED with hue smaller than the
-		// angle.
-		unsigned int i;
-
-		for (i = 1; (H > _colorEmitters[i]->angle) && (i < (_colorEmitters.size() - 1)); i++) {
-			if (H > _colorEmitters[i]->angle) {
-				emitter1 = i - 1;
-				emitter2 = i;
-			}
-		}
-
-		// TODO: This seems redundant; is the whole "if" block ablove required?
-		emitter1 = i - 1;
-		emitter2 = i;
+		emitter1 = *it++;
+		emitter2 = *it;
 	}
 
-	debugPrintf(DEBUG_INSANE, "Hue %f: Emitter 1: %u, Emitter 2: %u", H, emitter1, emitter2);
+	debugPrintf(DEBUG_INSANE, "Hue %f: Emitter 1: %s, Emitter 2: %s", H,
+	            emitter1.emitter->getName(), emitter2.emitter->getName());
 
 	// Get the ustar and vstar values for the target LEDs.
-	float emitter1_ustar = _colorEmitters[emitter1]->emitter->getU() - _whiteEmitter.emitter->getU();
-	float emitter1_vstar = _colorEmitters[emitter1]->emitter->getV() - _whiteEmitter.emitter->getV();
-	float emitter2_ustar = _colorEmitters[emitter2]->emitter->getU() - _whiteEmitter.emitter->getU();
-	float emitter2_vstar = _colorEmitters[emitter2]->emitter->getV() - _whiteEmitter.emitter->getV();
+	float emitter1_ustar = emitter1.emitter->emitter->getU() - _whiteEmitter.emitter->getU();
+	float emitter1_vstar = emitter1.emitter->emitter->getV() - _whiteEmitter.emitter->getV();
+	float emitter2_ustar = emitter2.emitter->emitter->getU() - _whiteEmitter.emitter->getU();
+	float emitter2_vstar = emitter2.emitter->emitter->getV() - _whiteEmitter.emitter->getV();
 
 	debugPrintf(DEBUG_INSANE,
 	            "t: %f, e1u: %f, e1v: %f, e2u: %f, e2v: %f",
@@ -187,46 +170,49 @@ std::vector<outputEmitter>CompositeModule::Hue2EmitterPower(const HSIColor& HSI)
 	            emitter2_vstar);
 
 	// Get the slope between LED1 and LED2.
-	float slope = _colorEmitters[emitter1]->slope;
+	float slope = emitter1.emitter->slope;
 
 	float ustar = (emitter2_vstar - slope * emitter2_ustar) / (tanH - slope);
 	float vstar = tanH / (slope - tanH) * (slope * emitter2_ustar - emitter2_vstar);
 
 	debugPrintf(DEBUG_INSANE, "s: %f, u: %f, v: %f", slope, ustar, vstar);
 
-	// Set the two selected colors.
-
 	// Calculate separately because abs() is a goddamned macro that returns
 	// goddamned integers which goddamned breaks
-	float nom1 = fabs(ustar - emitter2_ustar);
-	float nom2 = fabs(ustar - emitter1_ustar);
-	float denom = fabs(emitter2_ustar - emitter1_ustar);
+	float emitter1power = I * S * fabs(ustar - emitter2_ustar) / fabs(emitter2_ustar - emitter1_ustar);
+	float emitter2power = I * S * fabs(ustar - emitter1_ustar) / fabs(emitter2_ustar - emitter1_ustar);
 
-	emitterPowers[emitter1].power = I * S * nom1 / denom;
-	emitterPowers[emitter2].power = I * S * nom2 / denom;
+	// Build our output emitters, all of which are off (0.0f) except the two we
+	// just found and computed
 
 	debugPrintf(DEBUG_INSANE, "I: %3.2f S: %3.2f u: %f v: %f n1: %f d: %f p1: %f p2: %f", I, S,
-	            ustar, vstar, nom1, denom, emitterPowers[emitter1].power, emitterPowers[emitter2].power);
+	            ustar, vstar, nom1, denom, emitter1Power, emitter2Power);
+
+	// Copy our color emitters with default power of zero
+	std::vector<outputEmitter> emitterPowers;
+	float emitterPower = 0.0f;
+
+	for (std::vector<std::shared_ptr<componentEmitter> >::const_iterator itspEmitter = _colorEmitters.begin();
+	     itspEmitter < _colorEmitters.end();
+	     ++itspEmitter) {
+
+		if ((*itspEmitter) == emitter1) {
+			emitterPower = emitter1Power;
+		} else if ((*itspEmitter) == emitter2) {
+			emitterPower = emitter2Power;
+		} else {
+			emitterPower = 0.0f;
+		}
+		outputEmitter o((*itspEmitter)->outputLocalAddress, emitterPower);
+
+		emitterPowers.push_back(o);
+		debugPrintf(DEBUG_INSANE, "CompositeModule::Hue2EmitterPower added emitterPower[%u] at la %u with power %f",
+		            emitterPowers.size() - 1, emitterPowers.back().outputLocalAddress,
+		            emitterPowers.back().power);
+	}
 
 	// Add white to the end, and set the power
 	emitterPowers.push_back(outputEmitter(_whiteEmitter.outputLocalAddress, I * (1 - S)));
-
-	/*
-	   for (unsigned int i = 0; i < emitterPowers.size(); i++) {
-	        debugPrintf(DEBUG_TRACE, "  emitter %u power %f", i, emitterPowers[i].power);
-	   }
-	 */
-
-	//  // For debugging, print the actual output values.
-	//  Serial.println("Target Hue of " + String(H) + " between LEDs " +
-	// String(LED1) + " and " + String(LED2));
-	//  Serial.println("Output Values");
-	//  for (std::vector<float>::iterator i=LEDOutputs.begin(); i !=
-	// LEDOutputs.end(); ++i) {
-	//    Serial.print(*i, 2);
-	//    Serial.print(" ");
-	//  }
-	//  Serial.println("");
 
 	return emitterPowers;
 }
