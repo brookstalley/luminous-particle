@@ -62,6 +62,7 @@ public:
 	                      uint16_t outputLocalAddress);
 	void  addColorEmitter(const Emitter& emitter,
 	                      uint16_t outputLocalAddress);
+	void prepare();
 	float getAngle(int emitternum);
 	float getSlope(int emitternum);
 	std::vector < outputEmitter > Hue2EmitterPower(const HSIColor &HSI) const;

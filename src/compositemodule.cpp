@@ -61,61 +61,43 @@ void CompositeModule::addColorEmitter(const Emitter& emitter, uint16_t outputLoc
 
 	float newAngle = fmod((180 / M_PI) * atan2((vEmitter - vWHITE), (uEmitter - uWHITE)) + 360, 360);
 
-	if (_colorEmitters.empty()) {
-		// If it is the first LED, simply place it in the array.
-		// With only one LED, slope is undefined.
-		_colorEmitters.push_back(std::make_shared<componentEmitter>(componentEmitter(&emitter, outputLocalAddress, newAngle,
-		                                                                             0)));
-		debugPrintf(DEBUG_INSANE, "Added emitter %s at la %u", emitter.getName(), outputLocalAddress);
-		return;
-	}
-
-	// Otherwise, place the LED at the appropriate point in the array, and also
-	// recalculate slopes.
-
 	// Create our component emitter based on the prototype emitter, plus this
 	// one's particular address
-	// TODO: This doesn't need to be a shared pointer. Only this class will ever
-	// use it.
 	std::shared_ptr<componentEmitter> newEmitter =
 		std::make_shared<componentEmitter>(componentEmitter(&emitter, outputLocalAddress, newAngle, 0));
 
-	// Iterate through until finding the first location where the angle is bigger
-	// than the current value.
-	// TODO: Fix to use iterator
-	std::vector<std::shared_ptr<componentEmitter> >::iterator it = _colorEmitters.begin();
-
-	while ((it < _colorEmitters.end()) && ((*it)->angle < newAngle)) {
-		it++;
-	}
-
-	// We will now either be in the correct slot in the vector, or at the end of
-	// the vector
-	// Insert the new emitter, set the pwm offset, set slope to zero pending
-	// recalc
-	_colorEmitters.insert(it, newEmitter);
+	// Note that we add the emitter at the end without regard for order
+	// CompositeModule WILL NOT WORK unless calculate() is called after adding last emitter
+	_colorEmitters.push_back(newEmitter);
 
 	debugPrintf(DEBUG_INSANE, "Added emitter %s at la %u", emitter.getName(), outputLocalAddress);
+}
 
-	// And then recalculate all slopes
-	for (std::vector<std::shared_ptr<componentEmitter> >::iterator itThisEmitter = _colorEmitters.begin();
-	     itThisEmitter < _colorEmitters.end();
-	     ++itThisEmitter) {
+void CompositeModile::calculate() {
+	// Sort the emitters by angle
+	std::sort(_colorEmitters.begin(), _colorEmitters.end(),
+				    [](std::shared_ptr < componentEmitter > a, std::shared_ptr < componentEmitter > b) {
+								return b->angle < a->angle;
+							}
+	);
+
+	// Recalculate all slopes
+	for (auto it = _colorEmitters.begin(); it != _colorEmitters.end(); it++) {
 		std::shared_ptr<componentEmitter> spNextEmitter;
 
 		// Slope is to the next emitter, except the last one wraps around to the
 		// first
-		if (*itThisEmitter != _colorEmitters.back()) {
-			spNextEmitter = *(std::next(itThisEmitter));
+		if ((*it) != _colorEmitters.back()) {
+			spNextEmitter = *(std::next(it));
 		} else {
-			spNextEmitter = *(_colorEmitters.begin());
+			spNextEmitter = _colorEmitters.front());
 		}
 
 		// I hate this mix of iterators to shared pointers and shared pointers,
 		// but it works
-		(*itThisEmitter)->slope = (spNextEmitter->emitter->getV() - (*itThisEmitter)->emitter->getV())
-		                          / (spNextEmitter->emitter->getU() - (*itThisEmitter)->emitter->getU());
-	}
+		(*it)->slope = (spNextEmitter->emitter->getV() - (*it)->emitter->getV())
+		                          / (spNextEmitter->emitter->getU() - (*it)->emitter->getU());
+														}
 }
 
 float CompositeModule::getAngle(int num) {

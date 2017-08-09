@@ -136,6 +136,8 @@ void setupLEDs() {
 	LZ7.addColorEmitter(emitterLZ7blue,   2);
 	LZ7.addColorEmitter(emitterLZ7violet, 6);
 
+	LZ7.calculate();
+
 	debugPrint(DEBUG_TRACE, "  setting up lamps");
 
 	mainTemperature->begin();
