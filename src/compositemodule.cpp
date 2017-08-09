@@ -143,14 +143,6 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI(const HSIColor& 
 	float emitter2_ustar = emitter2.emitter->emitter->getU() - _whiteEmitter.emitter->getU();
 	float emitter2_vstar = emitter2.emitter->emitter->getV() - _whiteEmitter.emitter->getV();
 
-	debugPrintf(DEBUG_INSANE,
-	            "t: %f, e1u: %f, e1v: %f, e2u: %f, e2v: %f",
-	            tanH,
-	            emitter1_ustar,
-	            emitter1_vstar,
-	            emitter2_ustar,
-	            emitter2_vstar);
-
 	// Get the slope between LED1 and LED2.
 	float slope = emitter1.emitter->slope;
 
@@ -167,7 +159,12 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI(const HSIColor& 
 	// Build our output emitters, all of which are off (0.0f) except the two we
 	// just found and computed
 
-	debugPrintf(DEBUG_INSANE, "I: %3.2f S: %3.2f u: %f v: %f n1: %f d: %f p1: %f p2: %f", I, S,
+	debugPrintf(DEBUG_INSANE, "t: %f, e1u: %f, e1v: %f, e2u: %f, e2v: %f I: %3.2f S: %3.2f u: %f v: %f n1: %f d: %f p1: %f p2: %f"
+		,	tanH,
+	emitter1_ustar,
+	emitter1_vstar,
+	emitter2_ustar,
+	emitter2_vstar, I, S,
 	            ustar, vstar, nom1, denom, emitter1Power, emitter2Power);
 
 	// Copy our color emitters with default power of zero

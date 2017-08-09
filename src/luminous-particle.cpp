@@ -81,7 +81,7 @@ std::shared_ptr<TemperatureAds1115> mainTemperature
 
 std::shared_ptr<E131> mainUniverse = std::make_shared<E131>();
 
-// Shared lights
+// Shared lights with coordinates in CIE LUV colorspace
 Emitter emitterLZ7white("LZ7-w", 0.202531646, 0.469936709, (float)180 / 180);
 Emitter emitterLZ7red("LZ7-r", 0.5137017676, 0.5229440531, (float)78 / 78);
 Emitter emitterLZ7amber("LZ7-a", 0.3135687079, 0.5529418124, (float)60 / 60);
