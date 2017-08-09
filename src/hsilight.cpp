@@ -71,7 +71,7 @@ HSILight::HSILight(const char *name, const CompositeModule& compositeModule,
 }
 
 void HSILight::begin() {
-	_emitterPowers = _compositeModule.Hue2EmitterPower(HSIColor(0, 0, 0));
+	_emitterPowers = _compositeModule.emitterPowersFromHSI(HSIColor(0, 0, 0));
 	_lastE131PacketCount = 0;
 	debugPrintf(DEBUG_TRACE, "HSILight: begin (%u)", _emitterPowers.size());
 
@@ -81,7 +81,7 @@ void HSILight::begin() {
 }
 
 void HSILight::setColor(const HSIColor& color)  {
-	_emitterPowers = _compositeModule.Hue2EmitterPower(color);
+	_emitterPowers = _compositeModule.emitterPowersFromHSI(color);
 	/*
 	      for (unsigned int i = 0; i < _emitterPowers.size(); i++) {
 	              debugPrintf(DEBUG_INSANE, "HSILight: emitter %u power %f", i, _emitterPowers[i].power);

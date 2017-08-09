@@ -104,7 +104,7 @@ float CompositeModule::getAngle(int num) {
 	return _colorEmitters[num]->angle;
 }
 
-std::vector<outputEmitter>CompositeModule::Hue2EmitterPower(const HSIColor& HSI) const {
+std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI(const HSIColor& HSI) const {
 	float H = fmod(HSI.getHue() + 360, 360);
 	float S = HSI.getSaturation();
 	float I = HSI.getIntensity();
@@ -188,7 +188,7 @@ std::vector<outputEmitter>CompositeModule::Hue2EmitterPower(const HSIColor& HSI)
 		outputEmitter o((*itspEmitter)->outputLocalAddress, emitterPower);
 
 		emitterPowers.push_back(o);
-		debugPrintf(DEBUG_INSANE, "CompositeModule::Hue2EmitterPower added emitterPower[%u] at la %u with power %f",
+		debugPrintf(DEBUG_INSANE, "CompositeModule::emitterPowersFromHSI added emitterPower[%u] at la %u with power %f",
 		            emitterPowers.size() - 1, emitterPowers.back().outputLocalAddress,
 		            emitterPowers.back().power);
 	}
