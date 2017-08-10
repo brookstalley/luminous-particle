@@ -66,6 +66,8 @@ float LEDTempCelsius = 20.0f;
 bool displayMustUpdate = false;
 bool lightsMustUpdate  = false;
 
+unsigned int loopsPerSecond = 0.0f;
+
 ////////////////////////// Controllers and stuff
 Adafruit_SSD1351 display(spi_pin_cs, spi_pin_dc, spi_pin_rst);
 ClickButton modeButton(MODE_BUTTON_PIN, LOW,  CLICKBTN_PULLUP);
@@ -294,7 +296,8 @@ void loopDisplay() {
 	sprintf(lineData[currentLine++], "Running:    %s",
 	        TimeToString(millis() / 1000));
 	sprintf(lineData[currentLine++], "Mode:       %s", getCurrentModeName());
-
+	sprintf(lineData[currentLine++], "Loops/s:    %u",
+	        loopsPerSecond);
 	if (lastBrightnessRemote) {
 		sprintf(lineData[currentLine++], "Brightness: [%2.0f%%]",
 		        globalBrightness * 100);
@@ -423,8 +426,21 @@ void loopE131() {
 	// TODO: Reconnect logic?
 }
 
+void loopTimer() {
+	static unsigned long lastMillis = millis();
+	static unsigned int loops = 0;
+
+	loops++;
+	if (millis() - lastMillis > 1000) {
+		lastMillis = millis();
+		loopsPerSecond = loops;
+		loops = 0;
+	}
+}
+
 void loop() {
 	// loopSensors();
+	loopTimer();
 	particleProcess();
 	loopControls();
 	particleProcess();
