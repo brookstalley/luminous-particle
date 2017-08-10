@@ -73,13 +73,13 @@ void CompositeModule::addColorEmitter(const Emitter& emitter, uint16_t outputLoc
 	debugPrintf(DEBUG_INSANE, "Added emitter %s at la %u", emitter.getName(), outputLocalAddress);
 }
 
-void CompositeModile::calculate() {
+void CompositeModule::calculate() {
 	// Sort the emitters by angle
 	std::sort(_colorEmitters.begin(), _colorEmitters.end(),
-				    [](std::shared_ptr < componentEmitter > a, std::shared_ptr < componentEmitter > b) {
-								return b->angle < a->angle;
-							}
-	);
+	          [](std::shared_ptr < componentEmitter > a, std::shared_ptr < componentEmitter > b) {
+		return b->angle < a->angle;
+	}
+	          );
 
 	// Recalculate all slopes
 	for (auto it = _colorEmitters.begin(); it != _colorEmitters.end(); it++) {
@@ -90,14 +90,14 @@ void CompositeModile::calculate() {
 		if ((*it) != _colorEmitters.back()) {
 			spNextEmitter = *(std::next(it));
 		} else {
-			spNextEmitter = _colorEmitters.front());
+			spNextEmitter = _colorEmitters.front();
 		}
 
 		// I hate this mix of iterators to shared pointers and shared pointers,
 		// but it works
 		(*it)->slope = (spNextEmitter->emitter->getV() - (*it)->emitter->getV())
-		                          / (spNextEmitter->emitter->getU() - (*it)->emitter->getU());
-														}
+		               / (spNextEmitter->emitter->getU() - (*it)->emitter->getU());
+	}
 }
 
 float CompositeModule::getAngle(int num) {
@@ -118,9 +118,8 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI(const HSIColor& 
 	// For angle less than the smallest CIE hue or larger than the largest,
 	// special case.
 
-	std::shared_ptr<componentEmitter>::iterator it;
-	it = std::find_if(_colorEmitters.begin(), _colorEmitters.end(),
-	                  [H](const std::shared_ptr<componentEmitter> e) -> bool {
+	std::vector<std::shared_ptr<componentEmitter> >::const_iterator it = std::find_if(_colorEmitters.begin(), _colorEmitters.end(),
+	                                                                                  [H](const std::shared_ptr<componentEmitter> e) -> bool {
 		return e->angle < H;
 	});
 
@@ -135,16 +134,16 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI(const HSIColor& 
 	}
 
 	debugPrintf(DEBUG_INSANE, "Hue %f: Emitter 1: %s, Emitter 2: %s", H,
-	            emitter1.emitter->getName(), emitter2.emitter->getName());
+	            emitter1->emitter->getName(), emitter2->emitter->getName());
 
 	// Get the ustar and vstar values for the target LEDs.
-	float emitter1_ustar = emitter1.emitter->emitter->getU() - _whiteEmitter.emitter->getU();
-	float emitter1_vstar = emitter1.emitter->emitter->getV() - _whiteEmitter.emitter->getV();
-	float emitter2_ustar = emitter2.emitter->emitter->getU() - _whiteEmitter.emitter->getU();
-	float emitter2_vstar = emitter2.emitter->emitter->getV() - _whiteEmitter.emitter->getV();
+	float emitter1_ustar = emitter1->emitter->getU() - _whiteEmitter.emitter->getU();
+	//unused: float emitter1_vstar = emitter1->emitter->getV() - _whiteEmitter.emitter->getV();
+	float emitter2_ustar = emitter2->emitter->getU() - _whiteEmitter.emitter->getU();
+	float emitter2_vstar = emitter2->emitter->getV() - _whiteEmitter.emitter->getV();
 
 	// Get the slope between LED1 and LED2.
-	float slope = emitter1.emitter->slope;
+	float slope = emitter1->slope;
 
 	float ustar = (emitter2_vstar - slope * emitter2_ustar) / (tanH - slope);
 	float vstar = tanH / (slope - tanH) * (slope * emitter2_ustar - emitter2_vstar);
@@ -158,14 +157,14 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI(const HSIColor& 
 
 	// Build our output emitters, all of which are off (0.0f) except the two we
 	// just found and computed
-
-	debugPrintf(DEBUG_INSANE, "t: %f, e1u: %f, e1v: %f, e2u: %f, e2v: %f I: %3.2f S: %3.2f u: %f v: %f n1: %f d: %f p1: %f p2: %f"
-		,	tanH,
-	emitter1_ustar,
-	emitter1_vstar,
-	emitter2_ustar,
-	emitter2_vstar, I, S,
-	            ustar, vstar, nom1, denom, emitter1Power, emitter2Power);
+/*
+        debugPrintf(DEBUG_INSANE, "t: %f, e1u: %f, e1v: %f, e2u: %f, e2v: %f I: %3.2f S: %3.2f u: %f v: %f n1: %f d: %f p1: %f p2: %f"
+                ,	tanH,
+        emitter1_ustar,
+        emitter1_vstar,
+        emitter2_ustar,
+        emitter2_vstar, I, S,
+                    ustar, vstar, nom1, denom, emitter1Power, emitter2Power);*/
 
 	// Copy our color emitters with default power of zero
 	std::vector<outputEmitter> emitterPowers;
@@ -176,9 +175,9 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI(const HSIColor& 
 	     ++itspEmitter) {
 
 		if ((*itspEmitter) == emitter1) {
-			emitterPower = emitter1Power;
+			emitterPower = emitter1power;
 		} else if ((*itspEmitter) == emitter2) {
-			emitterPower = emitter2Power;
+			emitterPower = emitter2power;
 		} else {
 			emitterPower = 0.0f;
 		}

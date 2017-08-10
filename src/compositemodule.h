@@ -29,6 +29,7 @@
 #include "Particle.h"
 
 #include <vector>
+#include <algorithm>
 
 struct componentEmitter {
 	componentEmitter(const Emitter * e, uint16_t la, float a, float s) {
