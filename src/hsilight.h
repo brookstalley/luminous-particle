@@ -22,6 +22,8 @@
 #ifndef HSILIGHT_H
 #define HSILIGHT_H
 
+
+
 #include "compositemodule.h"
 #include "outputinterface.h"
 #include "temperatureinterface.h"
@@ -30,6 +32,7 @@
 
 #include "Particle.h"
 
+#define HSILIGHT_MAX_DIAGNOSTIC 25
 #define TEMPERATURE_VALID_MILLIS 1000
 
 class HSILight {
@@ -47,6 +50,7 @@ private:
 	std::vector < outputEmitter > _emitterPowers;
 	float _localBrightness;
 	float _temperature;
+	char _diagnostic[HSILIGHT_MAX_DIAGNOSTIC];
 
 	uint32_t _lastE131PacketCount;
 
@@ -83,6 +87,7 @@ public:
 	float       getTemperature();
 	float       updateTemperature();
 	const char* getName(void) const;
+	const char *                  getDiagnostic(void) const;
 	void        setSingleEmitterOn(unsigned int index);
 };
 

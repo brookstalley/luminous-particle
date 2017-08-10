@@ -47,7 +47,8 @@ HSILight::HSILight(const char *name, const CompositeModule& compositeModule,
 	_temperatureInterface(temperatureInterface),
 	_temperatureLocalAddress(temperatureLocalAddress),
 	_localBrightness(1.0f),
-	_temperature(-1.0f)
+	_temperature(-1.0f),
+	_diagnostic("")
 {
 }
 
@@ -66,7 +67,8 @@ HSILight::HSILight(const char *name, const CompositeModule& compositeModule,
 	_temperatureInterface(nullptr),
 	_temperatureLocalAddress(0),
 	_localBrightness(1.0f),
-	_temperature(-1.0f)
+	_temperature(-1.0f),
+	_diagnostic("")
 {
 }
 
@@ -106,12 +108,20 @@ void HSILight::setSingleEmitterOn(unsigned int index) {
 
 void HSILight::setEmitters() {
 	debugPrint(DEBUG_INSANE, "HSILight: setting emitters");
+	_diagnostic[0] = '\0';
+	for (auto const &e : _emitterPowers) {
+		sprintf(_diagnostic + strlen(_diagnostic), "%02X ", (uint16_t)round(e.power * 255));
+	}
 	float scaleFactor = globalBrightness * _localBrightness;
 	_outputInterface->setEmitterPowers(_emitterPowers, scaleFactor);
 }
 
 const char * HSILight::getName(void) const {
 	return _name;
+}
+
+const char * HSILight::getDiagnostic(void) const {
+	return _diagnostic;
 }
 
 std::shared_ptr<E131> HSILight::getE131() const {

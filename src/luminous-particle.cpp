@@ -311,6 +311,10 @@ void loopDisplay() {
 	sprintf(lineData[currentLine++],
 	        "Temp:       %3.0f",
 	        allLights[0]->getTemperature());
+	// Hack to show first diagnostic
+	sprintf(lineData[currentLine++],
+	        "%s",
+	        allLights[0]->getDiagnostic());
 	sprintf(lineData[currentLine++], "Debug:      %s", debugName);
 
 	if (wifiCurrentState == WIFI_CONNECTED) {
