@@ -90,3 +90,10 @@ void HSIColor::getHSI(float *HSI) {
 	HSI[1] = getSaturation();
 	HSI[2] = getIntensity();
 }
+
+bool HSIColor::operator== (const HSIColor &other) const {
+	if ((_hue == other._hue) && (_saturation == other._saturation) && (_intensity == other._intensity))
+		return true;
+
+	return false;
+}

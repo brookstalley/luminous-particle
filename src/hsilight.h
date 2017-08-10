@@ -53,6 +53,7 @@ private:
 	char _diagnostic[HSILIGHT_MAX_DIAGNOSTIC];
 
 	uint32_t _lastE131PacketCount;
+	HSIColor _lastColor;
 
 	unsigned long _tempertureUpdatedMillis;
 

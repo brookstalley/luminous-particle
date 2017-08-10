@@ -27,6 +27,7 @@
 class HSIColor {
 private:
 	float _hue, _saturation, _intensity;
+
 public:
 	HSIColor(float hue, float saturation, float intensity);
 	HSIColor(void);
@@ -39,6 +40,7 @@ public:
 	const float getSaturation(void) const;
 	const float getIntensity(void) const;
 	void getHSI(float *HSI);
+	bool operator== (const HSIColor &other) const;
 };
 
 #endif
