@@ -47,7 +47,7 @@ void CompositeModule::addWhiteEmitter(const Emitter& white,
                                       uint16_t       outputLocalAddress) {
   // slope and angle not relevant for white emitter
   // currently supports only one white emitter per composite module
-  _whiteEmitter = componentEmitter(&white, outputLocalAddress, 0.0f, 0.0f);
+  _whiteEmitter = componentEmitter(&white, outputLocalAddress, 0.0f, 0.0f, false);
   debugPrintf(DEBUG_INSANE,
               "Added white emitter %s at la %u",
               white.getName(),
@@ -147,12 +147,12 @@ void CompositeModule::calculate() {
 
       // Now it points to the start of the wedge and itNext to the end
       auto wedge = std::make_shared<colorspaceWedge>();
-      wedge.startAngle = *it->angle;
-      wedge.endAngle   = *itNext->angle;
-      wedge.slope      = (*itNext->emitter->getV() - (*it)->emitter->getV())
-                         / (*itNext->emitter->getU() - (*it)->emitter->getU());
-      wedge.emitter1 = *it;
-      wedge.emitter2 = *itNext;
+      wedge->startAngle = *it->angle;
+      wedge->endAngle   = *itNext->angle;
+      wedge->slope      = (*itNext->emitter->getV() - (*it)->emitter->getV())
+                          / (*itNext->emitter->getU() - (*it)->emitter->getU());
+      wedge->emitter1 = *it->emitter;
+      wedge->emitter2 = *itNext->emitter;
       _colorspaceWedges.push_back(wedge);
     }
   }

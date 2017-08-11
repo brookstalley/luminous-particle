@@ -38,7 +38,7 @@ struct colorspaceWedge {
   float          slope;
   const Emitter *emitter1;
   const Emitter *emitter2;
-}
+};
 
 struct componentEmitter {
   componentEmitter(const Emitter * e, uint16_t la, float a, float s, bool eo) {
@@ -78,7 +78,8 @@ public:
   void  addWhiteEmitter(const Emitter& white,
                         uint16_t       outputLocalAddress);
   void  addColorEmitter(const Emitter& emitter,
-                        uint16_t       outputLocalAddress);
+                        uint16_t       outputLocalAddress,
+                        bool           effectOnly);
   void  calculate();
   float getAngle(int emitternum);
   float getSlope(int emitternum);
