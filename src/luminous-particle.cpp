@@ -102,7 +102,7 @@ Emitter emitterLZ7blue("LZ7-b", 0.1747943747, 0.1117834986, (float)30 / 30);
 Emitter emitterLZ7violet("LZ7-v", 0.35, 0.15, (float)30 / 30);
 
 // LEDEngin LZ7 that should be dimmed above 70c and turned off above 90c
-CompositeModule LZ7(70.f, 90.0f);
+CompositeModule LZ7(70.0f, 90.0f);
 
 // Create a light that has an LZ7 module, on our main output at address 0
 // Eventually we'll have different groups of lights, so just make a group
@@ -419,8 +419,8 @@ void loopControls() {
 
   if (modeButton.clicks != 0) {
     if (modeClicks == 1) {
-      debugPrint(DEBUG_TRACE, "Click: change mode");
       nextMode();
+      debugPrintf(DEBUG_TRACE, "Click: change mode to %s", getCurrentModeName());
       displayMustUpdate = true;
       lightsMustUpdate  = true;
     }
