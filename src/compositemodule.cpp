@@ -125,7 +125,6 @@ void CompositeModule::calculate() {
   }
 
   // Build wedge list (experimental)
-  // TODO: make sure we're supposed to include the first one
   _colorspaceWedges.clear();
 
   for (auto it = _colorEmitters.begin(); it != _colorEmitters.end(); it++) {
@@ -140,19 +139,30 @@ void CompositeModule::calculate() {
           *itNext = _colorEmitters.front();
         }
 
-        if (!*itNext->effectOnly) {
+        if (!(*itNext)->effectOnly) {
           found = true;
         }
       }
 
       // Now it points to the start of the wedge and itNext to the end
-      auto wedge = std::make_shared<colorspaceWedge>();
-      wedge->startAngle = *it->angle;
-      wedge->endAngle   = *itNext->angle;
-      wedge->slope      = (*itNext->emitter->getV() - (*it)->emitter->getV())
-                          / (*itNext->emitter->getU() - (*it)->emitter->getU());
-      wedge->emitter1 = *it->emitter;
-      wedge->emitter2 = *itNext->emitter;
+      float slope = ((*itNext)->emitter->getV() - (*it)->emitter->getV())
+                    / ((*itNext)->emitter->getU() - (*it)->emitter->getU());
+      float e1ustar = (*it)->emitter->getU() - _whiteEmitter.emitter->getU();
+      float e1vstar = (*it)->vstar = (*it)->emitter->getV() -
+                                     _whiteEmitter.emitter->getV();
+      float e2ustar = (*itNext)->emitter->getU() - _whiteEmitter.emitter->getU();
+      float e2vstar = (*itNext)->vstar = (*itNext)->emitter->getV() -
+                                         _whiteEmitter.emitter->getV();
+
+      colorspaceWedge wedge((*it)->angle,
+                            (*itNext)->angle,
+                            slope,
+                            (*it)->emitter,
+                            e1ustar,
+                            e1vstar,
+                            (*itNext)->emitter,
+                            e2ustar,
+                            e2vstar);
       _colorspaceWedges.push_back(wedge);
     }
   }
@@ -228,10 +238,10 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI(
 
   // Calculate separately because abs() is a goddamned macro that returns
   // goddamned integers which goddamned breaks
-  float emitter1power = I * S * fabs(ustar - emitter2_ustar) / fabs(
-    emitter2_ustar - emitter1_ustar);
-  float emitter2power = I * S * fabs(ustar - emitter1_ustar) / fabs(
-    emitter2_ustar - emitter1_ustar);
+  float emitter1power = I * S * fabs(ustar - emitter2->ustar) / fabs(
+    emitter2->ustar - emitter1->ustar);
+  float emitter2power = I * S * fabs(ustar - emitter1->ustar) / fabs(
+    emitter2->ustar - emitter1->ustar);
 
   // Copy our color emitters with default power of zero
   std::vector<outputEmitter> emitterPowers;
@@ -272,9 +282,9 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI(
     debugPrintf(DEBUG_INSANE,
                 "t: %f, e1u: %f, e2u: %f, e2v: %f I: %3.2f S: %3.2f u: %f v: %f p1: %f p2: %f",
                 tanH,
-                emitter1_ustar,
-                emitter2_ustar,
-                emitter2_vstar,
+                emitter1->ustar,
+                emitter2->ustar,
+                emitter2->vstar,
                 I,
                 S,
                 ustar,
@@ -302,7 +312,7 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI2(
   std::shared_ptr<componentEmitter> emitter2;
 
   // We're looking for the wedge that the hue angle lives in
-  std::vector<colorspaceWedge> > ::const_iterator it =
+  std::vector<colorspaceWedge>::const_iterator it =
     std::find_if(_colorspaceWedges.begin(), _colorspaceWedges.end(),
                  [H](const colorspaceWedge w) -> bool {
     // We found the right wedge if 1) startAngle <= H <= endAngle, 2) startAngle
@@ -323,24 +333,24 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI2(
   debugPrintf(DEBUG_INSANE,
               "Hue %f: Emitter 1: %s (%4.0f), Emitter 2: %s (%4.0f)",
               H,
-              wedge.emitter1->emitter->getName(),
-              wedge.emitter1->angle,
-              wedge.emitter2->emitter->getName(),
-              wedge.emitter2->angle);
+              wedge.emitter1->getName(),
+              wedge.startAngle,
+              wedge.emitter2->getName(),
+              wedge.endAngle);
 
-  float ustar = (emitter2->vstar - wedge.slope * emitter2->ustar) /
+  float ustar = (wedge.e2vstar - wedge.slope * wedge.e2ustar) /
                 (tanH - wedge.slope);
   float vstar = tanH / (wedge.slope - tanH) *
-                (wedge.slope * emitter2->ustar - emitter2->vstar);
+                (wedge.slope * wedge.e2ustar - wedge.e2vstar);
 
   debugPrintf(DEBUG_INSANE, "s: %f, u: %f, v: %f", wedge.slope, ustar, vstar);
 
   // Calculate separately because abs() is a goddamned macro that returns
   // goddamned integers which goddamned breaks
-  float emitter1power = I * S * fabs(ustar - emitter2->ustar) / fabs(
-    emitter2->ustar - emitter1_ustar);
-  float emitter2power = I * S * fabs(ustar - emitter1->ustar) / fabs(
-    emitter2->ustar - emitter1_ustar);
+  float emitter1power = I * S * fabs(ustar - wedge.e2ustar) / fabs(
+    wedge.e2ustar - wedge.e1ustar);
+  float emitter2power = I * S * fabs(ustar - wedge.e1ustar) / fabs(
+    wedge.e2ustar - wedge.e1ustar);
 
   // Copy our color emitters with default power of zero
   std::vector<outputEmitter> emitterPowers;
@@ -353,9 +363,9 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI2(
          = _colorEmitters.begin();
        itspEmitter < _colorEmitters.end();
        ++itspEmitter) {
-    if ((*itspEmitter) == wedge.emitter1) {
+    if ((*itspEmitter)->emitter == wedge.emitter1) {
       emitterPower = emitter1power;
-    } else if ((*itspEmitter) == wedge.emitter2) {
+    } else if ((*itspEmitter)->emitter == wedge.emitter2) {
       emitterPower = emitter2power;
     } else {
       emitterPower = 0.0f;
@@ -373,9 +383,9 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI2(
     debugPrintf(DEBUG_INSANE,
                 "t: %f, e1u: %f, e2u: %f, e2v: %f I: %3.2f S: %3.2f u: %f v: %f p1: %f p2: %f",
                 tanH,
-                emitter1->ustar,
-                emitter2->ustar,
-                emitter2->vstar,
+                wedge.e1ustar,
+                wedge.e2ustar,
+                wedge.e2vstar,
                 I,
                 S,
                 ustar,
