@@ -93,13 +93,13 @@ std::shared_ptr<TemperatureAds1115> mainTemperature
 std::shared_ptr<E131> mainUniverse = std::make_shared<E131>();
 
 // Shared lights with coordinates in CIE LUV colorspace
-Emitter emitterLZ7white("LZ7-w", 0.202531646, 0.469936709, (float)180 / 180);
-Emitter emitterLZ7red("LZ7-r", 0.5137017676, 0.5229440531, (float)78 / 78);
-Emitter emitterLZ7amber("LZ7-a", 0.3135687079, 0.5529418124, (float)60 / 60);
-Emitter emitterLZ7green("LZ7-g", 0.0595846867, 0.574988823, (float)125 / 125);
-Emitter emitterLZ7cyan("LZ7-c", 0.0306675939, 0.5170937486, (float)95 / 95);
-Emitter emitterLZ7blue("LZ7-b", 0.1747943747, 0.1117834986, (float)30 / 30);
-Emitter emitterLZ7violet("LZ7-v", 0.35, 0.15, (float)30 / 30);
+Emitter emitterLZ7white("LZ7-w", 0.202531646, 0.469936709, 180);
+Emitter emitterLZ7red("LZ7-r", 0.5137017676, 0.5229440531, 78);
+Emitter emitterLZ7amber("LZ7-a", 0.3135687079, 0.5529418124, 60);
+Emitter emitterLZ7green("LZ7-g", 0.0595846867, 0.574988823, 125);
+Emitter emitterLZ7cyan("LZ7-c", 0.0306675939, 0.5170937486, 95);
+Emitter emitterLZ7blue("LZ7-b", 0.1747943747, 0.1117834986, 30);
+Emitter emitterLZ7violet("LZ7-v", 0.35, 0.15, 30);
 
 // LEDEngin LZ7 that should be dimmed above 70c and turned off above 90c
 CompositeModule LZ7(70.0f, 90.0f);

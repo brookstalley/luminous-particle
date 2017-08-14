@@ -30,7 +30,8 @@
 class Emitter {
 private:
 
-  float _u, _v, _maxLumens;
+  float _u, _v;
+  uint16_t maxLumens;
   const char *_name;
 
 public:
@@ -41,7 +42,7 @@ public:
           float       maxLumens);
   float       getU(void) const;
   float       getV(void) const;
-  float       getMaxLumens(void) const;
+  uint16_t    getMaxLumens(void) const;
   const char* getName(void) const;
 };
 #endif /* ifndef EMITTER_H */
