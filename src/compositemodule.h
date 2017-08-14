@@ -33,11 +33,35 @@
 #include <algorithm>
 
 struct colorspaceWedge {
+  colorspaceWedge(float sa,
+                  float ea,
+                  float sl,
+                  const Emitter * e1,
+                  float e1u,
+                  float e1v,
+                  const Emitter * e2,
+                  float e2u,
+                  float e2v) {
+    startAngle = sa;
+    endAngle   = ea;
+    slope      = sl;
+    emitter1   = e1;
+    e1ustar    = e1u;
+    e1vstar    = e2u;
+    emitter2   = e2;
+    e2ustar    = e2u;
+    e2vstar    = e2v;
+  }
+
   float          startAngle;
   float          endAngle;
   float          slope;
   const Emitter *emitter1;
+  float          e1ustar;
+  float          e1vstar;
   const Emitter *emitter2;
+  float          e2ustar;
+  float          e2vstar;
 };
 
 struct componentEmitter {
@@ -84,6 +108,7 @@ public:
   float getAngle(int emitternum);
   float getSlope(int emitternum);
   std::vector < outputEmitter > emitterPowersFromHSI(const HSIColor &HSI) const;
+  std::vector < outputEmitter > emitterPowersFromHSI2(const HSIColor &HSI) const;
 };
 
 #endif /* ifndef COMPOSITEMODULE_H */

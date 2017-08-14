@@ -62,8 +62,8 @@ const uint8_t displayWidth        = 128;
 const uint8_t displayHeight       = 128;
 const uint8_t displayLineHeight   = 9;
 const uint8_t displayCharWidth    = 6;
-const uint8_t displayCharsPerLine = floor(displayWidth / charWidth);
-const uint8_t displayMaxLines     = (displayHeight / lineHeight);
+const uint8_t displayCharsPerLine = floor(displayWidth / displayCharWidth);
+const uint8_t displayMaxLines     = (displayHeight / displayLineHeight);
 
 ////////////////////////// GLOBALS ///////////////////////////
 
@@ -102,7 +102,7 @@ Emitter emitterLZ7blue("LZ7-b", 0.1747943747, 0.1117834986, (float)30 / 30);
 Emitter emitterLZ7violet("LZ7-v", 0.35, 0.15, (float)30 / 30);
 
 // LEDEngin LZ7 that should be dimmed above 70c and turned off above 90c
-CompositeModule LZ7(70.f, 90.0f);
+CompositeModule LZ7(70.0f, 90.0f);
 
 // Create a light that has an LZ7 module, on our main output at address 0
 // Eventually we'll have different groups of lights, so just make a group
@@ -123,9 +123,9 @@ void setupDisplay() {
   debugPrint(DEBUG_TRACE, "setupDisplay: starting");
   display.begin();
 
-  display.fillScreen(BLACK);
+  display.fillScreen(DISPLAY_BLACK);
   display.setCursor(0, 5);
-  display.setTextColor(WHITE);
+  display.setTextColor(DISPLAY_WHITE);
   display.setTextSize(1);
   display.println("Starting...");
 
@@ -145,7 +145,7 @@ void setupLEDs() {
   LZ7.addWhiteEmitter(emitterLZ7white, 5);
   LZ7.addColorEmitter(emitterLZ7red,    0, false);
   LZ7.addColorEmitter(emitterLZ7amber,  3, false);
-  LZ7.addColorEmitter(emitterLZ7green,  1), false;
+  LZ7.addColorEmitter(emitterLZ7green,  1, false);
   LZ7.addColorEmitter(emitterLZ7cyan,   4, false);
   LZ7.addColorEmitter(emitterLZ7blue,   2, false);
   LZ7.addColorEmitter(emitterLZ7violet, 6, true);
@@ -285,7 +285,7 @@ void displayLine(uint8_t  lineNumber,
                  char    *lineData,
                  uint16_t fontColor,
                  uint16_t backColor) {
-  static char lineDataPrevious[maxLines][charsPerLine + 1] = {};
+  static char lineDataPrevious[displayMaxLines][displayCharsPerLine + 1] = {};
 
   display.setTextColor(fontColor, backColor);
 
@@ -294,25 +294,25 @@ void displayLine(uint8_t  lineNumber,
   // 128)
   if (strcmp(lineData, lineDataPrevious[lineNumber]) != 0) {
     // Print our new text
-    display.setCursor(0, lineNumber * lineHeight);
+    display.setCursor(0, lineNumber * displayLineHeight);
     display.println(lineData);
 
     // Determine how much we need to clear after the next text
     uint16_t charsBeforeEOL = strlen(lineData);
 
     size_t lengthPrevious = strlen(lineDataPrevious[lineNumber]);
-    size_t lengthNew      = strlen(lineData[lineNumber]);
+    size_t lengthNew      = strlen(lineData);
 
     if (lengthPrevious > lengthNew) {
-      uint16_t left   = charsBeforeEOL * charWidth;
-      uint16_t top    = i * lineHeight;
-      uint16_t width  = displayWidth - (lengthNew * charWidth);
-      uint16_t height = lineHeight;
-      display.fillRect(left, top, width, height, backColor);
+      uint16_t left  = charsBeforeEOL * displayCharWidth;
+      uint16_t top   = lineNumber * displayLineHeight;
+      uint16_t width = displayWidth - (lengthNew * displayCharWidth);
+      display.fillRect(left, top, width, displayLineHeight, backColor);
     }
 
     // Save the new text for next time
-    strncpy(lineDataPrevious[i], sizeof(lineDataPrevious[i]), lineData);
+    strncpy(lineDataPrevious[lineNumber],
+            lineData, sizeof(lineDataPrevious[lineNumber]));
   }
 }
 
@@ -321,7 +321,7 @@ void loopDisplay() {
   const unsigned long  maxUpdateLagMillis = 500;
   static unsigned long lastUpdateMillis   = 0;
 
-  static char lineData[charsPerLine + 1] = {};
+  static char lineData[displayCharsPerLine + 1] = {};
 
   if (millis() - lastUpdateMillis > maxUpdateLagMillis) {
     displayMustUpdate = true;
@@ -333,14 +333,14 @@ void loopDisplay() {
   uint8_t currentLine = 0;
   snprintf(lineData, sizeof(lineData), "Running:    %s",
            TimeToString(millis() / 1000));
-  displayLine(currentLine, lineData++, DISPLAY_WHITE, DISPLAY_BLACK);
+  displayLine(currentLine++, lineData, DISPLAY_WHITE, DISPLAY_BLACK);
 
   snprintf(lineData, sizeof(lineData), "Mode:       %s", getCurrentModeName());
-  displayLine(currentLine, lineData++, DISPLAY_WHITE, DISPLAY_BLACK);
+  displayLine(currentLine++, lineData, DISPLAY_WHITE, DISPLAY_BLACK);
 
   snprintf(lineData, sizeof(lineData), "Loops/s:    %u",
            loopsPerSecond);
-  displayLine(currentLine, lineData++, DISPLAY_WHITE, DISPLAY_BLACK);
+  displayLine(currentLine++, lineData, DISPLAY_WHITE, DISPLAY_BLACK);
 
   if (lastBrightnessRemote) {
     snprintf(lineData, sizeof(lineData), "Brightness: [%2.0f%%]",
@@ -350,37 +350,37 @@ void loopDisplay() {
              "Brightness: %2.0f%%",
              globalBrightness * 100);
   }
-  displayLine(currentLine, lineData++, DISPLAY_WHITE, DISPLAY_BLACK);
+  displayLine(currentLine++, lineData, DISPLAY_WHITE, DISPLAY_BLACK);
 
   // Hack for now to show first temperature
   snprintf(lineData, sizeof(lineData),
            "Temp:       %3.0f",
            allLights[0]->getTemperature());
-  displayLine(currentLine, lineData++, DISPLAY_WHITE, DISPLAY_BLACK);
+  displayLine(currentLine++, lineData, DISPLAY_WHITE, DISPLAY_BLACK);
 
   // Hack to show first diagnostic
   snprintf(lineData, sizeof(lineData),
            "%s",
            allLights[0]->getDiagnostic());
-  displayLine(currentLine, lineData++, DISPLAY_WHITE, DISPLAY_BLACK);
+  displayLine(currentLine++, lineData, DISPLAY_WHITE, DISPLAY_BLACK);
 
   char debugName[12];
   getDebugLevelName(getDebugLevel(), debugName, sizeof(debugName));
   snprintf(lineData, sizeof(lineData), "Debug:      %s", debugName);
-  displayLine(currentLine, lineData++, DISPLAY_WHITE, DISPLAY_BLACK);
+  displayLine(currentLine++, lineData, DISPLAY_WHITE, DISPLAY_BLACK);
 
   if (wifiCurrentState == WIFI_CONNECTED) {
     snprintf(lineData, sizeof(lineData), "WiFi:       %s", WiFi.SSID());
   } else {
     snprintf(lineData, sizeof(lineData), "WiFi:       offline");
   }
-  displayLine(currentLine, lineData++, DISPLAY_WHITE, DISPLAY_BLACK);
+  displayLine(currentLine++, lineData, DISPLAY_WHITE, DISPLAY_BLACK);
 
   snprintf(lineData, sizeof(lineData),
            (particleCurrentState == PARTICLE_CONNECTED ?
             "Particle:   online" :
             "Particle:   offline"));
-  displayLine(currentLine, lineData++, DISPLAY_WHITE, DISPLAY_BLACK);
+  displayLine(currentLine++, lineData, DISPLAY_WHITE, DISPLAY_BLACK);
 
   snprintf(lineData, sizeof(lineData),
            (particleDesiredState != particleCurrentState ?
@@ -388,7 +388,7 @@ void loopDisplay() {
              PARTICLE_CONNECTED ?
              "  Connecting" : "  Disconnecting")
             : ""));
-  displayLine(currentLine, lineData++, DISPLAY_YELLOW, DISPLAY_BLACK);
+  displayLine(currentLine++, lineData, DISPLAY_YELLOW, DISPLAY_BLACK);
 
   lastUpdateMillis  = millis();
   displayMustUpdate = false;
@@ -419,8 +419,8 @@ void loopControls() {
 
   if (modeButton.clicks != 0) {
     if (modeClicks == 1) {
-      debugPrint(DEBUG_TRACE, "Click: change mode");
       nextMode();
+      debugPrintf(DEBUG_TRACE, "Click: change mode to %s", getCurrentModeName());
       displayMustUpdate = true;
       lightsMustUpdate  = true;
     }
