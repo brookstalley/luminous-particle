@@ -1,4 +1,5 @@
-//*********************************************************
+// *********************************************************
+
 //
 // TeensyLED Controller Library
 // Copyright Brian Neltner 2015
@@ -19,28 +20,37 @@
 // You should have received a copy of the GNU General Public License
 // along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 //
-//**********************************************************
+// **********************************************************
 
 #ifndef HSICOLOR_H
 #define HSICOLOR_H
 
 class HSIColor {
 private:
-	float _hue, _saturation, _intensity;
+
+  float _hue, _saturation, _intensity;
 
 public:
-	HSIColor(float hue, float saturation, float intensity);
-	HSIColor(void);
-	void setHue(float hue);
-	void setSaturation(float saturation);
-	void setIntensity(float intensity);
-	void setHSI(float hue, float saturation, float intensity);
-	void setRGB(float red, float green, float blue);
-	const float getHue(void) const;
-	const float getSaturation(void) const;
-	const float getIntensity(void) const;
-	void getHSI(float *HSI);
-	bool operator== (const HSIColor &other) const;
+
+  HSIColor(float hue, float saturation, float intensity);
+  HSIColor(void);
+  void        setHue(float hue);
+  void        setSaturation(float saturation);
+  void        setIntensity(float intensity);
+  void        setHSI(float hue,
+                     float saturation,
+                     float intensity);
+  void        setRGB(float red,
+                     float green,
+                     float blue);
+  void        setHLS(float hue,
+                     float lightness,
+                     float saturation);
+  const float getHue(void) const;
+  const float getSaturation(void) const;
+  const float getIntensity(void) const;
+  void        getHSI(float *HSI);
+  bool operator == (const HSIColor &other) const;
 };
 
-#endif
+#endif /* ifndef HSICOLOR_H */
