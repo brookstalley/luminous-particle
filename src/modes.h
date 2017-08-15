@@ -1,4 +1,5 @@
-//*********************************************************
+// *********************************************************
+
 //
 // Luminous
 // Copyright 2017 Brooks Talley
@@ -16,9 +17,9 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+// along with Luminous.  If not, see <http://www.gnu.org/licenses/>.
 //
-//**********************************************************
+// **********************************************************
 #ifndef MODES_H
 #define MODES_H
 
@@ -34,37 +35,37 @@
 #include <vector>
 #include <memory>
 
-class ModeOff: public Mode {
+class ModeOff : public Mode {
 public:
 
-	using Mode::Mode;
-	bool start(std::vector < std::shared_ptr < HSILight >>);
+  using Mode::Mode;
+  bool start(std::vector<std::shared_ptr<HSILight> >);
 };
 
-class ModeTest: public Mode {
+class ModeTest : public Mode {
 public:
 
-	using Mode::Mode;
-	bool run(std::vector < std::shared_ptr < HSILight >>,
-	         bool);
+  using Mode::Mode;
+  bool run(std::vector<std::shared_ptr<HSILight> >,
+           bool);
 };
 
-class ModeRotate: public Mode {
+class ModeRotate : public Mode {
 public:
 
-	using Mode::Mode;
-	bool run(std::vector < std::shared_ptr < HSILight >>,
-	         bool);
+  using Mode::Mode;
+  bool run(std::vector<std::shared_ptr<HSILight> >,
+           bool);
 };
 
-class ModeE131: public Mode {
+class ModeE131 : public Mode {
 public:
 
-	using Mode::Mode;
-	bool      start(std::vector < std::shared_ptr < HSILight >>);
-	bool      run(std::vector < std::shared_ptr < HSILight >>,
-	              bool);
-	bool      end(std::vector < std::shared_ptr < HSILight >>);
+  using Mode::Mode;
+  bool      start(std::vector<std::shared_ptr<HSILight> >);
+  bool      run(std::vector<std::shared_ptr<HSILight> >,
+                bool);
+  bool      end(std::vector<std::shared_ptr<HSILight> >);
 };
 
 void        nextMode();
@@ -72,8 +73,9 @@ bool        setModeByNumber(uint16_t modeNumber);
 bool        setModeByName(String modeName);
 void        runCurrentMode();
 const char* getCurrentModeName();
+
 // Stray, but this seems a reasonable place for it
-float twoBytesToFloat(const uint8_t *buf);
+float       twoBytesToFloat(const uint8_t *buf);
 
 
 #endif /* ifndef MODES_H */
