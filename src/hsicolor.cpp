@@ -89,6 +89,14 @@ void HSIColor::setHLS(float hslHue, float hslLightness, float hslSaturation) {
   _intensity =
     ((2.0f * hslLightness) + hslSaturation * (1.0f - fabs(2.0f * hslLightness - 1.0f))) / 2.0f;
   _saturation = 2.0f * (_intensity - hslLightness) / _intensity;
+  debugPrintf(DEBUG_TRACE,
+              "HSIColor::setHLS converted (%4.4f, %4.4f, %4.4f) to (%4.4f, %4.4f, %4.4f)",
+              hslHue,
+              hslLightness,
+              hslSaturation,
+              _hue,
+              _saturation,
+              _intensity);
 }
 
 const float HSIColor::getHue(void) const {
