@@ -22,10 +22,8 @@
 // **********************************************************
 
 #ifndef LUMINOUSMENU_H
-# define LUMINOUSMENU_H
+#define LUMINOUSMENU_H
 
-
-#endif // ifndef LUMINOUSMENU_H
 
 class Menu {
 private:
@@ -34,3 +32,4 @@ private:
 
 public:
 }
+#endif // ifndef LUMINOUSMENU_H
