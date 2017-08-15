@@ -20,11 +20,23 @@
 // along with Luminous.  If not, see <http://www.gnu.org/licenses/>.
 //
 // **********************************************************
+#include "page.h"
+#include "pages.h"
 #include "menus.h"
 
-Menu *menus[modeCount] = {
-  new ModeOff("Off"),
-  new ModeTest("Test"),
-  new ModeRotate("Rotate"),
-  new ModeE131("E131")
-};
+Menu topMenu = new Menu("Luminous", nullptr);
+
+StatusPage status = new StatusPage("Status");
+topMenu->addChild(&status);
+
+Menu lightList = new Menu("Lights");
+foreach light {
+  LightPage lightPage = new LightPage(light);
+  lightList.addChild(&lightPage);
+}
+topMenu->addChild(&lightList);
+
+E131Page e131Page = new E131Page("Monitor");
+topMenu->addChild(&E131Page);
+
+Page *currentPage = topMenu;

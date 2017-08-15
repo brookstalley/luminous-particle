@@ -39,7 +39,8 @@ public:
   Menu(const char *name);
   addChild(Page * childPage);
 
-  bool moveSelection(schar direction);
+  bool moveNext();
+  bool movePrev();
   bool selectItem();
 }
 
