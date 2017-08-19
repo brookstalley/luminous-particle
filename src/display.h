@@ -21,27 +21,50 @@
 //
 // **********************************************************
 
-#ifndef LUMINOUS_MENU_H
-#define LUMINOUS_MENU_H
+#ifndef LUMINOUS_DISPLAY_H
+#define LUMINOUS_DISPLAY_H
 
-#include "page.h"
-#include <vector>
+#include "Adafruit-GFX-library/Adafruit_GFX.h"
 
-class Menu : public Page {
+// Color definitions
+#define DISPLAY_BLACK           0x0000
+#define DISPLAY_BLUE            0x001F
+#define DISPLAY_RED             0xF800
+#define DISPLAY_GREEN           0x07E0
+#define DISPLAY_CYAN            0x07FF
+#define DISPLAY_MAGENTA         0xF81F
+#define DISPLAY_YELLOW          0xFFE0
+#define DISPLAY_WHITE           0xFFFF
+
+
+class Display {
 private:
 
-  // childItems can be another menu, or any Page
-  std::vector<Menu>_childItems;
-  std::vector<Menu>::iterator _selectedItem;
+  Adafruit_GFX& _screen;
+  uint8_t _width;
+  uint8_t _height;
+  uint8_t _lineHeight;
+  uint8_t _charWidth;
+  uint8_t _charsPerLine;
+  uint8_t _maxLines;
+  uint8_t _nextLine;
 
 public:
 
-  Menu(const char *name);
-  addChild(Page * childPage);
+  Display(Adafruit_GFX,
+          width,
+          height);
 
-  bool moveNext();
-  bool movePrev();
-  bool selectItem();
+  void startPage(bool clearDisplay);
+
+  void println(
+    uint16_t    fontColor,
+    uint16_t    backColor,
+    const char *lineData,
+    ...);
+
+  void clear();
+  void setTop();
 }
 
-#endif // ifndef LUMINOUS_MENU_H
+#endif // ifndef LUMINOUS_DISPLAY_H

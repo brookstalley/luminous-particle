@@ -21,30 +21,21 @@
 //
 // **********************************************************
 
-#include "menu.h"
+#include "pages.h"
+#include "display.h"
 
-Menu::Menu(const char *name, const Page *parentPage) : Page(name, parentPage) {
-  _selectedItem = _childItems.begin();
+void StatusPage::render() {
+  Page::render();
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "(status page)");
 }
 
-Menu::addChild(const Page * childItem) {
-  _childItems.push_back(childItem);
-  _selectedItem = _childItems.begin();
+LightPage::LightPage(const HSILight& light) {
+  _name  = light->getName();
+  _light = light;
 }
 
-bool Menu::moveNext() {
-  _selectedItem++;
-
-  if (selectedItem == _childItems.end()) {
-    _selectedItem = _childItems.begin();
-  }
-  return true;
-}
-
-bool Menu::movePrev() {
-  if (_selectedItem == _childItems.begin()) {
-    _selectedItem = _chiledItems.end();
-  }
-  _selectedItem--;
-  return true;
+void LightPage::render() {
+  // Assume that we either were already on this page, or someone else called display.clear
+  Page::render();
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "E131 Address: %u", _light->getE131LocalAddress());
 }

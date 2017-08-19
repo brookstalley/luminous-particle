@@ -21,30 +21,22 @@
 //
 // **********************************************************
 
-#include "menu.h"
+#include "page.h"
+#include "display.h"
 
-Menu::Menu(const char *name, const Page *parentPage) : Page(name, parentPage) {
-  _selectedItem = _childItems.begin();
-}
+Page::Page(const char *name, const Page *parent) :
+  _name(name),
+  _parentPage(parent) {}
 
-Menu::addChild(const Page * childItem) {
-  _childItems.push_back(childItem);
-  _selectedItem = _childItems.begin();
-}
-
-bool Menu::moveNext() {
-  _selectedItem++;
-
-  if (selectedItem == _childItems.end()) {
-    _selectedItem = _childItems.begin();
-  }
+bool Page::render() {
+  display.println(_name);
   return true;
 }
 
-bool Menu::movePrev() {
-  if (_selectedItem == _childItems.begin()) {
-    _selectedItem = _chiledItems.end();
-  }
-  _selectedItem--;
-  return true;
+const char * Page::getName() {
+  return _name;
+}
+
+const Page * Page::getParent() {
+  return _parentPage;
 }

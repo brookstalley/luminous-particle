@@ -1,4 +1,5 @@
-//*********************************************************
+// *********************************************************
+
 //
 // Luminous
 // Copyright 2017 Brooks Talley
@@ -16,9 +17,9 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+// along with Luminous.  If not, see <http://www.gnu.org/licenses/>.
 //
-//**********************************************************
+// **********************************************************
 
 
 #ifndef EMITTER_H
@@ -26,27 +27,22 @@
 
 #include "Particle.h"
 
-struct outputEmitter {
-	outputEmitter(uint8_t la, float pwr) {
-		outputLocalAddress = la;
-		power              = pwr;
-	}
-	uint16_t outputLocalAddress;
-	float power;
-};
-
 class Emitter {
 private:
 
-	float _u, _v, _maxvalue;
-	const char *_name;
+  float _u, _v;
+  uint16_t maxLumens;
+  const char *_name;
 
 public:
 
-	Emitter(const char *name, float u, float v, float maxvalue);
-	float       getU(void) const;
-	float       getV(void) const;
-	float       getMax(void) const;
-	const char* getName(void) const;
+  Emitter(const char *name,
+          float       u,
+          float       v,
+          float       maxLumens);
+  float       getU(void) const;
+  float       getV(void) const;
+  uint16_t    getMaxLumens(void) const;
+  const char* getName(void) const;
 };
 #endif /* ifndef EMITTER_H */

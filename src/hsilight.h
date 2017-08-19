@@ -1,4 +1,5 @@
-//*********************************************************
+// *********************************************************
+
 //
 // Luminous
 // Copyright 2017 Brooks Talley
@@ -16,12 +17,11 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+// along with Luminous.  If not, see <http://www.gnu.org/licenses/>.
 //
-//**********************************************************
+// **********************************************************
 #ifndef HSILIGHT_H
 #define HSILIGHT_H
-
 
 
 #include "compositemodule.h"
@@ -38,60 +38,64 @@
 class HSILight {
 private:
 
-	const char *_name;
-	const CompositeModule& _compositeModule;
-	std::shared_ptr < OutputInterface > _outputInterface;
-	const uint16_t _outputLocalAddress;
-	const std::shared_ptr < E131 > _e131;
-	const uint16_t _e131LocalAddress;
-	std::shared_ptr < TemperatureInterface > _temperatureInterface;
-	const uint16_t _temperatureLocalAddress;
+  const char *_name;
+  const CompositeModule& _compositeModule;
 
-	std::vector < outputEmitter > _emitterPowers;
-	float _localBrightness;
-	float _temperature;
-	char _diagnostic[HSILIGHT_MAX_DIAGNOSTIC];
+  std::shared_ptr<OutputInterface>_outputInterface;
+  const uint16_t _outputLocalAddress;
 
-	uint32_t _lastE131PacketCount;
-	HSIColor _lastColor;
+  const std::shared_ptr<E131>_e131;
+  const uint16_t _e131LocalAddress;
 
-	unsigned long _tempertureUpdatedMillis;
+  std::shared_ptr<TemperatureInterface>_temperatureInterface;
+  const uint16_t _temperatureLocalAddress;
 
-	void setEmitters();
+  std::vector<outputEmitter>_emitterPowers;
+
+  float _localBrightness;
+
+  float _temperature;
+  unsigned long _tempertureUpdatedMillis;
+
+  char _diagnostic[HSILIGHT_MAX_DIAGNOSTIC];
+
+  uint32_t _lastE131PacketCount;
+  HSIColor _lastColor;
+
+  void setEmitters();
 
 public:
 
-	HSILight(const char *name,
-	         const CompositeModule &compositemodule,
-	         std::shared_ptr < OutputInterface > outputInterface,
-	         const uint16_t outputLocalAddress,
-	         const std::shared_ptr < E131 > e131,
-	         const uint16_t e131LocalAddress, // TODO: Add multiple universe
-	                                          // support
-	         std::shared_ptr < TemperatureInterface > temperatureInterface,
-	         const uint16_t temperatureLocalAddress);
+  HSILight(const char                          *name,
+           const CompositeModule              & compositemodule,
+           std::shared_ptr<OutputInterface>     outputInterface,
+           const uint16_t                       outputLocalAddress,
+           const std::shared_ptr<E131>          e131,
+           const uint16_t                       e131LocalAddress, // TODO: Add multiple universe
+                                                                  // support
+           std::shared_ptr<TemperatureInterface>temperatureInterface,
+           const uint16_t                       temperatureLocalAddress);
 
-	HSILight(const char *name,
-	         const CompositeModule &compositemodule,
-	         std::shared_ptr < OutputInterface > outputInterface,
-	         const uint16_t outputLocalAddress,
-	         const std::shared_ptr < E131 > e131,
-	         const uint16_t e131LocalAddress); // TODO: Add multiple universe
-	                                           // support
+  HSILight(const char                     *name,
+           const CompositeModule         & compositemodule,
+           std::shared_ptr<OutputInterface>outputInterface,
+           const uint16_t                  outputLocalAddress,
+           const std::shared_ptr<E131>     e131,
+           const uint16_t                  e131LocalAddress); // TODO: Add multiple universe
+                                                              // support
 
-	void        begin();
-	void        setColor(const HSIColor& color);
-	void        getColor(const HSIColor *) const;
-	void        setTemperatureInterface(std::shared_ptr < TemperatureInterface > temperatureInterface);
-	std::shared_ptr<E131> getE131() const;
-	const uint16_t getE131LocalAddress() const;
-	float       getTemperature();
-	float       updateTemperature();
-	const char* getName(void) const;
-	const char *                  getDiagnostic(void) const;
-	void        setSingleEmitterOn(unsigned int index);
+  void                 begin();
+  void                 setColor(const HSIColor& color);
+  void                 getColor(const HSIColor *) const;
+  void                 setTemperatureInterface(std::shared_ptr<TemperatureInterface>temperatureInterface);
+  std::shared_ptr<E131>getE131() const;
+  const uint16_t       getE131LocalAddress() const;
+  float                getTemperature();
+  float                updateTemperature();
+  const char         * getName(void) const;
+  const char         * getDiagnostic(void) const;
+  void                 setSingleEmitterOn(unsigned int index);
 };
-
 
 
 #endif /* ifndef HSILIGHT_H */

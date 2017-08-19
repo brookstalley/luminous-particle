@@ -18,7 +18,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+// along with Luminous.  If not, see <http://www.gnu.org/licenses/>.
 //
 // **********************************************************
 
@@ -83,11 +83,20 @@ void HSIColor::setRGB(float red, float green, float blue) {
               _intensity);
 }
 
-void HSIColor::setHLS(float hue, float lightness, float saturation) {
-  // TODO: real function that does correct conversion
-  _hue        = hue;
-  _saturation = saturation;
-  _intensity  = lightness;
+void HSIColor::setHLS(float hslHue, float hslLightness, float hslSaturation) {
+  // Formula from http://codeitdown.com/hsl-hsb-hsv-color/
+  _hue       = hslHue;
+  _intensity =
+    ((2.0f * hslLightness) + hslSaturation * (1.0f - fabs(2.0f * hslLightness - 1.0f))) / 2.0f;
+  _saturation = 2.0f * (_intensity - hslLightness) / _intensity;
+  debugPrintf(DEBUG_TRACE,
+              "HSIColor::setHLS converted (%4.4f, %4.4f, %4.4f) to (%4.4f, %4.4f, %4.4f)",
+              hslHue,
+              hslLightness,
+              hslSaturation,
+              _hue,
+              _saturation,
+              _intensity);
 }
 
 const float HSIColor::getHue(void) const {

@@ -20,31 +20,28 @@
 // along with Luminous.  If not, see <http://www.gnu.org/licenses/>.
 //
 // **********************************************************
+#include "page.h"
+#include "pages.h"
+#include "menus.h"
+#include "luminous-particle.h"
 
-#include "menu.h"
+Page* SetupMenus() {
+  Menu topMenu = new Menu("Luminous", nullptr);
 
-Menu::Menu(const char *name, const Page *parentPage) : Page(name, parentPage) {
-  _selectedItem = _childItems.begin();
-}
+  StatusPage status = new StatusPage("Status");
 
-Menu::addChild(const Page * childItem) {
-  _childItems.push_back(childItem);
-  _selectedItem = _childItems.begin();
-}
+  topMenu->addChild(&status);
 
-bool Menu::moveNext() {
-  _selectedItem++;
+  Menu lightList = new Menu("Lights", &topMenu);
 
-  if (selectedItem == _childItems.end()) {
-    _selectedItem = _childItems.begin();
+  for (const auto& it : allLights) {
+    LightPage lightPage = new LightPage(*it);
+    lightList.addChild(&lightPage);
   }
-  return true;
-}
+  topMenu->addChild(&lightList);
 
-bool Menu::movePrev() {
-  if (_selectedItem == _childItems.begin()) {
-    _selectedItem = _chiledItems.end();
-  }
-  _selectedItem--;
-  return true;
+  E131Page e131Page = new E131Page("Monitor");
+  topMenu->addChild(&E131Page);
+
+  return &topMenu;
 }

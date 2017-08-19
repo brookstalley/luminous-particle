@@ -21,30 +21,11 @@
 //
 // **********************************************************
 
-#include "menu.h"
+#ifndef LUMINOUS_MENUS_H
+#define LUMINOUS_MENUS_H
 
-Menu::Menu(const char *name, const Page *parentPage) : Page(name, parentPage) {
-  _selectedItem = _childItems.begin();
-}
+#include "page.h"
 
-Menu::addChild(const Page * childItem) {
-  _childItems.push_back(childItem);
-  _selectedItem = _childItems.begin();
-}
+Page* SetupMenus();
 
-bool Menu::moveNext() {
-  _selectedItem++;
-
-  if (selectedItem == _childItems.end()) {
-    _selectedItem = _childItems.begin();
-  }
-  return true;
-}
-
-bool Menu::movePrev() {
-  if (_selectedItem == _childItems.begin()) {
-    _selectedItem = _chiledItems.end();
-  }
-  _selectedItem--;
-  return true;
-}
+#endif // ifndef LUMINOUS_MENUS_H

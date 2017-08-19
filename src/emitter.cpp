@@ -1,4 +1,5 @@
-//*********************************************************
+// *********************************************************
+
 //
 // Luminous
 // Copyright 2017 Brooks Talley
@@ -16,33 +17,33 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+// along with Luminous.  If not, see <http://www.gnu.org/licenses/>.
 //
-//**********************************************************
+// **********************************************************
 
 
 #include "Emitter.h"
+#include "Particle.h"
 
-Emitter::Emitter(const char *name, float u, float v, float maxvalue) :
-	_u(u),
-	_v(v),
-	_maxvalue(maxvalue),
-	_name(name)
-{
-}
+Emitter::Emitter(const char *name, float u, float v, uint16_t maxLumens) :
+  _u(u),
+  _v(v),
+  _maxLumens(maxLumens),
+  _name(name)
+{}
 
 float Emitter::getU(void) const {
-	return _u;
+  return _u;
 }
 
 float Emitter::getV(void) const {
-	return _v;
+  return _v;
 }
 
-float Emitter::getMax(void) const {
-	return _maxvalue;
+uint16_t Emitter::getMaxLumens(void) const {
+  return _maxLumens;
 }
 
 const char * Emitter::getName(void) const {
-	return _name;
+  return _name;
 }

@@ -21,30 +21,24 @@
 //
 // **********************************************************
 
-#include "menu.h"
+#ifndef LUMINOUS_PAGE_H
+#define LUMINOUS_PAGE_H
 
-Menu::Menu(const char *name, const Page *parentPage) : Page(name, parentPage) {
-  _selectedItem = _childItems.begin();
+class Page {
+private:
+
+  const char *_name;
+  const Page *_parentPage;
+
+public:
+
+  Page(const char *name,
+       const Page *parent);
+
+  virtual bool render();
+
+  const char * getName();
+  const Page * getParent();
 }
 
-Menu::addChild(const Page * childItem) {
-  _childItems.push_back(childItem);
-  _selectedItem = _childItems.begin();
-}
-
-bool Menu::moveNext() {
-  _selectedItem++;
-
-  if (selectedItem == _childItems.end()) {
-    _selectedItem = _childItems.begin();
-  }
-  return true;
-}
-
-bool Menu::movePrev() {
-  if (_selectedItem == _childItems.begin()) {
-    _selectedItem = _chiledItems.end();
-  }
-  _selectedItem--;
-  return true;
-}
+#endif // ifndef LUMINOUS_PAGE_H

@@ -17,7 +17,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+// along with Luminous.  If not, see <http://www.gnu.org/licenses/>.
 //
 // **********************************************************
 #include "luminous-particle.h"
@@ -28,6 +28,9 @@
 #include "ldebug.h"
 #include "modes.h"
 #include "credentials.h"
+#include "display.h"
+#include "page.h"
+#include "menus.h"
 
 #include "outputPCA9685.h"
 #include "temperatureAds1115.h"
@@ -47,24 +50,6 @@
 SYSTEM_MODE(MANUAL);
 SYSTEM_THREAD(ENABLED);
 
-// Color definitions
-#define DISPLAY_BLACK           0x0000
-#define DISPLAY_BLUE            0x001F
-#define DISPLAY_RED             0xF800
-#define DISPLAY_GREEN           0x07E0
-#define DISPLAY_CYAN            0x07FF
-#define DISPLAY_MAGENTA         0xF81F
-#define DISPLAY_YELLOW          0xFFE0
-#define DISPLAY_WHITE           0xFFFF
-
-// This is awful, but until I feel like moving the display into a class...
-const uint8_t displayWidth        = 128;
-const uint8_t displayHeight       = 128;
-const uint8_t displayLineHeight   = 9;
-const uint8_t displayCharWidth    = 6;
-const uint8_t displayCharsPerLine = floor(displayWidth / displayCharWidth);
-const uint8_t displayMaxLines     = (displayHeight / displayLineHeight);
-
 ////////////////////////// GLOBALS ///////////////////////////
 
 float globalBrightness     = 1.0f;
@@ -77,13 +62,16 @@ bool lightsMustUpdate  = false;
 
 unsigned int loopsPerSecond = 0.0f;
 
+Page *currentPage;
+
 ////////////////////////// Controllers and stuff
-Adafruit_SSD1351 display(spi_pin_cs, spi_pin_dc, spi_pin_rst);
+Adafruit_SSD1351 screen(spi_pin_cs, spi_pin_dc, spi_pin_rst);
+Display display(screen, 128, 128);
+
 ClickButton modeButton(MODE_BUTTON_PIN, LOW,  CLICKBTN_PULLUP);
 ResponsiveAnalogRead brightnessControl(BRIGHTNESS_PIN, true);
 
 // Input and output devices
-
 std::shared_ptr<OutputPCA9685> mainOutput =
   std::make_shared<OutputPCA9685>(Wire, 0x40);
 
@@ -93,13 +81,14 @@ std::shared_ptr<TemperatureAds1115> mainTemperature
 std::shared_ptr<E131> mainUniverse = std::make_shared<E131>();
 
 // Shared lights with coordinates in CIE LUV colorspace
-Emitter emitterLZ7white("LZ7-w", 0.202531646, 0.469936709, (float)180 / 180);
-Emitter emitterLZ7red("LZ7-r", 0.5137017676, 0.5229440531, (float)78 / 78);
-Emitter emitterLZ7amber("LZ7-a", 0.3135687079, 0.5529418124, (float)60 / 60);
-Emitter emitterLZ7green("LZ7-g", 0.0595846867, 0.574988823, (float)125 / 125);
-Emitter emitterLZ7cyan("LZ7-c", 0.0306675939, 0.5170937486, (float)95 / 95);
-Emitter emitterLZ7blue("LZ7-b", 0.1747943747, 0.1117834986, (float)30 / 30);
-Emitter emitterLZ7violet("LZ7-v", 0.35, 0.15, (float)30 / 30);
+// LZ7 max lumens are for 1000ma drive
+Emitter emitterLZ7white("LZ7-w", 0.202531646, 0.469936709, 180);
+Emitter emitterLZ7red("LZ7-r", 0.5137017676, 0.5229440531, 78);
+Emitter emitterLZ7amber("LZ7-a", 0.3135687079, 0.5529418124, 60);
+Emitter emitterLZ7green("LZ7-g", 0.0595846867, 0.574988823, 125);
+Emitter emitterLZ7cyan("LZ7-c", 0.0306675939, 0.5170937486, 95);
+Emitter emitterLZ7blue("LZ7-b", 0.1747943747, 0.1117834986, 30);
+Emitter emitterLZ7violet("LZ7-v", 0.35, 0.15, 30);
 
 // LEDEngin LZ7 that should be dimmed above 70c and turned off above 90c
 CompositeModule LZ7(70.0f, 90.0f);
@@ -122,13 +111,8 @@ std::vector<std::shared_ptr<HSILight> > allLights = {
 void setupDisplay() {
   debugPrint(DEBUG_TRACE, "setupDisplay: starting");
   display.begin();
-
-  display.fillScreen(DISPLAY_BLACK);
-  display.setCursor(0, 5);
-  display.setTextColor(DISPLAY_WHITE);
-  display.setTextSize(1);
-  display.println("Starting...");
-
+  displayLine(0, "Starting...", DISPLAY_WHITE, DISPLAY_BLACK);
+  currentPage = SetupMenus(); // returns a Page* to the top level menu
   debugPrint(DEBUG_TRACE, "  Finished");
 }
 
@@ -281,39 +265,32 @@ char* TimeToString(unsigned long t)
   return str;
 }
 
-void displayLine(uint8_t  lineNumber,
-                 char    *lineData,
-                 uint16_t fontColor,
-                 uint16_t backColor) {
-  static char lineDataPrevious[displayMaxLines][displayCharsPerLine + 1] = {};
+void displayStatusBar() {
+  char statusBar[25] = { ' ' };
 
-  display.setTextColor(fontColor, backColor);
-
-  // We always have 12 characters of label
-  // So, clear the space from char 13 until the end (currently hardcoded at
-  // 128)
-  if (strcmp(lineData, lineDataPrevious[lineNumber]) != 0) {
-    // Print our new text
-    display.setCursor(0, lineNumber * displayLineHeight);
-    display.println(lineData);
-
-    // Determine how much we need to clear after the next text
-    uint16_t charsBeforeEOL = strlen(lineData);
-
-    size_t lengthPrevious = strlen(lineDataPrevious[lineNumber]);
-    size_t lengthNew      = strlen(lineData);
-
-    if (lengthPrevious > lengthNew) {
-      uint16_t left  = charsBeforeEOL * displayCharWidth;
-      uint16_t top   = lineNumber * displayLineHeight;
-      uint16_t width = displayWidth - (lengthNew * displayCharWidth);
-      display.fillRect(left, top, width, displayLineHeight, backColor);
-    }
-
-    // Save the new text for next time
-    strncpy(lineDataPrevious[lineNumber],
-            lineData, sizeof(lineDataPrevious[lineNumber]));
+  if (wifiCurrentState == WIFI_CONNECTED) {
+    statusBar[0] = (char)0x1e;
+  } else {
+    statusBar[0] = (char)0x1f;
   }
+
+  if (particleCurrentState == PARTICLE_CONNECTED) {
+    statusBar[1] = (char)0x1e;
+  } else {
+    statusBar[1] = (char)0x1f;
+  }
+
+  if (lastBrightnessRemote) {
+    snprintf(statusBar[12], sizeof(statusBar) - 12, "[%2.0f%%]",
+             globalBrightness * 100);
+  } else {
+    snprintf(statusBar[12], sizeof(statusBar) - 12,
+             "%2.0f%%",
+             globalBrightness * 100);
+  }
+  screen.setTextColor(DISPLAY_BLACK, DISPLAY_WHITE);
+  screen.setCursor(0, 0);
+  screen.println(statusBar);
 }
 
 void loopDisplay() {
@@ -321,74 +298,67 @@ void loopDisplay() {
   const unsigned long  maxUpdateLagMillis = 500;
   static unsigned long lastUpdateMillis   = 0;
 
-  static char lineData[displayCharsPerLine + 1] = {};
-
   if (millis() - lastUpdateMillis > maxUpdateLagMillis) {
     displayMustUpdate = true;
   }
 
   if (!displayMustUpdate) return;
 
+  display.setTop()
+  displayStatusBar();
 
-  uint8_t currentLine = 0;
-  snprintf(lineData, sizeof(lineData), "Running:    %s",
-           TimeToString(millis() / 1000));
-  displayLine(currentLine++, lineData, DISPLAY_WHITE, DISPLAY_BLACK);
+  currentPage->render();
+  return;
 
-  snprintf(lineData, sizeof(lineData), "Mode:       %s", getCurrentModeName());
-  displayLine(currentLine++, lineData, DISPLAY_WHITE, DISPLAY_BLACK);
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Running:    %s",
+                  TimeToString(millis() / 1000));
 
-  snprintf(lineData, sizeof(lineData), "Loops/s:    %u",
-           loopsPerSecond);
-  displayLine(currentLine++, lineData, DISPLAY_WHITE, DISPLAY_BLACK);
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Mode:       %s", getCurrentModeName());
+
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Loops/s:    %u",
+                  loopsPerSecond);
 
   if (lastBrightnessRemote) {
-    snprintf(lineData, sizeof(lineData), "Brightness: [%2.0f%%]",
-             globalBrightness * 100);
+    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Brightness: [%2.0f%%]",
+                    globalBrightness * 100);
   } else {
-    snprintf(lineData, sizeof(lineData),
-             "Brightness: %2.0f%%",
-             globalBrightness * 100);
+    display.println(DISPLAY_WHITE, DISPLAY_BLACK,
+                    "Brightness: %2.0f%%",
+                    globalBrightness * 100);
   }
-  displayLine(currentLine++, lineData, DISPLAY_WHITE, DISPLAY_BLACK);
 
   // Hack for now to show first temperature
-  snprintf(lineData, sizeof(lineData),
-           "Temp:       %3.0f",
-           allLights[0]->getTemperature());
-  displayLine(currentLine++, lineData, DISPLAY_WHITE, DISPLAY_BLACK);
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK,
+                  "Temp:       %3.0f",
+                  allLights[0]->getTemperature());
 
   // Hack to show first diagnostic
-  snprintf(lineData, sizeof(lineData),
-           "%s",
-           allLights[0]->getDiagnostic());
-  displayLine(currentLine++, lineData, DISPLAY_WHITE, DISPLAY_BLACK);
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK,
+                  "%s",
+                  allLights[0]->getDiagnostic());
 
   char debugName[12];
   getDebugLevelName(getDebugLevel(), debugName, sizeof(debugName));
-  snprintf(lineData, sizeof(lineData), "Debug:      %s", debugName);
-  displayLine(currentLine++, lineData, DISPLAY_WHITE, DISPLAY_BLACK);
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Debug:      %s", debugName);
 
   if (wifiCurrentState == WIFI_CONNECTED) {
-    snprintf(lineData, sizeof(lineData), "WiFi:       %s", WiFi.SSID());
+    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "WiFi:       %s", WiFi.SSID());
   } else {
-    snprintf(lineData, sizeof(lineData), "WiFi:       offline");
+    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "WiFi:       Offline");
   }
-  displayLine(currentLine++, lineData, DISPLAY_WHITE, DISPLAY_BLACK);
 
-  snprintf(lineData, sizeof(lineData),
-           (particleCurrentState == PARTICLE_CONNECTED ?
-            "Particle:   online" :
-            "Particle:   offline"));
-  displayLine(currentLine++, lineData, DISPLAY_WHITE, DISPLAY_BLACK);
+  if (particleCurrentState == PARTICLE_CONNECTED) {
+    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Particle:   Online")
+  } else {
+    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Particle:   Offline")
+  }
 
-  snprintf(lineData, sizeof(lineData),
-           (particleDesiredState != particleCurrentState ?
-            (particleDesiredState ==
-             PARTICLE_CONNECTED ?
-             "  Connecting" : "  Disconnecting")
-            : ""));
-  displayLine(currentLine++, lineData, DISPLAY_YELLOW, DISPLAY_BLACK);
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK,
+                  (particleDesiredState != particleCurrentState ?
+                   (particleDesiredState ==
+                    PARTICLE_CONNECTED ?
+                    "            Connecting" : "            Disconnecting")
+                   : ""));
 
   lastUpdateMillis  = millis();
   displayMustUpdate = false;

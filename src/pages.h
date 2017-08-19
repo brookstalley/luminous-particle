@@ -21,30 +21,28 @@
 //
 // **********************************************************
 
-#include "menu.h"
+#ifndef LUMINOUS_PAGES_H
+#define LUMINOUS_PAGES_H
 
-Menu::Menu(const char *name, const Page *parentPage) : Page(name, parentPage) {
-  _selectedItem = _childItems.begin();
+#include "page.h"
+#include "hsilight.h"
+
+class StatusPage : public Page {
+public:
+
+  void render();
 }
 
-Menu::addChild(const Page * childItem) {
-  _childItems.push_back(childItem);
-  _selectedItem = _childItems.begin();
+class LightPage : public Page {
+private:
+
+  // Just calling it light because at some point we'll generalize lights to not always be HSI
+  const HSILight& _light;
+
+public:
+
+  LightPage(const HSILight *light);
+  void render();
 }
 
-bool Menu::moveNext() {
-  _selectedItem++;
-
-  if (selectedItem == _childItems.end()) {
-    _selectedItem = _childItems.begin();
-  }
-  return true;
-}
-
-bool Menu::movePrev() {
-  if (_selectedItem == _childItems.begin()) {
-    _selectedItem = _chiledItems.end();
-  }
-  _selectedItem--;
-  return true;
-}
+#endif // ifndef LUMINOUS_PAGES_H
