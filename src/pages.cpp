@@ -22,5 +22,20 @@
 // **********************************************************
 
 #include "pages.h"
+#include "display.h"
 
-void StatusPage::render() {}
+void StatusPage::render() {
+  Page::render();
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "(status page)");
+}
+
+LightPage::LightPage(const HSILight& light) {
+  _name  = light->getName();
+  _light = light;
+}
+
+void LightPage::render() {
+  // Assume that we either were already on this page, or someone else called display.clear
+  Page::render();
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "E131 Address: %u", _light->getE131LocalAddress());
+}

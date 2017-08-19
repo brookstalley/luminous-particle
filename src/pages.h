@@ -24,9 +24,24 @@
 #ifndef LUMINOUS_PAGES_H
 #define LUMINOUS_PAGES_H
 
+#include "page.h"
+#include "hsilight.h"
+
 class StatusPage : public Page {
 public:
 
+  void render();
+}
+
+class LightPage : public Page {
+private:
+
+  // Just calling it light because at some point we'll generalize lights to not always be HSI
+  const HSILight& _light;
+
+public:
+
+  LightPage(const HSILight *light);
   void render();
 }
 

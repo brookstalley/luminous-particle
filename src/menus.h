@@ -24,5 +24,8 @@
 #ifndef LUMINOUS_MENUS_H
 #define LUMINOUS_MENUS_H
 
+#include "page.h"
+
+Page* SetupMenus();
 
 #endif // ifndef LUMINOUS_MENUS_H

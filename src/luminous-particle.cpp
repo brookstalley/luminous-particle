@@ -29,6 +29,8 @@
 #include "modes.h"
 #include "credentials.h"
 #include "display.h"
+#include "page.h"
+#include "menus.h"
 
 #include "outputPCA9685.h"
 #include "temperatureAds1115.h"
@@ -59,6 +61,8 @@ bool displayMustUpdate = false;
 bool lightsMustUpdate  = false;
 
 unsigned int loopsPerSecond = 0.0f;
+
+Page *currentPage;
 
 ////////////////////////// Controllers and stuff
 Adafruit_SSD1351 screen(spi_pin_cs, spi_pin_dc, spi_pin_rst);
@@ -108,6 +112,7 @@ void setupDisplay() {
   debugPrint(DEBUG_TRACE, "setupDisplay: starting");
   display.begin();
   displayLine(0, "Starting...", DISPLAY_WHITE, DISPLAY_BLACK);
+  currentPage = SetupMenus(); // returns a Page* to the top level menu
   debugPrint(DEBUG_TRACE, "  Finished");
 }
 
@@ -301,6 +306,10 @@ void loopDisplay() {
 
   display.setTop()
   displayStatusBar();
+
+  currentPage->render();
+  return;
+
   display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Running:    %s",
                   TimeToString(millis() / 1000));
 

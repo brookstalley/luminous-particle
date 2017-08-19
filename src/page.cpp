@@ -22,12 +22,14 @@
 // **********************************************************
 
 #include "page.h"
+#include "display.h"
 
 Page::Page(const char *name, const Page *parent) :
   _name(name),
   _parentPage(parent) {}
 
 bool Page::render() {
+  display.println(_name);
   return true;
 }
 

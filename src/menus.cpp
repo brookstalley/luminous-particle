@@ -23,20 +23,25 @@
 #include "page.h"
 #include "pages.h"
 #include "menus.h"
+#include "luminous-particle.h"
 
-Menu topMenu = new Menu("Luminous", nullptr);
+Page* SetupMenus() {
+  Menu topMenu = new Menu("Luminous", nullptr);
 
-StatusPage status = new StatusPage("Status");
-topMenu->addChild(&status);
+  StatusPage status = new StatusPage("Status");
 
-Menu lightList = new Menu("Lights");
-foreach light {
-  LightPage lightPage = new LightPage(light);
-  lightList.addChild(&lightPage);
+  topMenu->addChild(&status);
+
+  Menu lightList = new Menu("Lights", &topMenu);
+
+  for (const auto& it : allLights) {
+    LightPage lightPage = new LightPage(*it);
+    lightList.addChild(&lightPage);
+  }
+  topMenu->addChild(&lightList);
+
+  E131Page e131Page = new E131Page("Monitor");
+  topMenu->addChild(&E131Page);
+
+  return &topMenu;
 }
-topMenu->addChild(&lightList);
-
-E131Page e131Page = new E131Page("Monitor");
-topMenu->addChild(&E131Page);
-
-Page *currentPage = topMenu;
