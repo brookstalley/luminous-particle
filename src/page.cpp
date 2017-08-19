@@ -23,13 +23,22 @@
 
 #include "page.h"
 #include "display.h"
+#include "ldebug.h"
 #include "luminous-particle.h"
 
-Page::Page(const char *name, const Page *parent) :
+Page::Page(const char *name, const std::shared_ptr<Page>parent) :
   _name(name),
   _parentPage(parent) {}
 
 bool Page::render() {
+  debugPrintf(DEBUG_TRACE, "Page::render begin (%s)", _name);
+  display.clear();
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, _name);
+  return true;
+}
+
+bool Page::update() {
+  debugPrintf(DEBUG_TRACE, "Page::update begin (%s)", _name);
   display.println(DISPLAY_WHITE, DISPLAY_BLACK, _name);
   return true;
 }
@@ -38,6 +47,18 @@ const char * Page::getName() {
   return _name;
 }
 
-const Page * Page::getParent() {
+const std::shared_ptr<Page>Page::getParent() {
   return _parentPage;
+}
+
+void Page::nextButton(int clicks) {
+  debugPrintf(DEBUG_TRACE, "Page::nextButton (%i)", clicks);
+}
+
+void Page::prevButton(int clicks) {
+  debugPrintf(DEBUG_TRACE, "Page::prevButton (%i)", clicks);
+}
+
+void Page::selectButton(int clicks) {
+  debugPrintf(DEBUG_TRACE, "Page::selectButton (%i)", clicks);
 }

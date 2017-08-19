@@ -28,22 +28,22 @@
 
 #include <utility>
 
-Page* SetupMenus() {
-  Menu *topMenu = new Menu("Luminous", nullptr);
+std::shared_ptr<Page>SetupMenus() {
+  std::shared_ptr<Menu> topMenu = std::make_shared<Menu>("Luminous", nullptr);
 
-  StatusPage *status = new StatusPage(topMenu);
+  std::shared_ptr<StatusPage> status = std::make_shared<StatusPage>(topMenu);
 
-  topMenu->addChild(*status);
+  topMenu->addChild(status);
 
-  Menu *lightList = new Menu("Lights", topMenu);
+  std::shared_ptr<Menu> lightList = std::make_shared<Menu>("Lights", topMenu);
 
   for (std::vector<std::shared_ptr<HSILight> >::const_iterator itspLight = allLights.begin();
        itspLight < allLights.end();
        itspLight++) {
-    LightPage *lightPage = new LightPage(*itspLight, lightList);
-    lightList->addChild(*lightPage);
+    std::shared_ptr<LightPage> lightPage = std::make_shared<LightPage>(*itspLight, lightList);
+    lightList->addChild(lightPage);
   }
-  topMenu->addChild(*lightList);
+  topMenu->addChild(lightList);
 
   // E131Page e131Page = new E131Page("Monitor");
   // topMenu->addChild(&E131Page);

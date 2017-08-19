@@ -62,15 +62,18 @@ bool lightsMustUpdate  = false;
 
 unsigned int loopsPerSecond = 0.0f;
 
-Page *currentPage;
-
 ////////////////////////// Screen type and size
 Adafruit_SSD1351 screen(spi_pin_cs, spi_pin_dc, spi_pin_rst);
 Display display(screen, 128, 128);
 
 ////////////////////////// Controllers and stuff
 ClickButton modeButton(MODE_BUTTON_PIN, LOW,  CLICKBTN_PULLUP);
-ResponsiveAnalogRead brightnessControl(BRIGHTNESS_PIN, true);
+ClickButton prevButton(PREV_BUTTON_PIN, LOW, CLICKBTN_PULLUP);
+ClickButton nextButton(NEXT_BUTTON_PIN, LOW, CLICKBTN_PULLUP);
+ClickButton selectButton(SELECT_BUTTON_PIN, LOW, CLICKBTN_PULLUP);
+
+ResponsiveAnalogRead  brightnessControl(BRIGHTNESS_PIN, true);
+std::shared_ptr<Page> currentPage;
 
 // Input and output devices
 std::shared_ptr<OutputPCA9685> mainOutput =
@@ -111,9 +114,15 @@ std::vector<std::shared_ptr<HSILight> > allLights = {
 
 void setupDisplay() {
   debugPrint(DEBUG_TRACE, "setupDisplay: starting");
+
+  screen.begin();
   display.begin();
+
   display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Starting...");
-  currentPage = SetupMenus(); // returns a Page* to the top level menu
+
+  currentPage = SetupMenus(); // returns a shared_ptr to the top level menu
+  display.clear();
+  currentPage->render();      // render it for the first time
   debugPrint(DEBUG_TRACE, "  Finished");
 }
 
@@ -239,6 +248,7 @@ void setup(void) {
 
   setupDisplay();
   setupNetwork();
+
   setupLEDs();
   setupControls();
   setupSensors();
@@ -251,19 +261,7 @@ void loopSensors() {}
 void loopInputs()  {}
 
 void loopLEDs() {
-  runCurrentMode();
-}
-
-char* TimeToString(unsigned long t)
-{
-  static char str[12];
-  long h = t / 3600;
-
-  t = t % 3600;
-  int m = t / 60;
-  int s = t % 60;
-  sprintf(str, "%02ld:%02d:%02d", h, m, s);
-  return str;
+  // runCurrentMode();
 }
 
 void displayStatusBar() {
@@ -295,7 +293,6 @@ void displayStatusBar() {
 }
 
 void loopDisplay() {
-  // Assumes monospace fonts
   const unsigned long  maxUpdateLagMillis = 500;
   static unsigned long lastUpdateMillis   = 0;
 
@@ -306,60 +303,10 @@ void loopDisplay() {
   if (!displayMustUpdate) return;
 
   display.setTop();
+
   displayStatusBar();
 
-  currentPage->render();
-  return;
-
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Running:    %s",
-                  TimeToString(millis() / 1000));
-
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Mode:       %s", getCurrentModeName());
-
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Loops/s:    %u",
-                  loopsPerSecond);
-
-  if (lastBrightnessRemote) {
-    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Brightness: [%2.0f%%]",
-                    globalBrightness * 100);
-  } else {
-    display.println(DISPLAY_WHITE, DISPLAY_BLACK,
-                    "Brightness: %2.0f%%",
-                    globalBrightness * 100);
-  }
-
-  // Hack for now to show first temperature
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK,
-                  "Temp:       %3.0f",
-                  allLights[0]->getTemperature());
-
-  // Hack to show first diagnostic
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK,
-                  "%s",
-                  allLights[0]->getDiagnostic());
-
-  char debugName[12];
-  getDebugLevelName(getDebugLevel(), debugName, sizeof(debugName));
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Debug:      %s", debugName);
-
-  if (wifiCurrentState == WIFI_CONNECTED) {
-    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "WiFi:       %s", WiFi.SSID());
-  } else {
-    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "WiFi:       Offline");
-  }
-
-  if (particleCurrentState == PARTICLE_CONNECTED) {
-    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Particle:   Online");
-  } else {
-    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Particle:   Offline");
-  }
-
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK,
-                  (particleDesiredState != particleCurrentState ?
-                   (particleDesiredState ==
-                    PARTICLE_CONNECTED ?
-                    "            Connecting" : "            Disconnecting")
-                   : ""));
+  currentPage->update();
 
   lastUpdateMillis  = millis();
   displayMustUpdate = false;
@@ -383,10 +330,20 @@ void loopControlBrightness() {
 }
 
 void loopControls() {
-  static int modeClicks = 0;
+  static int modeClicks   = 0;
+  static int prevClicks   = 0;
+  static int nextClicks   = 0;
+  static int selectClicks = 0;
 
   modeButton.Update();
-  modeClicks = modeButton.clicks;
+  prevButton.Update();
+  nextButton.Update();
+  selectButton.Update();
+
+  modeClicks   = modeButton.clicks;
+  prevClicks   = prevButton.clicks;
+  nextClicks   = nextButton.clicks;
+  selectClicks = selectButton.clicks;
 
   if (modeButton.clicks != 0) {
     if (modeClicks == 1) {
@@ -412,6 +369,21 @@ void loopControls() {
       setDebugLevel(getDebugLevel() + 1);
       displayMustUpdate = true;
     }
+  }
+
+  if (nextButton.clicks != 0) {
+    debugPrint(DEBUG_TRACE, "Next click");
+    currentPage->nextButton(nextClicks);
+  }
+
+  if (prevButton.clicks != 0) {
+    debugPrint(DEBUG_TRACE, "prev click");
+    currentPage->prevButton(prevClicks);
+  }
+
+  if (selectButton.clicks != 0) {
+    debugPrint(DEBUG_TRACE, "select click");
+    currentPage->selectButton(selectClicks);
   }
 
   loopControlBrightness();

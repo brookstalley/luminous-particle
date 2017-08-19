@@ -26,6 +26,6 @@
 
 #include "page.h"
 
-Page* SetupMenus();
+std::shared_ptr<Page>SetupMenus();
 
 #endif // ifndef LUMINOUS_MENUS_H

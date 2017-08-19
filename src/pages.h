@@ -26,13 +26,15 @@
 
 #include "page.h"
 #include "hsilight.h"
+#include <memory>
 
 class StatusPage : public Page {
 public:
 
-  StatusPage(const Page *parent) : Page("Status", parent) {}
+  StatusPage(const std::shared_ptr<Page>parent) : Page("Status", parent) {}
 
   bool render();
+  bool update();
 };
 
 class LightPage : public Page {
@@ -44,7 +46,7 @@ private:
 public:
 
   LightPage(const std::shared_ptr<HSILight>light,
-            const Page                    *parent);
+            const std::shared_ptr<Page>    parent);
 
   bool render();
 };

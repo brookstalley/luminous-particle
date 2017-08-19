@@ -40,22 +40,24 @@ Display::Display(Adafruit_GFX& screen, uint8_t width, uint8_t height) :
   _maxLines = (_height / _lineHeight) - 1;
   _nextLine = 1;
 
-  char **_lineDataPrevious = 0;
-  _lineDataPrevious = new char *[_maxLines + 1];
+  /*
+     char **_lineDataPrevious = 0;
+     _lineDataPrevious = new char *[_maxLines];
 
-  for (uint8_t i = 0; i <= _maxLines; i++) {
-    _lineDataPrevious[i] = new char[_charsPerLine + 1]();
-  }
+     for (uint8_t i = 0; i < _maxLines; i++) {
+      _lineDataPrevious[i] = new char[_charsPerLine + 1]();
+     }
+   */
 }
 
 void Display::begin() {
-  // _screen.begin();
   clear();
 }
 
 void Display::clear() {
   // Only use clear if you need the screen truly blank; it is slow
   _screen.fillScreen(DISPLAY_BLACK);
+  setTop();
 }
 
 void Display::setTop() {

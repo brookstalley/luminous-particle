@@ -22,12 +22,14 @@
 // **********************************************************
 
 #include "menu.h"
+#include "ldebug.h"
+#include "luminous-particle.h"
 
-Menu::Menu(const char *name, const Page *parentPage) : Page(name, parentPage) {
+Menu::Menu(const char *name, std::shared_ptr<Page>parentPage) : Page(name, parentPage) {
   _selectedItem = _childItems.begin();
 }
 
-void Menu::addChild(const Page& childItem) {
+void Menu::addChild(std::shared_ptr<Page>childItem) {
   _childItems.push_back(childItem);
   _selectedItem = _childItems.begin();
 }
@@ -47,4 +49,42 @@ bool Menu::movePrev() {
   }
   _selectedItem--;
   return true;
+}
+
+bool Menu::render() {
+  // Whatever we're doing for all pages
+  debugPrintf(DEBUG_TRACE, "Menu::render starting");
+  Page::render();
+
+  for (auto& itp : _childItems) {
+    if (itp != *_selectedItem) {
+      display.println(DISPLAY_WHITE, DISPLAY_BLACK, (*itp).getName());
+    }
+    else {
+      display.println(DISPLAY_BLACK, DISPLAY_WHITE, (*itp).getName());
+    }
+  }
+  return true;
+}
+
+bool Menu::update() {
+  return true;
+}
+
+void Menu::nextButton(int clicks) {
+  debugPrintf(DEBUG_TRACE, "Menu::nextButton (%i)", clicks);
+  moveNext();
+  currentPage->render();
+}
+
+void Menu::prevButton(int clicks) {
+  debugPrintf(DEBUG_TRACE, "Menu::prevButton (%i)", clicks);
+  movePrev();
+  currentPage->render();
+}
+
+void Menu::selectButton(int clicks) {
+  debugPrintf(DEBUG_TRACE, "Menu::selectButton (%i)", clicks);
+  currentPage = *_selectedItem;
+  currentPage->render();
 }

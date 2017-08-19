@@ -26,23 +26,30 @@
 
 #include "page.h"
 #include <vector>
+#include <memory>
 
 class Menu : public Page {
 private:
 
   // childItems can be another menu, or any Page
-  std::vector<Page>_childItems;
-  std::vector<Page>::iterator _selectedItem;
-
-public:
-
-  Menu(const char *name,
-       const Page *parentPage);
-  void addChild(const Page& childPage);
+  std::vector<std::shared_ptr<Page> >_childItems;
+  std::vector<std::shared_ptr<Page> >::iterator _selectedItem;
 
   bool moveNext();
   bool movePrev();
   bool selectItem();
+
+public:
+
+  Menu(const char          *name,
+       std::shared_ptr<Page>parentPage);
+  void addChild(std::shared_ptr<Page>childPage);
+
+  bool render();
+  bool update();
+  void nextButton(int clicks);
+  void prevButton(int clicks);
+  void selectButton(int clicks);
 };
 
 #endif // ifndef LUMINOUS_MENU_H

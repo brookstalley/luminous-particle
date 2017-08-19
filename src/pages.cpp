@@ -23,15 +23,88 @@
 
 #include "pages.h"
 #include "display.h"
+#include "modes.h"
+#include "debug.h"
+#include "particlefunctions.h"
 #include "luminous-particle.h"
+
+char* TimeToString(unsigned long t)
+{
+  static char str[12];
+  long h = t / 3600;
+
+  t = t % 3600;
+  int m = t / 60;
+  int s = t % 60;
+  sprintf(str, "%02ld:%02d:%02d", h, m, s);
+  return str;
+}
 
 bool StatusPage::render() {
   Page::render();
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "(status page)");
+
+  update();
+
+
   return true;
 }
 
-LightPage::LightPage(const std::shared_ptr<HSILight>light, const Page *parent)
+bool StatusPage::update() {
+  display.setTop();
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Running:    %s",
+                  TimeToString(millis() / 1000));
+
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Mode:       %s", getCurrentModeName());
+
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Loops/s:    %u",
+                  loopsPerSecond);
+
+  if (lastBrightnessRemote) {
+    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Brightness: [%2.0f%%]",
+                    globalBrightness * 100);
+  } else {
+    display.println(DISPLAY_WHITE, DISPLAY_BLACK,
+                    "Brightness: %2.0f%%",
+                    globalBrightness * 100);
+  }
+
+  // Hack for now to show first temperature
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK,
+                  "Temp:       %3.0f",
+                  allLights[0]->getTemperature());
+
+  // Hack to show first diagnostic
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK,
+                  "%s",
+                  allLights[0]->getDiagnostic());
+
+  char debugName[12];
+  getDebugLevelName(getDebugLevel(), debugName, sizeof(debugName));
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Debug:      %s", debugName);
+
+  if (wifiCurrentState == WIFI_CONNECTED) {
+    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "WiFi:       %s", WiFi.SSID());
+  } else {
+    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "WiFi:       Offline");
+  }
+
+  if (particleCurrentState == PARTICLE_CONNECTED) {
+    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Particle:   Online");
+  } else {
+    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Particle:   Offline");
+  }
+
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK,
+                  (particleDesiredState != particleCurrentState ?
+                   (particleDesiredState ==
+                    PARTICLE_CONNECTED ?
+                    "            Connecting" : "            Disconnecting")
+                   : ""));
+
+  return true;
+}
+
+LightPage::LightPage(const std::shared_ptr<HSILight>light, const std::shared_ptr<Page>parent)
   : Page(light->getName(), parent), _light(light) {}
 
 bool LightPage::render() {

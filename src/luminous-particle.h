@@ -25,6 +25,7 @@
 
 #include "display.h"
 #include "HSILight.h"
+#include "page.h"
 #include "ResponsiveAnalogRead/ResponsiveAnalogRead.h"
 
 #include <vector>
@@ -44,6 +45,9 @@
 #define TEMP_PIN A1
 #define BRIGHTNESS_PIN  A0
 #define MODE_BUTTON_PIN D4
+#define PREV_BUTTON_PIN D3
+#define NEXT_BUTTON_PIN D2
+#define SELECT_BUTTON_PIN A1
 
 extern float globalBrightness;
 extern bool  lastBrightnessRemote;
@@ -52,6 +56,9 @@ extern float LEDTempCelsius;
 
 extern bool displayMustUpdate;
 extern bool lightsMustUpdate;
+extern unsigned int loopsPerSecond;
+
+extern std::shared_ptr<Page> currentPage;
 
 extern ResponsiveAnalogRead brightnessControl;
 extern std::vector<std::shared_ptr<HSILight> > allLights;

@@ -24,21 +24,29 @@
 #ifndef LUMINOUS_PAGE_H
 #define LUMINOUS_PAGE_H
 
+#include <memory>
+
 class Page {
 private:
 
   const char *_name;
-  const Page *_parentPage;
+  const std::shared_ptr<Page>_parentPage;
 
 public:
 
-  Page(const char *name,
-       const Page *parent);
+  Page(const char          *name,
+       std::shared_ptr<Page>parent);
 
-  virtual bool render();
+  virtual bool               render();
+  virtual bool               update();
+  virtual void               nextButton(int clicks);
 
-  const char * getName();
-  const Page * getParent();
+  virtual void               prevButton(int clicks);
+
+  virtual void               selectButton(int clicks);
+
+  const char               * getName();
+  const std::shared_ptr<Page>getParent();
 };
 
 #endif // ifndef LUMINOUS_PAGE_H
