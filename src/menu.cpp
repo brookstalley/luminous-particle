@@ -27,7 +27,7 @@ Menu::Menu(const char *name, const Page *parentPage) : Page(name, parentPage) {
   _selectedItem = _childItems.begin();
 }
 
-Menu::addChild(const Page * childItem) {
+void Menu::addChild(const Page& childItem) {
   _childItems.push_back(childItem);
   _selectedItem = _childItems.begin();
 }
@@ -35,7 +35,7 @@ Menu::addChild(const Page * childItem) {
 bool Menu::moveNext() {
   _selectedItem++;
 
-  if (selectedItem == _childItems.end()) {
+  if (_selectedItem == _childItems.end()) {
     _selectedItem = _childItems.begin();
   }
   return true;
@@ -43,7 +43,7 @@ bool Menu::moveNext() {
 
 bool Menu::movePrev() {
   if (_selectedItem == _childItems.begin()) {
-    _selectedItem = _chiledItems.end();
+    _selectedItem = _childItems.end();
   }
   _selectedItem--;
   return true;

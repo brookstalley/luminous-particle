@@ -23,13 +23,14 @@
 // **********************************************************
 
 #include "display.h"
+#include "ldebug.h"
 
 #include "Adafruit-GFX-library/Adafruit_GFX.h"
 #include <math.h>
 
-Display::Display(Adafruit_GFX screen, uint8_t width, uint8_t height) :
+Display::Display(Adafruit_GFX& screen, uint8_t width, uint8_t height) :
   _screen(screen),
-  _width(Width),
+  _width(width),
   _height(height) {
   _lineHeight   = 9;
   _charWidth    = 6;
@@ -38,25 +39,34 @@ Display::Display(Adafruit_GFX screen, uint8_t width, uint8_t height) :
   // Reserve one line at the top for status display
   _maxLines = (_height / _lineHeight) - 1;
   _nextLine = 1;
+
+  char **_lineDataPrevious = 0;
+  _lineDataPrevious = new char *[_maxLines + 1];
+
+  for (uint8_t i = 0; i <= _maxLines; i++) {
+    _lineDataPrevious[i] = new char[_charsPerLine + 1]();
+  }
 }
 
-Display::clear() {
+void Display::begin() {
+  // _screen.begin();
+  clear();
+}
+
+void Display::clear() {
   // Only use clear if you need the screen truly blank; it is slow
-  display.fillScreen(DISPLAY_BLACK);
+  _screen.fillScreen(DISPLAY_BLACK);
 }
 
-Display::setTop() {
+void Display::setTop() {
   // Use setTop for text screens where we can cache the previous content
   // and be smart about what we erase
   _nextLine = 1;
 }
 
-void Display::println(
-  uint16_t fontColor,
-  uint16_t backColor, const char    *lineData, ) {
+void Display::println(uint16_t fontColor, uint16_t backColor, const char *lineData, ...) {
   va_list arguments;
-  static char lineDataPrevious[_maxLines][_charsPerLine + 1] = {};
-  char thisLine[_charsPerLine + 1];
+  char    thisLine[_charsPerLine + 1];
 
   if (_nextLine >= _maxLines) {
     debugPrintf(DEBUG_ERROR, "Display::println: exceeded screen size");
@@ -66,30 +76,30 @@ void Display::println(
   vsnprintf(thisLine, sizeof(thisLine), lineData, arguments);
   va_end(arguments);
 
-  screen.setTextColor(fontColor, backColor);
+  _screen.setTextColor(fontColor, backColor);
 
   // We always have 12 characters of label
   // So, clear the space from char 13 until the end (currently hardcoded at
   // 128)
-  if (strcmp(thisLine, lineDataPrevious[_nextLine]) != 0) {
+  if (strcmp(thisLine, _lineDataPrevious[_nextLine]) != 0) {
     // Print our new text
-    screen.setCursor(0, _nextLine * _lineHeight);
-    screen.println(thisLine);
+    _screen.setCursor(0, _nextLine * _lineHeight);
+    _screen.println(thisLine);
 
     // If the line we just printed is shorter than what was there before, clear to EOL
-    size_t lengthPrevious = strlen(lineDataPrevious[_nextLine]);
+    size_t lengthPrevious = strlen(_lineDataPrevious[_nextLine]);
     size_t lengthNew      = strlen(thisLine);
 
     if (lengthPrevious > lengthNew) {
       uint16_t left  = strlen(thisLine) * _charWidth;
       uint16_t top   = _nextLine * _lineHeight;
       uint16_t width = _width - (lengthNew * _charWidth);
-      screen.fillRect(left, top, width, _lineHeight, backColor);
+      _screen.fillRect(left, top, width, _lineHeight, backColor);
     }
 
     // Save the new text for next time
-    strncpy(lineDataPrevious[_nextLine],
-            thisLine, sizeof(lineDataPrevious[_nextLine]));
+    strncpy(_lineDataPrevious[_nextLine],
+            thisLine, _charsPerLine);
   }
   _nextLine++;
 }

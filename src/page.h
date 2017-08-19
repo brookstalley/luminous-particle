@@ -39,6 +39,6 @@ public:
 
   const char * getName();
   const Page * getParent();
-}
+};
 
 #endif // ifndef LUMINOUS_PAGE_H

@@ -23,19 +23,20 @@
 
 #include "pages.h"
 #include "display.h"
+#include "luminous-particle.h"
 
-void StatusPage::render() {
+bool StatusPage::render() {
   Page::render();
   display.println(DISPLAY_WHITE, DISPLAY_BLACK, "(status page)");
+  return true;
 }
 
-LightPage::LightPage(const HSILight& light) {
-  _name  = light->getName();
-  _light = light;
-}
+LightPage::LightPage(const std::shared_ptr<HSILight>light, const Page *parent)
+  : Page(light->getName(), parent), _light(light) {}
 
-void LightPage::render() {
+bool LightPage::render() {
   // Assume that we either were already on this page, or someone else called display.clear
   Page::render();
   display.println(DISPLAY_WHITE, DISPLAY_BLACK, "E131 Address: %u", _light->getE131LocalAddress());
+  return true;
 }

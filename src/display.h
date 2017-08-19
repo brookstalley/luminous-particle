@@ -48,12 +48,15 @@ private:
   uint8_t _charsPerLine;
   uint8_t _maxLines;
   uint8_t _nextLine;
+  char **_lineDataPrevious;
 
 public:
 
-  Display(Adafruit_GFX,
-          width,
-          height);
+  Display(Adafruit_GFX& screen,
+          uint8_t       width,
+          uint8_t       height);
+
+  void begin();
 
   void startPage(bool clearDisplay);
 
@@ -65,6 +68,6 @@ public:
 
   void clear();
   void setTop();
-}
+};
 
 #endif // ifndef LUMINOUS_DISPLAY_H

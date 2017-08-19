@@ -23,13 +23,14 @@
 
 #include "page.h"
 #include "display.h"
+#include "luminous-particle.h"
 
 Page::Page(const char *name, const Page *parent) :
   _name(name),
   _parentPage(parent) {}
 
 bool Page::render() {
-  display.println(_name);
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, _name);
   return true;
 }
 

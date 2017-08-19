@@ -64,10 +64,11 @@ unsigned int loopsPerSecond = 0.0f;
 
 Page *currentPage;
 
-////////////////////////// Controllers and stuff
+////////////////////////// Screen type and size
 Adafruit_SSD1351 screen(spi_pin_cs, spi_pin_dc, spi_pin_rst);
 Display display(screen, 128, 128);
 
+////////////////////////// Controllers and stuff
 ClickButton modeButton(MODE_BUTTON_PIN, LOW,  CLICKBTN_PULLUP);
 ResponsiveAnalogRead brightnessControl(BRIGHTNESS_PIN, true);
 
@@ -111,7 +112,7 @@ std::vector<std::shared_ptr<HSILight> > allLights = {
 void setupDisplay() {
   debugPrint(DEBUG_TRACE, "setupDisplay: starting");
   display.begin();
-  displayLine(0, "Starting...", DISPLAY_WHITE, DISPLAY_BLACK);
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Starting...");
   currentPage = SetupMenus(); // returns a Page* to the top level menu
   debugPrint(DEBUG_TRACE, "  Finished");
 }
@@ -281,10 +282,10 @@ void displayStatusBar() {
   }
 
   if (lastBrightnessRemote) {
-    snprintf(statusBar[12], sizeof(statusBar) - 12, "[%2.0f%%]",
+    snprintf(&statusBar[12], sizeof(statusBar) - 12, "[%2.0f%%]",
              globalBrightness * 100);
   } else {
-    snprintf(statusBar[12], sizeof(statusBar) - 12,
+    snprintf(&statusBar[12], sizeof(statusBar) - 12,
              "%2.0f%%",
              globalBrightness * 100);
   }
@@ -304,7 +305,7 @@ void loopDisplay() {
 
   if (!displayMustUpdate) return;
 
-  display.setTop()
+  display.setTop();
   displayStatusBar();
 
   currentPage->render();
@@ -348,9 +349,9 @@ void loopDisplay() {
   }
 
   if (particleCurrentState == PARTICLE_CONNECTED) {
-    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Particle:   Online")
+    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Particle:   Online");
   } else {
-    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Particle:   Offline")
+    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Particle:   Offline");
   }
 
   display.println(DISPLAY_WHITE, DISPLAY_BLACK,

@@ -33,24 +33,49 @@
 #include <algorithm>
 
 struct outputEmitter {
-	outputEmitter(uint8_t la, float pwr) {
-		outputLocalAddress = la;
-		power              = pwr;
-	}
-	uint16_t outputLocalAddress;
-	float power;
+  outputEmitter(uint8_t la, float pwr) {
+    outputLocalAddress = la;
+    power              = pwr;
+  }
+
+  uint16_t outputLocalAddress;
+  float    power;
 };
 
 struct colorspaceWedge {
+  colorspaceWedge(float          & sa,
+                  float          & ea,
+                  float          & sl,
+                  const Emitter *& e1,
+                  float          & e1u,
+                  float          & e1v,
+                  const Emitter *& e2,
+                  float          & e2u,
+                  float          & e2v) {
+    startAngle = sa;
+    endAngle   = ea;
+    slope      = sl;
+    emitter1   = e1;
+    e1ustar    = e1u;
+    e1vstar    = e2v;
+    emitter2   = e2;
+    e2ustar    = e2u;
+    e2vstar    = e2v;
+  }
+
   float          startAngle;
   float          endAngle;
   float          slope;
   const Emitter *emitter1;
+  float          e1ustar;
+  float          e1vstar;
   const Emitter *emitter2;
+  float          e2ustar;
+  float          e2vstar;
 };
 
 struct componentEmitter {
-  componentEmitter(const Emitter * e, uint16_t la, float a, float s, bool eo) {
+  componentEmitter(const Emitter *e, uint16_t la, float a, float s, bool eo) {
     emitter            = e;
     outputLocalAddress = la;
     angle              = a;
@@ -75,24 +100,26 @@ struct componentEmitter {
 class CompositeModule {
 private:
 
-  std::vector < std::shared_ptr < componentEmitter >> _colorEmitters;
-  std::vector < colorspaceWedge > _colorspaceWedges;
+  std::vector<std::shared_ptr<componentEmitter> >_colorEmitters;
+  std::vector<colorspaceWedge>_colorspaceWedges;
   componentEmitter _whiteEmitter;
   float _dimTemperature;
   float _shutdownTemperature;
 
 public:
 
-  CompositeModule(float dimTemperature, float shutdownTemperature);
-  void  addWhiteEmitter(const Emitter& white,
-                        uint16_t       outputLocalAddress);
-  void  addColorEmitter(const Emitter& emitter,
-                        uint16_t       outputLocalAddress,
-                        bool           effectOnly);
-  void  calculate();
-  float getAngle(int emitternum);
-  float getSlope(int emitternum);
-  std::vector < outputEmitter > emitterPowersFromHSI(const HSIColor &HSI) const;
+  CompositeModule(float dimTemperature,
+                  float shutdownTemperature);
+  void                      addWhiteEmitter(const Emitter& white,
+                                            uint16_t       outputLocalAddress);
+  void                      addColorEmitter(const Emitter& emitter,
+                                            uint16_t       outputLocalAddress,
+                                            bool           effectOnly);
+  void                      calculate();
+  float                     getAngle(int emitternum);
+  float                     getSlope(int emitternum);
+  std::vector<outputEmitter>emitterPowersFromHSI(const HSIColor& HSI) const;
+  std::vector<outputEmitter>emitterPowersFromHSI2(const HSIColor& HSI) const;
 };
 
 #endif /* ifndef COMPOSITEMODULE_H */

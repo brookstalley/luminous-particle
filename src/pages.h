@@ -30,19 +30,23 @@
 class StatusPage : public Page {
 public:
 
-  void render();
-}
+  StatusPage(const Page *parent) : Page("Status", parent) {}
+
+  bool render();
+};
 
 class LightPage : public Page {
 private:
 
   // Just calling it light because at some point we'll generalize lights to not always be HSI
-  const HSILight& _light;
+  const std::shared_ptr<HSILight>_light;
 
 public:
 
-  LightPage(const HSILight *light);
-  void render();
-}
+  LightPage(const std::shared_ptr<HSILight>light,
+            const Page                    *parent);
+
+  bool render();
+};
 
 #endif // ifndef LUMINOUS_PAGES_H

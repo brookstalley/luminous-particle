@@ -22,26 +22,31 @@
 // **********************************************************
 #include "page.h"
 #include "pages.h"
+#include "menu.h"
 #include "menus.h"
 #include "luminous-particle.h"
 
+#include <utility>
+
 Page* SetupMenus() {
-  Menu topMenu = new Menu("Luminous", nullptr);
+  Menu *topMenu = new Menu("Luminous", nullptr);
 
-  StatusPage status = new StatusPage("Status");
+  StatusPage *status = new StatusPage(topMenu);
 
-  topMenu->addChild(&status);
+  topMenu->addChild(*status);
 
-  Menu lightList = new Menu("Lights", &topMenu);
+  Menu *lightList = new Menu("Lights", topMenu);
 
-  for (const auto& it : allLights) {
-    LightPage lightPage = new LightPage(*it);
-    lightList.addChild(&lightPage);
+  for (std::vector<std::shared_ptr<HSILight> >::const_iterator itspLight = allLights.begin();
+       itspLight < allLights.end();
+       itspLight++) {
+    LightPage *lightPage = new LightPage(*itspLight, lightList);
+    lightList->addChild(*lightPage);
   }
-  topMenu->addChild(&lightList);
+  topMenu->addChild(*lightList);
 
-  E131Page e131Page = new E131Page("Monitor");
-  topMenu->addChild(&E131Page);
+  // E131Page e131Page = new E131Page("Monitor");
+  // topMenu->addChild(&E131Page);
 
-  return &topMenu;
+  return topMenu;
 }

@@ -31,17 +31,18 @@ class Menu : public Page {
 private:
 
   // childItems can be another menu, or any Page
-  std::vector<Menu>_childItems;
-  std::vector<Menu>::iterator _selectedItem;
+  std::vector<Page>_childItems;
+  std::vector<Page>::iterator _selectedItem;
 
 public:
 
-  Menu(const char *name);
-  addChild(Page * childPage);
+  Menu(const char *name,
+       const Page *parentPage);
+  void addChild(const Page& childPage);
 
   bool moveNext();
   bool movePrev();
   bool selectItem();
-}
+};
 
 #endif // ifndef LUMINOUS_MENU_H

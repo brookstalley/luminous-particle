@@ -1,4 +1,5 @@
-//*********************************************************
+// *********************************************************
+
 //
 // Luminous
 // Copyright 2017 Brooks Talley
@@ -18,10 +19,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Luminous.  If not, see <http://www.gnu.org/licenses/>.
 //
-//**********************************************************
+// **********************************************************
 #ifndef LUMINOUS_PARTICLE_H
 #define LUMINOUS_PARTICLE_H
 
+#include "display.h"
 #include "HSILight.h"
 #include "ResponsiveAnalogRead/ResponsiveAnalogRead.h"
 
@@ -44,7 +46,7 @@
 #define MODE_BUTTON_PIN D4
 
 extern float globalBrightness;
-extern bool lastBrightnessRemote;
+extern bool  lastBrightnessRemote;
 
 extern float LEDTempCelsius;
 
@@ -52,7 +54,8 @@ extern bool displayMustUpdate;
 extern bool lightsMustUpdate;
 
 extern ResponsiveAnalogRead brightnessControl;
-extern std::vector < std::shared_ptr < HSILight >> allLights;
+extern std::vector<std::shared_ptr<HSILight> > allLights;
+extern Display display;
 
 void setupDisplay();
 void setup(void);
