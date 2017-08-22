@@ -116,8 +116,8 @@ bool LightPage::render() {
 bool LightPage::update() {
   display.setTop();
 
-  HSIColor *color;
-  (*_itsplight)->getColor(color);
+  HSIColor color;
+  (*_itsplight)->getColor(&color);
   display.println(DISPLAY_CYAN,  DISPLAY_BLACK, "Light %s",        (*_itspLight)->getName());
   display.println(DISPLAY_WHITE, DISPLAY_BLACK, "  E131 Addr: %u", (*_itsplight)->getE131LocalAddress());
   display.println(DISPLAY_WHITE,
@@ -126,8 +126,9 @@ bool LightPage::update() {
                   color->getHue(),
                   color->getSaturation,
                   color->getIntensity);
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "%s",         (*_itsplight)->getDiagnostic());
-  display.println(DISPLAY_WHITE, DISPLAY_BLCAK, "  Temp: %f", (*_itsplight)->getTempterature());
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "%s",                    (*_itsplight)->getDiagnostic());
+  display.println(DISPLAY_WHITE, DISPLAY_BLCAK, "  Temp: %4.4f",         (*_itsplight)->getTempterature());
+  display.println(DISPLAY_WHITE, DISPLAY_BLCAK, "  Local bright: %2.0f", (*_itsplight)->getLocalBrightness());
 }
 
 void LightPage::nextButton(int clicks) {

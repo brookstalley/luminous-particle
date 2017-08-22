@@ -153,6 +153,10 @@ const char * HSILight::getDiagnostic(void) const {
   return _diagnostic;
 }
 
+const float HSILight::getLocalBrightness() const {
+  return _localBrightness;
+}
+
 std::shared_ptr<E131>HSILight::getE131() const {
   return _e131;
 }

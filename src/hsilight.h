@@ -94,6 +94,7 @@ public:
   float                updateTemperature();
   const char         * getName(void) const;
   const char         * getDiagnostic(void) const;
+  float                getLocalBrightness() const;
   void                 setSingleEmitterOn(unsigned int index);
 };
 
