@@ -26,6 +26,7 @@
 #include "modes.h"
 #include "debug.h"
 #include "hsicolor.h"
+#include "menus.h"
 #include "particlefunctions.h"
 #include "luminous-particle.h"
 
@@ -38,6 +39,18 @@ char* TimeToString(unsigned long t)
   int m = t / 60;
   int s = t % 60;
   sprintf(str, "%02ld:%02d:%02d", h, m, s);
+  return str;
+}
+
+char* IPtoString(IPAddress i) {
+  static char str[15];
+
+  byte oct1 = i[0];
+  byte oct2 = i[1];
+  byte oct3 = i[2];
+  byte oct4 = i[3];
+
+  sprintf(str, "%d.%d.%d.%d", oct0, oct1, oct2, oct3);
   return str;
 }
 
@@ -76,12 +89,7 @@ bool StatusPage::update() {
     // It is insane that the following line does not compile.
     // debugPrintf(DEBUG_TRACE, "  server=%s:%u", WiFi.localIP(),
     // mainUniverse->getUdpPort());
-    IPAddress localAddr = WiFi.localIP();
-    byte oct1           = localAddr[0];
-    byte oct2           = localAddr[1];
-    byte oct3           = localAddr[2];
-    byte oct4           = localAddr[3];
-    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "     %d.%d.%d.%d", oct1, oct2, oct3, oct4);
+    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "    %s", IPAddressToString(WiFi.localIP));
   } else {
     display.println(DISPLAY_WHITE, DISPLAY_BLACK, "WiFi:       Offline");
   }
@@ -148,6 +156,5 @@ void LightPage::prevButton(int clicks) {
 
 void LightPage::selectButton(int clicks) {
   debugPrintf(DEBUG_TRACE, "LightPage::selectButton (%i)", clicks);
-  currentPage = *_selectedItem;
-  currentPage->render();
+  menuPop();
 }

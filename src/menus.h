@@ -28,6 +28,7 @@
 
 extern std::vector<std::shared_ptr<Page> > menuStack;
 
-bool SetupMenus();
+bool setupMenus();
+bool menuPop();
 
 #endif // ifndef LUMINOUS_MENUS_H

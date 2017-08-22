@@ -74,17 +74,17 @@ bool Menu::update() {
 void Menu::nextButton(int clicks) {
   debugPrintf(DEBUG_TRACE, "Menu::nextButton (%i)", clicks);
   moveNext();
-  currentPage->render();
+  render();
 }
 
 void Menu::prevButton(int clicks) {
   debugPrintf(DEBUG_TRACE, "Menu::prevButton (%i)", clicks);
   movePrev();
-  currentPage->render();
+  render();
 }
 
 void Menu::selectButton(int clicks) {
   debugPrintf(DEBUG_TRACE, "Menu::selectButton (%i)", clicks);
-  pageStack.push_front(_selectedItem);
+  pageStack.push_front(*_selectedItem);
   pageStack[0].render();
 }

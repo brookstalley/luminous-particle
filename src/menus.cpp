@@ -30,7 +30,7 @@
 
 std::vector<std::shared_ptr<Page> > pageStack;
 
-bool SetupMenus() {
+bool setupMenus() {
   std::shared_ptr<Page> topMenu = std::make_shared<Menu>("Luminous");
   std::shared_ptr<Page> status  = std::make_shared<StatusPage>();
 
@@ -43,7 +43,7 @@ bool SetupMenus() {
   return true;
 }
 
-bool pagePop {
+bool menuPop() {
   if (pageStack.begin() != pageStack.back()) {
     menuStack.pop_front();
     return true;
