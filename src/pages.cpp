@@ -135,8 +135,15 @@ bool LightPage::update() {
                   color->getSaturation,
                   color->getIntensity);
   display.println(DISPLAY_WHITE, DISPLAY_BLACK, "%s",                    (*_itsplight)->getDiagnostic());
-  display.println(DISPLAY_WHITE, DISPLAY_BLCAK, "  Temp: %4.4f",         (*_itsplight)->getTempterature());
-  display.println(DISPLAY_WHITE, DISPLAY_BLCAK, "  Local bright: %2.0f", (*_itsplight)->getLocalBrightness());
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "  Temp: %4.4f",         (*_itsplight)->getTempterature());
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "  Local bright: %2.0f", (*_itsplight)->getLocalBrightness());
+  std::vector<outputEmitter> o = (*_itspLight)->getOutputEmitters();
+
+  for (const auto& it : o) {
+    if (*it->pwr > 0.0f) {
+      display.println(DISPLAY_WHITE, DISPLAY_BLACK, " %s : %4.4f", (*it)->emitter->getName(), (*it)->pwr);
+    }
+  }
 }
 
 void LightPage::nextButton(int clicks) {

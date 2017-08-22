@@ -261,7 +261,7 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI(
     } else {
       emitterPower = 0.0f;
     }
-    outputEmitter o((*itspEmitter)->outputLocalAddress, emitterPower);
+    outputEmitter o((*itspEmitter)->emitter, (*itspEmitter)->outputLocalAddress, emitterPower);
 
     emitterPowers.push_back(o);
 

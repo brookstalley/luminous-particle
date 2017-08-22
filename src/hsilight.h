@@ -84,18 +84,19 @@ public:
            const uint16_t                  e131LocalAddress); // TODO: Add multiple universe
                                                               // support
 
-  void                 begin();
-  void                 setColor(const HSIColor& color);
-  void                 getColor(HSIColor *) const;
-  void                 setTemperatureInterface(std::shared_ptr<TemperatureInterface>temperatureInterface);
-  std::shared_ptr<E131>getE131() const;
-  const uint16_t       getE131LocalAddress() const;
-  float                getTemperature();
-  float                updateTemperature();
-  const char         * getName(void) const;
-  const char         * getDiagnostic(void) const;
-  float                getLocalBrightness() const;
-  void                 setSingleEmitterOn(unsigned int index);
+  void                            begin();
+  void                            setColor(const HSIColor& color);
+  void                            getColor(HSIColor *) const;
+  void                            setTemperatureInterface(std::shared_ptr<TemperatureInterface>temperatureInterface);
+  std::shared_ptr<E131>           getE131() const;
+  const uint16_t                  getE131LocalAddress() const;
+  float                           getTemperature();
+  float                           updateTemperature();
+  const char                    * getName(void) const;
+  const char                    * getDiagnostic(void) const;
+  float                           getLocalBrightness() const;
+  void                            setSingleEmitterOn(unsigned int index);
+  const std::vector<outputEmitter>getOutputEmitters() const;
 };
 
 

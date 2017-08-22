@@ -188,3 +188,7 @@ float HSILight::getTemperature(void) {
     return -1.0f;
   }
 }
+
+const std::vector<outputEmitter>getOutputEmitters() const {
+  return _emitterPowers;
+}

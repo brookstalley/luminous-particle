@@ -33,11 +33,13 @@
 #include <algorithm>
 
 struct outputEmitter {
-  outputEmitter(uint8_t la, float pwr) {
+  outputEmitter(Emitter *e, uint8_t la, float pwr) {
+    emitter            = e;
     outputLocalAddress = la;
     power              = pwr;
   }
 
+  Emitter *emitter;
   uint16_t outputLocalAddress;
   float    power;
 };
