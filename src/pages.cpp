@@ -25,6 +25,7 @@
 #include "display.h"
 #include "modes.h"
 #include "debug.h"
+#include "hsicolor.h"
 #include "particlefunctions.h"
 #include "luminous-particle.h"
 
@@ -42,10 +43,7 @@ char* TimeToString(unsigned long t)
 
 bool StatusPage::render() {
   Page::render();
-
   update();
-
-
   return true;
 }
 
@@ -104,12 +102,28 @@ bool StatusPage::update() {
   return true;
 }
 
-LightPage::LightPage(const std::shared_ptr<HSILight>light, const std::shared_ptr<Page>parent)
-  : Page(light->getName(), parent), _light(light) {}
+LightPage::LightPage(const std::shared_ptr<HSILight>light)
+  : Page(light->getName()), _light(light) {}
 
 bool LightPage::render() {
   // Assume that we either were already on this page, or someone else called display.clear
   Page::render();
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "E131 Address: %u", _light->getE131LocalAddress());
   return true;
+}
+
+bool LightPage::update() {
+  display.setTop();
+
+  HSIColor *color;
+  _light->getColor(color);
+
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "E131 Address: %u", _light->getE131LocalAddress());
+  display.println(DISPLAY_WHITE,
+                  DISPLAY_BLACK,
+                  "HSI: %4.4f, %4.4f, %4.4f",
+                  color->getHue(),
+                  color->getSaturation,
+                  color->getIntensity);
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "%u",       _light->getE131LocalAddress());
+  display.println(DISPLAY_WHITE, DISPLAY_BLCAK, "Temp: %f", _light->getTempterature());
 }

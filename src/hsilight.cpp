@@ -111,6 +111,10 @@ void HSILight::setColor(const HSIColor& color)  {
   setEmitters();
 }
 
+void HSILight::getColor(HSIColor *color) const {
+  color = _lastColor;
+}
+
 void HSILight::setSingleEmitterOn(unsigned int index) {
   debugPrintf(DEBUG_INSANE,
               "HSILight: Setting single emitter for index %u (%u)",

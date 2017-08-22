@@ -28,14 +28,13 @@
 
 #include <utility>
 
+std::vector<std::shared_ptr<Page> > pageStack;
+
 std::shared_ptr<Page>SetupMenus() {
-  std::shared_ptr<Menu> topMenu = std::make_shared<Menu>("Luminous", nullptr);
+  std::shared_ptr<Menu> topMenu    = std::make_shared<Menu>("Luminous");
+  std::shared_ptr<Menu> statusMenu = std::make_shared<StatusMenu>();
 
-  std::shared_ptr<StatusPage> status = std::make_shared<StatusPage>(topMenu);
-
-  topMenu->addChild(status);
-
-  std::shared_ptr<Menu> lightList = std::make_shared<Menu>("Lights", topMenu);
+  std::shared_ptr<Menu> lightList = std::make_shared<Menu>("Lights");
 
   for (std::vector<std::shared_ptr<HSILight> >::const_iterator itspLight = allLights.begin();
        itspLight < allLights.end();
@@ -44,9 +43,16 @@ std::shared_ptr<Page>SetupMenus() {
     lightList->addChild(lightPage);
   }
   topMenu->addChild(lightList);
+  topMenu->addChild(statusMenu);
 
-  // E131Page e131Page = new E131Page("Monitor");
-  // topMenu->addChild(&E131Page);
+  pageStack.push_front(topMenu);
+  return true;
+}
 
-  return topMenu;
+bool menuPop {
+  if (pageStack.begin() != pageStack.back()) {
+    menuStack.pop_front();
+    return true;
+  }
+  return false;
 }

@@ -31,7 +31,7 @@
 class StatusPage : public Page {
 public:
 
-  StatusPage(const std::shared_ptr<Page>parent) : Page("Status", parent) {}
+  StatusPage() : Page("Status") {}
 
   bool render();
   bool update();
@@ -45,8 +45,8 @@ private:
 
 public:
 
-  LightPage(const std::shared_ptr<HSILight>light,
-            const std::shared_ptr<Page>    parent);
+  LightPage(const std::shared_ptr<HSILight>light
+            );
 
   bool render();
 };

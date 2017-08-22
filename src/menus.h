@@ -26,6 +26,8 @@
 
 #include "page.h"
 
-std::shared_ptr<Page>SetupMenus();
+extern std::vector<std::shared_ptr<Page> > menuStack;
+
+bool SetupMenus();
 
 #endif // ifndef LUMINOUS_MENUS_H

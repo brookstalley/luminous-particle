@@ -42,10 +42,14 @@ Display::Display(Adafruit_GFX& screen, uint8_t width, uint8_t height) :
 
   /*
      char **_lineDataPrevious = 0;
+     uint16_t **_colorDataPrevious = 0;
      _lineDataPrevious = new char *[_maxLines];
+     _colorDataPrevious = new uint16_t[2];
 
      for (uint8_t i = 0; i < _maxLines; i++) {
       _lineDataPrevious[i] = new char[_charsPerLine + 1]();
+      _colorDataPrevious[i][1] = new uint16_t(0);
+      _colorDataPrevious[i][2] = new uint16_t(0);
      }
    */
 }
@@ -83,7 +87,9 @@ void Display::println(uint16_t fontColor, uint16_t backColor, const char *lineDa
   // We always have 12 characters of label
   // So, clear the space from char 13 until the end (currently hardcoded at
   // 128)
-  if (strcmp(thisLine, _lineDataPrevious[_nextLine]) != 0) {
+  if ((fontColor != _colorDataPrevious[_nextLine][0]) ||
+      (backColor != _colorDataPreviosi[_nextLine][1]) ||
+      (strcmp(thisLine, _lineDataPrevious[_nextLine]) != 0)) {
     // Print our new text
     _screen.setCursor(0, _nextLine * _lineHeight);
     _screen.println(thisLine);
@@ -102,6 +108,8 @@ void Display::println(uint16_t fontColor, uint16_t backColor, const char *lineDa
     // Save the new text for next time
     strncpy(_lineDataPrevious[_nextLine],
             thisLine, _charsPerLine);
+    _colorDataPrevious[_nextLine][0] = fontColor;
+    _colorDataPreviois[_nextLine][1] = backColor;
   }
   _nextLine++;
 }

@@ -25,7 +25,7 @@
 #include "ldebug.h"
 #include "luminous-particle.h"
 
-Menu::Menu(const char *name, std::shared_ptr<Page>parentPage) : Page(name, parentPage) {
+Menu::Menu(const char *name) : Page(name) {
   _selectedItem = _childItems.begin();
 }
 
