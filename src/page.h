@@ -29,24 +29,19 @@
 class Page {
 private:
 
-  const char *_name;
-  const std::shared_ptr<Page>_parentPage;
+  char *_name;
 
 public:
 
-  Page(const char          *name,
-       std::shared_ptr<Page>parent);
+  Page(const char *name);
 
-  virtual bool               render();
-  virtual bool               update();
-  virtual void               nextButton(int clicks);
-
-  virtual void               prevButton(int clicks);
-
-  virtual void               selectButton(int clicks);
-
-  const char               * getName();
-  const std::shared_ptr<Page>getParent();
+  virtual bool render();
+  virtual bool update();
+  virtual void nextButton(int clicks);
+  virtual void prevButton(int clicks);
+  virtual void selectButton(int clicks);
+  const char * getName();
+  void         setName(const char *name);
 };
 
 #endif // ifndef LUMINOUS_PAGE_H

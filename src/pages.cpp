@@ -66,22 +66,22 @@ bool StatusPage::update() {
                     globalBrightness * 100);
   }
 
-  // Hack for now to show first temperature
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK,
-                  "Temp:       %3.0f",
-                  allLights[0]->getTemperature());
-
-  // Hack to show first diagnostic
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK,
-                  "%s",
-                  allLights[0]->getDiagnostic());
-
   char debugName[12];
   getDebugLevelName(getDebugLevel(), debugName, sizeof(debugName));
   display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Debug:      %s", debugName);
 
   if (wifiCurrentState == WIFI_CONNECTED) {
     display.println(DISPLAY_WHITE, DISPLAY_BLACK, "WiFi:       %s", WiFi.SSID());
+
+    // It is insane that the following line does not compile.
+    // debugPrintf(DEBUG_TRACE, "  server=%s:%u", WiFi.localIP(),
+    // mainUniverse->getUdpPort());
+    IPAddress localAddr = WiFi.localIP();
+    byte oct1           = localAddr[0];
+    byte oct2           = localAddr[1];
+    byte oct3           = localAddr[2];
+    byte oct4           = localAddr[3];
+    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "     %d.%d.%d.%d", oct1, oct2, oct3, oct4);
   } else {
     display.println(DISPLAY_WHITE, DISPLAY_BLACK, "WiFi:       Offline");
   }
@@ -102,8 +102,10 @@ bool StatusPage::update() {
   return true;
 }
 
-LightPage::LightPage(const std::shared_ptr<HSILight>light)
-  : Page(light->getName()), _light(light) {}
+LightPage::LightPage() {
+  // When constructed, we point to the first light
+  _itsplight = allLights.begin();
+}
 
 bool LightPage::render() {
   // Assume that we either were already on this page, or someone else called display.clear
@@ -115,15 +117,36 @@ bool LightPage::update() {
   display.setTop();
 
   HSIColor *color;
-  _light->getColor(color);
-
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "E131 Address: %u", _light->getE131LocalAddress());
+  (*_itsplight)->getColor(color);
+  display.println(DISPLAY_CYAN,  DISPLAY_BLACK, "Light %s",        (*_itspLight)->getName());
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "  E131 Addr: %u", (*_itsplight)->getE131LocalAddress());
   display.println(DISPLAY_WHITE,
                   DISPLAY_BLACK,
-                  "HSI: %4.4f, %4.4f, %4.4f",
+                  "  HSI: %4.4f, %4.4f, %4.4f",
                   color->getHue(),
                   color->getSaturation,
                   color->getIntensity);
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "%u",       _light->getE131LocalAddress());
-  display.println(DISPLAY_WHITE, DISPLAY_BLCAK, "Temp: %f", _light->getTempterature());
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "%s",         (*_itsplight)->getDiagnostic());
+  display.println(DISPLAY_WHITE, DISPLAY_BLCAK, "  Temp: %f", (*_itsplight)->getTempterature());
+}
+
+void LightPage::nextButton(int clicks) {
+  debugPrintf(DEBUG_TRACE, "LightPage::nextButton (%i)", clicks);
+
+  if (++_itspLight == allLights.end()) _itspLight = allLights.begin();
+  render();
+}
+
+void LightPage::prevButton(int clicks) {
+  if (_itspLight == allLights.begin()) {
+    _itspLight = allLights.end();
+  }
+  _itsplight--;
+  render();
+}
+
+void LightPage::selectButton(int clicks) {
+  debugPrintf(DEBUG_TRACE, "LightPage::selectButton (%i)", clicks);
+  currentPage = *_selectedItem;
+  currentPage->render();
 }

@@ -85,6 +85,6 @@ void Menu::prevButton(int clicks) {
 
 void Menu::selectButton(int clicks) {
   debugPrintf(DEBUG_TRACE, "Menu::selectButton (%i)", clicks);
-  currentPage = *_selectedItem;
-  currentPage->render();
+  pageStack.push_front(_selectedItem);
+  pageStack[0].render();
 }

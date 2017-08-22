@@ -36,7 +36,6 @@
 #define DISPLAY_YELLOW          0xFFE0
 #define DISPLAY_WHITE           0xFFFF
 
-
 class Display {
 private:
 
@@ -49,6 +48,7 @@ private:
   uint8_t _maxLines;
   uint8_t _nextLine;
   char **_lineDataPrevious;
+  uint16_t **colorDataPrevious;
 
 public:
 

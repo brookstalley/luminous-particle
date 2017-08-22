@@ -133,6 +133,7 @@ void HSILight::setSingleEmitterOn(unsigned int index) {
 }
 
 void HSILight::setEmitters() {
+  // TODO: Move diagnostic calculation to getDiagnostic so it doesn't run so often
   debugPrint(DEBUG_INSANE, "HSILight::setEmitters start");
   _diagnostic[0] = '\0';
 

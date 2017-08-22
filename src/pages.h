@@ -26,7 +26,10 @@
 
 #include "page.h"
 #include "hsilight.h"
+#include <vector>
 #include <memory>
+
+// Each page is a derived class from the main page
 
 class StatusPage : public Page {
 public:
@@ -41,12 +44,11 @@ class LightPage : public Page {
 private:
 
   // Just calling it light because at some point we'll generalize lights to not always be HSI
-  const std::shared_ptr<HSILight>_light;
+  cstd::vector<std::shared_ptr<HSILight> >::iterator _itspLight;
 
 public:
 
-  LightPage(const std::shared_ptr<HSILight>light
-            );
+  LightPage(const std::shared_ptr<HSILight>light) : Page("Lights");
 
   bool render();
 };

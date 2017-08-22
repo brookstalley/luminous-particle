@@ -26,9 +26,9 @@
 #include "ldebug.h"
 #include "luminous-particle.h"
 
-Page::Page(const char *name, const std::shared_ptr<Page>parent) :
+Page::Page(char *name) :
   _name(name),
-  _parentPage(parent) {}
+{}
 
 bool Page::render() {
   debugPrintf(DEBUG_TRACE, "Page::render begin (%s)", _name);
@@ -47,8 +47,8 @@ const char * Page::getName() {
   return _name;
 }
 
-const std::shared_ptr<Page>Page::getParent() {
-  return _parentPage;
+void Page::setName(const char *name) {
+  _name = name;
 }
 
 void Page::nextButton(int clicks) {
