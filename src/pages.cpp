@@ -85,7 +85,7 @@ bool StatusPage::update() {
 
   if (wifiCurrentState == WIFI_CONNECTED) {
     display.println(DISPLAY_WHITE, DISPLAY_BLACK, "WiFi:       %s", WiFi.SSID());
-    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "    %s",         IPAddressToString(WiFi.localIP));
+    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "    %s",         IPAddressToString(WiFi.localIP()));
   } else {
     display.println(DISPLAY_WHITE, DISPLAY_BLACK, "WiFi:       Offline");
   }
@@ -122,7 +122,7 @@ bool LightPage::update() {
 
   const HSIColor color = (*_itspLight)->getColor();
   display.println(DISPLAY_CYAN,  DISPLAY_BLACK, "Light: %s",             (*_itspLight)->getName());
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "  Temp: %4.4f",         (*_itspLight)->getTempterature());
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "  Temp: %4.4f",         (*_itspLight)->getTemperature());
   display.println(DISPLAY_WHITE, DISPLAY_BLACK, "  Local bright: %2.0f", (*_itspLight)->getLocalBrightness());
   display.println(DISPLAY_WHITE, DISPLAY_BLACK, "  E131 Addr: %u",       (*_itspLight)->getE131LocalAddress());
   display.println(DISPLAY_WHITE, DISPLAY_BLACK, "%s",                    (*_itspLight)->getDiagnostic());
@@ -135,8 +135,8 @@ bool LightPage::update() {
   std::vector<outputEmitter> o = (*_itspLight)->getOutputEmitters();
 
   for (const auto& it : o) {
-    if ((*it).pwr > 0.0f) {
-      display.println(DISPLAY_WHITE, DISPLAY_BLACK, " %s : %4.4f", (*it).emitter->getName(), (*it).pwr);
+    if (it.power > 0.0f) {
+      display.println(DISPLAY_WHITE, DISPLAY_BLACK, " %s : %4.4f", it.emitter->getName(), it.power);
     }
   }
   return true;
