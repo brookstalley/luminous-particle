@@ -88,7 +88,7 @@ void Display::println(uint16_t fontColor, uint16_t backColor, const char *lineDa
   // So, clear the space from char 13 until the end (currently hardcoded at
   // 128)
   if ((fontColor != _colorDataPrevious[_nextLine][0]) ||
-      (backColor != _colorDataPreviosi[_nextLine][1]) ||
+      (backColor != _colorDataPrevious[_nextLine][1]) ||
       (strcmp(thisLine, _lineDataPrevious[_nextLine]) != 0)) {
     // Print our new text
     _screen.setCursor(0, _nextLine * _lineHeight);
@@ -109,7 +109,7 @@ void Display::println(uint16_t fontColor, uint16_t backColor, const char *lineDa
     strncpy(_lineDataPrevious[_nextLine],
             thisLine, _charsPerLine);
     _colorDataPrevious[_nextLine][0] = fontColor;
-    _colorDataPreviois[_nextLine][1] = backColor;
+    _colorDataPrevious[_nextLine][1] = backColor;
   }
   _nextLine++;
 }

@@ -61,7 +61,7 @@ extern unsigned int loopsPerSecond;
 
 extern ResponsiveAnalogRead brightnessControl;
 extern std::vector<std::shared_ptr<HSILight> > allLights;
-extern std::vector<shared_ptr<Page> > pageStack;
+extern std::vector<std::shared_ptr<Page> > pageStack;
 extern Display display;
 
 void setupDisplay();

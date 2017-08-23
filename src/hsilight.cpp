@@ -111,7 +111,7 @@ void HSILight::setColor(const HSIColor& color)  {
   setEmitters();
 }
 
-void HSILight::getColor(HSIColor *color) const {
+void HSILight::getColor(HSIColor& color) const {
   color = _lastColor;
 }
 
@@ -189,6 +189,6 @@ float HSILight::getTemperature(void) {
   }
 }
 
-const std::vector<outputEmitter>getOutputEmitters() const {
+const std::vector<outputEmitter>HSILight::getOutputEmitters() const {
   return _emitterPowers;
 }

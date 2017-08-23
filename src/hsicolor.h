@@ -32,7 +32,9 @@ private:
 
 public:
 
-  HSIColor(float hue, float saturation, float intensity);
+  HSIColor(float hue,
+           float saturation,
+           float intensity);
   HSIColor(void);
   void        setHue(float hue);
   void        setSaturation(float saturation);
@@ -50,7 +52,7 @@ public:
   const float getSaturation(void) const;
   const float getIntensity(void) const;
   void        getHSI(float *HSI);
-  bool operator == (const HSIColor &other) const;
+  bool        operator==(const HSIColor& other) const;
 };
 
 #endif /* ifndef HSICOLOR_H */

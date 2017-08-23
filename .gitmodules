@@ -1,6 +1,3 @@
-[submodule "lib/Adafruit-GFX-Library"]
-	path = lib/Adafruit-GFX-Library
-	url = https://github.com/brookstalley/Adafruit-GFX-Library.git
 [submodule "lib/PCA9685-Particle"]
 	path = lib/PCA9685-Particle
 	url = https://github.com/brookstalley/PCA9685-Particle.git
@@ -19,3 +16,9 @@
 [submodule "lib/E131"]
 	path = lib/E131
 	url = https://github.com/brookstalley/E131.git
+[submodule "lib/--force"]
+	path = lib/--force
+	url = https://github.com/brookstalley/Adafruit-GFX-Library.git
+[submodule "lib/Adafruit-GFX-Library"]
+	path = lib/Adafruit-GFX-Library
+	url = https://github.com/brookstalley/Adafruit-GFX-Library.git

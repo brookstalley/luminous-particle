@@ -48,7 +48,7 @@ private:
   uint8_t _maxLines;
   uint8_t _nextLine;
   char **_lineDataPrevious;
-  uint16_t **colorDataPrevious;
+  uint16_t **_colorDataPrevious;
 
 public:
 
