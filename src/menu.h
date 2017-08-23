@@ -33,7 +33,8 @@ private:
   // childItems can be another menu, or any Page
   std::vector<Page>_childItems;
   std::vector<Page>::iterator _selectedItem;
-
+  bool render();
+  bool update();
   bool moveNext();
   bool movePrev();
   bool selectItem();
@@ -41,7 +42,7 @@ private:
 public:
 
   Menu(const char *name);
-  virtual void addChild(Page *childPage);
+  void         addChild(const std::shared_ptr<Page>);
 
   virtual void nextButton(int clicks);
   virtual void prevButton(int clicks);
