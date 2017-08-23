@@ -100,8 +100,7 @@ void CompositeModule::calculate() {
             [](std::shared_ptr<componentEmitter>a,
                std::shared_ptr<componentEmitter>b) {
     return b->angle > a->angle;
-  }
-            );
+  });
 
   // Recalculate all slopes and ustar / vtar
   for (auto it = _colorEmitters.begin(); it != _colorEmitters.end(); it++) {
@@ -194,9 +193,7 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI(
   float S = HSI.getSaturation();
   float I = HSI.getIntensity();
 
-  float tanH = tan(M_PI * fmod(H, 360) / (float)180); // Get the tangent since
-
-  // we will use it often.
+  float tanH = tan(M_PI * fmod(H, 360) / (float)180); // Get the tangent since we will use it often.
 
   std::shared_ptr<componentEmitter> emitter1;
   std::shared_ptr<componentEmitter> emitter2;
@@ -371,7 +368,6 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI2(
       emitterPower = 0.0f;
     }
     outputEmitter o((*itspEmitter)->emitter, (*itspEmitter)->outputLocalAddress, emitterPower);
-
     emitterPowers.push_back(o);
   }
 
@@ -380,8 +376,8 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI2(
                                         I * (1 - S)));
 
   if ((emitter1power > 1.0f) || (emitter2power > 1.0f)) {
-    debugPrintf(DEBUG_INSANE,
-                "t: %f, e1u: %f, e2u: %f, e2v: %f I: %3.2f S: %3.2f u: %f v: %f p1: %f p2: %f",
+    debugPrintf(DEBUG_ERROR,
+                "Power>1: t: %f, e1u: %f, e2u: %f, e2v: %f I: %3.2f S: %3.2f u: %f v: %f p1: %f p2: %f",
                 tanH,
                 wedge.e1ustar,
                 wedge.e2ustar,
