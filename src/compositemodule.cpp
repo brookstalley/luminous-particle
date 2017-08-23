@@ -275,7 +275,7 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI(
   }
 
   // Add white to the end, and set the power based on saturation
-  emitterPowers.push_back(outputEmitter(_whiteEmitter.outputLocalAddress,
+  emitterPowers.push_back(outputEmitter(_whiteEmitter.emitter, _whiteEmitter.outputLocalAddress,
                                         I * (1 - S)));
 
   if ((emitter1power > 1.0f) || (emitter2power > 1.0f)) {
@@ -370,13 +370,13 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI2(
     } else {
       emitterPower = 0.0f;
     }
-    outputEmitter o((*itspEmitter)->outputLocalAddress, emitterPower);
+    outputEmitter o((*itspEmitter)->emitter, (*itspEmitter)->outputLocalAddress, emitterPower);
 
     emitterPowers.push_back(o);
   }
 
   // Add white to the end, and set the power based on saturation
-  emitterPowers.push_back(outputEmitter(_whiteEmitter.outputLocalAddress,
+  emitterPowers.push_back(outputEmitter(_whiteEmitter.emitter, _whiteEmitter.outputLocalAddress,
                                         I * (1 - S)));
 
   if ((emitter1power > 1.0f) || (emitter2power > 1.0f)) {
