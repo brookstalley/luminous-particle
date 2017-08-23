@@ -51,9 +51,15 @@ public:
 };
 
 class ModeRotate : public Mode {
+private:
+
+  HSIColor _rotateColor;
+
 public:
 
   using Mode::Mode;
+  bool doRotate();
+  bool start(std::vector<std::shared_ptr<HSILight> >);
   bool run(std::vector<std::shared_ptr<HSILight> >,
            bool);
 };

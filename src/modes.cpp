@@ -81,10 +81,18 @@ bool ModeTest::run(std::vector<std::shared_ptr<HSILight> >lights,
   return true;
 }
 
-bool ModeRotate::run(std::vector<std::shared_ptr<HSILight> >lights,
-                     bool                                   lightsMustUpdate) {
+bool ModeRotate::start(std::vector<std::shared_ptr<HSILight> >lights) {
+  _rotateColor = HSIColor(0, 1.0f, 0.5f);
+  debugPrintf(DEBUG_INSANE, "Rotate: setting colors");
+  std::for_each(lights.begin(),
+                lights.end(),
+                [&](std::shared_ptr<HSILight>light) {
+    light->setColor(_rotateColor);
+  });
   return true;
+}
 
+bool ModeRotate::doRotation() {
   const unsigned int millisPerHueRotation = 1000 * 60;
   const unsigned int millisPerSatRotation = millisPerHueRotation * 2;
 
@@ -118,13 +126,18 @@ bool ModeRotate::run(std::vector<std::shared_ptr<HSILight> >lights,
     satDir = 1;
   }
   debugPrintf(DEBUG_INSANE,
-              "H: %3.0f (+ %3.3f, %lu) S: %3.2f I: 1.0",
+              "H: %3.0f (+ %3.3f, %lu) S: %3.2f I: 0.5f",
               hue,
               hueToAdd,
               millisPassed,
               sat);
-
   rotateColor.setHSI(hue, sat, 0.5f);
+}
+
+bool ModeRotate::run(std::vector<std::shared_ptr<HSILight> >lights,
+                     bool                                   lightsMustUpdate) {
+  doRotate();
+
   std::for_each(lights.begin(), lights.end(), [&](std::shared_ptr<HSILight>val) {
     val->setColor(rotateColor);
   });
