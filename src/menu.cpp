@@ -21,6 +21,7 @@
 //
 // **********************************************************
 
+#include "page.h"
 #include "menu.h"
 #include "ldebug.h"
 #include "luminous-particle.h"
@@ -87,4 +88,5 @@ void Menu::selectButton(int clicks) {
   debugPrintf(DEBUG_TRACE, "Menu::selectButton (%i)", clicks);
   pageStack.push_front(*_selectedItem);
   pageStack[0].render();
+}
 }

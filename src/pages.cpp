@@ -85,11 +85,7 @@ bool StatusPage::update() {
 
   if (wifiCurrentState == WIFI_CONNECTED) {
     display.println(DISPLAY_WHITE, DISPLAY_BLACK, "WiFi:       %s", WiFi.SSID());
-
-    // It is insane that the following line does not compile.
-    // debugPrintf(DEBUG_TRACE, "  server=%s:%u", WiFi.localIP(),
-    // mainUniverse->getUdpPort());
-    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "    %s", IPAddressToString(WiFi.localIP));
+    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "    %s",         IPAddressToString(WiFi.localIP));
   } else {
     display.println(DISPLAY_WHITE, DISPLAY_BLACK, "WiFi:       Offline");
   }
@@ -126,17 +122,17 @@ bool LightPage::update() {
 
   HSIColor color;
   (*_itsplight)->getColor(&color);
-  display.println(DISPLAY_CYAN,  DISPLAY_BLACK, "Light %s",        (*_itspLight)->getName());
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "  E131 Addr: %u", (*_itsplight)->getE131LocalAddress());
+  display.println(DISPLAY_CYAN,  DISPLAY_BLACK, "Light: %s",             (*_itspLight)->getName());
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "  Temp: %4.4f",         (*_itsplight)->getTempterature());
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "  Local bright: %2.0f", (*_itsplight)->getLocalBrightness());
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "  E131 Addr: %u",       (*_itsplight)->getE131LocalAddress());
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "%s",                    (*_itsplight)->getDiagnostic());
   display.println(DISPLAY_WHITE,
                   DISPLAY_BLACK,
                   "  HSI: %4.4f, %4.4f, %4.4f",
                   color->getHue(),
                   color->getSaturation,
                   color->getIntensity);
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "%s",                    (*_itsplight)->getDiagnostic());
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "  Temp: %4.4f",         (*_itsplight)->getTempterature());
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "  Local bright: %2.0f", (*_itsplight)->getLocalBrightness());
   std::vector<outputEmitter> o = (*_itspLight)->getOutputEmitters();
 
   for (const auto& it : o) {

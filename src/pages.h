@@ -30,7 +30,6 @@
 #include <memory>
 
 // Each page is a derived class from the main page
-
 class StatusPage : public Page {
 public:
 

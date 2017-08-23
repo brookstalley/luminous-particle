@@ -1,4 +1,5 @@
-//*********************************************************
+// *********************************************************
+
 //
 // Luminous
 // Copyright 2017 Brooks Talley
@@ -18,7 +19,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Luminous.  If not, see <http://www.gnu.org/licenses/>.
 //
-//**********************************************************
+// **********************************************************
 
 // Do not try to change this file to debug.h, or use DEBUG_H as the
 // include guard. It will make you very unhappy.
@@ -30,36 +31,42 @@
 #define PRINTF_BUFFER_SIZE 256
 
 enum DEBUG_LEVEL {
-	DEBUG_MANDATORY = 0,
-	DEBUG_ERROR,
-	DEBUG_WARN,
-	DEBUG_TRACE,
-	DEBUG_INSANE,
-	END_OF_LIST
+  DEBUG_MANDATORY = 0,
+  DEBUG_ERROR,
+  DEBUG_WARN,
+  DEBUG_TRACE,
+  DEBUG_INSANE,
+  END_OF_LIST
 };
 
 #ifdef DEBUG_BUILD
 
-#include <stdarg.h>
+# include <stdarg.h>
 
-void Serial_printf(const char* fmt, ...);
+void Serial_printf(const char *fmt,
+                   ...);
 
-#define debug_print(fmt, ...) \
-	do { if (DEBUG_LEVEL) Serial_printf("%s:%d:%s(): " fmt, __FILE__, \
-		                            __LINE__, __func__, __VA_ARGS__); } while (0)
+# define debug_print(fmt, ...)                                      \
+  do { if (DEBUG_LEVEL) Serial_printf("%s:%d:%s(): " fmt, __FILE__, \
+                                      __LINE__, __func__, __VA_ARGS__); } while (0)
 
-#endif
+#endif // ifdef DEBUG_BUILD
 
 
-//TODO: make debugPrint and debugPrintf into macros that don't produce
+// TODO: make debugPrint and debugPrintf into macros that don't produce
 //      code if DEBUG_BUILD is not defined
-void debugPrint(uint16_t level, const char* text);
-void debugPrintf(uint16_t level, const char* fmt, ...);
+void debugPrint(uint16_t    level,
+                const char *text);
+void debugPrintf(uint16_t    level,
+                 const char *fmt,
+                 ...);
 
-void setDebugLevel(uint16_t newMode);
+void     setDebugLevel(uint16_t newMode);
 
 uint16_t getDebugLevel();
-void getDebugLevelName(uint16_t level, char *buffer, size_t buffer_length);
+void     getDebugLevelName(uint16_t level,
+                           char    *buffer,
+                           size_t   buffer_length);
 
 
-#endif
+#endif // ifndef LUMINOUS_DEBUG_H

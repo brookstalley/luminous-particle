@@ -41,11 +41,11 @@ private:
 public:
 
   Menu(const char *name);
-  addChild(Page * childPage);
+  virtual void addChild(Page *childPage);
 
   virtual void nextButton(int clicks);
   virtual void prevButton(int clicks);
   virtual void selectButton(int clicks);
-}
+};
 
 #endif // ifndef LUMINOUS_MENU_H

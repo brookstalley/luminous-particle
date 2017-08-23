@@ -120,9 +120,10 @@ void setupDisplay() {
 
   display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Starting...");
 
-  currentPage = SetupMenus(); // returns a shared_ptr to the top level menu
+
+  setupMenus();          // creates our pageStack with the first screen on top
   display.clear();
-  currentPage->render();      // render it for the first time
+  currentPage->render(); // render it for the first time
   debugPrint(DEBUG_TRACE, "  Finished");
 }
 
