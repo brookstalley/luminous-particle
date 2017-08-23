@@ -30,7 +30,7 @@ Menu::Menu(const char *name) : Page(name) {
   _selectedItem = _childItems.begin();
 }
 
-void Menu::addChild(std::shared_ptr<Page>childItem) {
+void Menu::addChild(const std::shared_ptr<Page>childItem) {
   _childItems.push_back(childItem);
   _selectedItem = _childItems.begin();
 }
@@ -86,7 +86,6 @@ void Menu::prevButton(int clicks) {
 
 void Menu::selectButton(int clicks) {
   debugPrintf(DEBUG_TRACE, "Menu::selectButton (%i)", clicks);
-  pageStack.push_front(*_selectedItem);
-  pageStack[0].render();
-}
+  pageStack.push_back(*_selectedItem);
+  pageStack.back()->render();
 }

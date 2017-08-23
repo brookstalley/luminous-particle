@@ -31,26 +31,28 @@
 std::vector<std::shared_ptr<Page> > pageStack;
 
 bool setupMenus() {
-  std::shared_ptr<Page> topMenu = std::make_shared<Menu>("Luminous");
-  std::shared_ptr<Page> status  = std::make_shared<StatusPage>();
+  std::shared_ptr<Menu> topMenu          = std::make_shared<Menu>("Luminous");
+  std::shared_ptr<StatusPage> statusPage = std::make_shared<StatusPage>();
 
-  std::shared_ptr<Page> lightList = std::make_shared<LightPage>();
+  std::shared_ptr<LightPage> lightPage = std::make_shared<LightPage>();
 
-  topMenu->addChild(lightList);
-  topMenu->addChild(statusMenu);
+  topMenu->addChild(lightPage);
+  topMenu->addChild(statusPage);
 
-  pageStack.push_front(topMenu);
+  pageStack.push_back(topMenu);
   return true;
 }
 
 bool menuPop() {
-  if (pageStack.begin() != pageStack.back()) {
-    menuStack.pop_front();
+  if (pageStack.size() > 1) {
+    menuStack.pop_back();
+    pageStack.at(0)->render();
     return true;
   }
   return false;
 }
 
 bool redrawCurrentPage() {
-  pageStack.at(0).render();
+  pageStack.at(0)->render();
+  return true;
 }

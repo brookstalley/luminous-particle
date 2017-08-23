@@ -111,8 +111,8 @@ void HSILight::setColor(const HSIColor& color)  {
   setEmitters();
 }
 
-void HSILight::getColor(HSIColor& color) const {
-  color = _lastColor;
+const HSIColor& HSILight::getColor() const {
+  return _lastColor;
 }
 
 void HSILight::setSingleEmitterOn(unsigned int index) {

@@ -29,7 +29,7 @@
 class Page {
 private:
 
-  char *_name;
+  const char *_name;
 
 public:
 

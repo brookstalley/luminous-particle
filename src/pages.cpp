@@ -42,7 +42,7 @@ char* TimeToString(unsigned long t)
   return str;
 }
 
-char* IPtoString(IPAddress i) {
+char* IPAddressToString(IPAddress i) {
   static char str[15];
 
   byte oct1 = i[0];
@@ -50,7 +50,7 @@ char* IPtoString(IPAddress i) {
   byte oct3 = i[2];
   byte oct4 = i[3];
 
-  sprintf(str, "%d.%d.%d.%d", oct0, oct1, oct2, oct3);
+  sprintf(str, "%d.%d.%d.%d", oct1, oct2, oct3, oct4);
   return str;
 }
 
@@ -106,9 +106,9 @@ bool StatusPage::update() {
   return true;
 }
 
-LightPage::LightPage() {
+LightPage::LightPage() : Page("Lights") {
   // When constructed, we point to the first light
-  _itsplight = allLights.begin();
+  _itspLight = allLights.begin();
 }
 
 bool LightPage::render() {
@@ -120,26 +120,26 @@ bool LightPage::render() {
 bool LightPage::update() {
   display.setTop();
 
-  HSIColor color;
-  (*_itsplight)->getColor(&color);
+  const HSIColor color = (*_itspLight)->getColor();
   display.println(DISPLAY_CYAN,  DISPLAY_BLACK, "Light: %s",             (*_itspLight)->getName());
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "  Temp: %4.4f",         (*_itsplight)->getTempterature());
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "  Local bright: %2.0f", (*_itsplight)->getLocalBrightness());
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "  E131 Addr: %u",       (*_itsplight)->getE131LocalAddress());
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "%s",                    (*_itsplight)->getDiagnostic());
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "  Temp: %4.4f",         (*_itspLight)->getTempterature());
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "  Local bright: %2.0f", (*_itspLight)->getLocalBrightness());
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "  E131 Addr: %u",       (*_itspLight)->getE131LocalAddress());
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "%s",                    (*_itspLight)->getDiagnostic());
   display.println(DISPLAY_WHITE,
                   DISPLAY_BLACK,
                   "  HSI: %4.4f, %4.4f, %4.4f",
-                  color->getHue(),
-                  color->getSaturation,
-                  color->getIntensity);
+                  color.getHue(),
+                  color.getSaturation(),
+                  color.getIntensity());
   std::vector<outputEmitter> o = (*_itspLight)->getOutputEmitters();
 
   for (const auto& it : o) {
-    if (*it->pwr > 0.0f) {
-      display.println(DISPLAY_WHITE, DISPLAY_BLACK, " %s : %4.4f", (*it)->emitter->getName(), (*it)->pwr);
+    if ((*it).pwr > 0.0f) {
+      display.println(DISPLAY_WHITE, DISPLAY_BLACK, " %s : %4.4f", (*it).emitter->getName(), (*it).pwr);
     }
   }
+  return true;
 }
 
 void LightPage::nextButton(int clicks) {
@@ -153,7 +153,7 @@ void LightPage::prevButton(int clicks) {
   if (_itspLight == allLights.begin()) {
     _itspLight = allLights.end();
   }
-  _itsplight--;
+  _itspLight--;
   render();
 }
 

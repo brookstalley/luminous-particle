@@ -43,13 +43,19 @@ class LightPage : public Page {
 private:
 
   // Just calling it light because at some point we'll generalize lights to not always be HSI
-  cstd::vector<std::shared_ptr<HSILight> >::iterator _itspLight;
+  std::vector<std::shared_ptr<HSILight> >::iterator _itspLight;
 
 public:
 
-  LightPage(const std::shared_ptr<HSILight>light) : Page("Lights");
+  LightPage();
 
   bool render();
+  bool update();
+  void nextButton(int clicks);
+  void prevButton(int clicks);
+  void selectButton(int clicks);
 };
+
+char * IPAddressToString(IPAddress i);
 
 #endif // ifndef LUMINOUS_PAGES_H

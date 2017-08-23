@@ -86,7 +86,7 @@ public:
 
   void                            begin();
   void                            setColor(const HSIColor& color);
-  void                            getColor(HSIColor&) const;
+  const HSIColor                & getColor() const;
   void                            setTemperatureInterface(std::shared_ptr<TemperatureInterface>temperatureInterface);
   std::shared_ptr<E131>           getE131() const;
   const uint16_t                  getE131LocalAddress() const;

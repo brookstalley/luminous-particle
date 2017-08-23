@@ -26,8 +26,8 @@
 #include "ldebug.h"
 #include "luminous-particle.h"
 
-Page::Page(char *name) :
-  _name(name),
+Page::Page(const char *name) :
+  _name(name)
 {}
 
 bool Page::render() {

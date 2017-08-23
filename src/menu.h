@@ -31,8 +31,8 @@ class Menu : public Page {
 private:
 
   // childItems can be another menu, or any Page
-  std::vector<Page>_childItems;
-  std::vector<Page>::iterator _selectedItem;
+  std::vector<std::shared_ptr<Page> >_childItems;
+  std::vector<std::shared_ptr<Page> >::iterator _selectedItem;
   bool render();
   bool update();
   bool moveNext();
