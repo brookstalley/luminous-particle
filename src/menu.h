@@ -42,11 +42,12 @@ private:
 public:
 
   Menu(const char *name);
-  void         addChild(const std::shared_ptr<Page>);
+  void addChild(const std::shared_ptr<Page>);
 
-  virtual void nextButton(int clicks);
-  virtual void prevButton(int clicks);
-  virtual void selectButton(int clicks);
+  void backButton(int clicks);
+  void nextButton(int clicks);
+  void prevButton(int clicks);
+  void selectButton(int clicks);
 };
 
 #endif // ifndef LUMINOUS_MENU_H

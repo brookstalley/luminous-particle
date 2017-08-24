@@ -72,8 +72,7 @@ ClickButton prevButton(PREV_BUTTON_PIN, LOW, CLICKBTN_PULLUP);
 ClickButton nextButton(NEXT_BUTTON_PIN, LOW, CLICKBTN_PULLUP);
 ClickButton selectButton(SELECT_BUTTON_PIN, LOW, CLICKBTN_PULLUP);
 
-ResponsiveAnalogRead  brightnessControl(BRIGHTNESS_PIN, true);
-std::shared_ptr<Page> currentPage;
+ResponsiveAnalogRead brightnessControl(BRIGHTNESS_PIN, true);
 
 // Input and output devices
 std::shared_ptr<OutputPCA9685> mainOutput =
@@ -121,9 +120,9 @@ void setupDisplay() {
   display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Starting...");
 
 
-  setupMenus();          // creates our pageStack with the first screen on top
+  setupMenus();               // creates our pageStack with the first screen on top
   display.clear();
-  currentPage->render(); // render it for the first time
+  pageStack.back()->render(); // render it for the first time
   debugPrint(DEBUG_TRACE, "  Finished");
 }
 
@@ -295,7 +294,7 @@ void loopDisplay() {
 
   displayStatusBar();
 
-  currentPage->update();
+  pageStack.at(0)->update();
 
   lastUpdateMillis  = millis();
   displayMustUpdate = false;
@@ -334,45 +333,53 @@ void loopControls() {
   nextClicks   = nextButton.clicks;
   selectClicks = selectButton.clicks;
 
+  /*
+     if (modeButton.clicks != 0) {
+      if (modeClicks == 1) {
+        nextMode();
+        debugPrintf(DEBUG_TRACE, "Click: change mode to %s", getCurrentModeName());
+        displayMustUpdate = true;
+        lightsMustUpdate  = true;
+      }
+
+      if (modeClicks == 2) {
+        debugPrint(DEBUG_TRACE, "Double-click: toggle Particle cloud");
+        particleToggle();
+        displayMustUpdate = true;
+      }
+
+      if (modeClicks == 3) {
+        debugPrint(DEBUG_TRACE, "Triple-click: setup particle functions");
+        particleSetupFunctions();
+      }
+
+      if (modeClicks == -1) {
+        debugPrint(DEBUG_TRACE, "Long click: increment debugging");
+        setDebugLevel(getDebugLevel() + 1);
+        displayMustUpdate = true;
+      }
+     }
+   */
   if (modeButton.clicks != 0) {
-    if (modeClicks == 1) {
-      nextMode();
-      debugPrintf(DEBUG_TRACE, "Click: change mode to %s", getCurrentModeName());
-      displayMustUpdate = true;
-      lightsMustUpdate  = true;
-    }
+    debugPrint(DEBUG_TRACE, "mode click");
 
-    if (modeClicks == 2) {
-      debugPrint(DEBUG_TRACE, "Double-click: toggle Particle cloud");
-      particleToggle();
-      displayMustUpdate = true;
-    }
-
-    if (modeClicks == 3) {
-      debugPrint(DEBUG_TRACE, "Triple-click: setup particle functions");
-      particleSetupFunctions();
-    }
-
-    if (modeClicks == -1) {
-      debugPrint(DEBUG_TRACE, "Long click: increment debugging");
-      setDebugLevel(getDebugLevel() + 1);
-      displayMustUpdate = true;
-    }
+    pageStack.back()->backButton(nextClicks);
   }
 
   if (nextButton.clicks != 0) {
     debugPrint(DEBUG_TRACE, "Next click");
-    currentPage->nextButton(nextClicks);
+    pageStack.back()->nextButton(nextClicks);
   }
 
   if (prevButton.clicks != 0) {
     debugPrint(DEBUG_TRACE, "prev click");
-    currentPage->prevButton(prevClicks);
+    pageStack.back()->prevButton(prevClicks);
   }
 
   if (selectButton.clicks != 0) {
     debugPrint(DEBUG_TRACE, "select click");
-    currentPage->selectButton(selectClicks);
+
+    pageStack.back()->selectButton(selectClicks);
   }
 
   loopControlBrightness();

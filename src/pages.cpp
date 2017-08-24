@@ -159,5 +159,4 @@ void LightPage::prevButton(int clicks) {
 
 void LightPage::selectButton(int clicks) {
   debugPrintf(DEBUG_TRACE, "LightPage::selectButton (%i)", clicks);
-  menuPop();
 }

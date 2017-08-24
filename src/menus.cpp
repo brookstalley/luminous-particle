@@ -43,15 +43,6 @@ bool setupMenus() {
   return true;
 }
 
-bool menuPop() {
-  if (pageStack.size() > 1) {
-    menuStack.pop_back();
-    pageStack.at(0)->render();
-    return true;
-  }
-  return false;
-}
-
 bool redrawCurrentPage() {
   pageStack.at(0)->render();
   return true;

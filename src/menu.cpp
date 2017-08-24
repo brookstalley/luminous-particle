@@ -72,6 +72,16 @@ bool Menu::update() {
   return true;
 }
 
+void Menu::backButton(int clicks) {
+  debugPrintf(DEBUG_TRACE, "Menu::backButton (%i)", clicks);
+
+  if (pageStack.size() > 1) {
+    // TODO: Why won't it go back
+    pageStack.pop_back();
+    pageStack.back()->render();
+  }
+}
+
 void Menu::nextButton(int clicks) {
   debugPrintf(DEBUG_TRACE, "Menu::nextButton (%i)", clicks);
   moveNext();

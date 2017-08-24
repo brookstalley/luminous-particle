@@ -37,6 +37,7 @@ public:
 
   virtual bool render();
   virtual bool update();
+  virtual void backButton(int clicks);
   virtual void nextButton(int clicks);
   virtual void prevButton(int clicks);
   virtual void selectButton(int clicks);

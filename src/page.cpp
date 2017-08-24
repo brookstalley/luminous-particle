@@ -51,6 +51,10 @@ void Page::setName(const char *name) {
   _name = name;
 }
 
+void Page::backButton(int clicks) {
+  debugPrintf(DEBUG_TRACE, "Page::backButton (%i)", clicks);
+}
+
 void Page::nextButton(int clicks) {
   debugPrintf(DEBUG_TRACE, "Page::nextButton (%i)", clicks);
 }
