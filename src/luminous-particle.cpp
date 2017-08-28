@@ -116,13 +116,8 @@ void setupDisplay() {
 
   screen.begin();
   display.begin();
-
   display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Starting...");
-
-
-  setupMenus();               // creates our pageStack with the first screen on top
-  display.clear();
-  pageStack.back()->render(); // render it for the first time
+  setupMenus(); // creates our pageStack with the first screen on top
   debugPrint(DEBUG_TRACE, "  Finished");
 }
 
@@ -233,14 +228,18 @@ void setup(void) {
   // No sense logging before we start serial or network
   debugPrint(DEBUG_MANDATORY, "Starting...");
   luminousBooting.setActive(false);
-
   setupDisplay();
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Starting network...");
   setupNetwork();
-
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Starting LEDs...");
   setupLEDs();
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Starting controls...");
   setupControls();
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Starting sensors...");
   setupSensors();
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Starting E131...");
   setupE131();
+  redrawCurrentPage();
   debugPrint(DEBUG_TRACE, "  Finished");
 }
 

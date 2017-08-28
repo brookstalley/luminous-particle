@@ -24,6 +24,7 @@
 #include "page.h"
 #include "display.h"
 #include "ldebug.h"
+#include "menus.h"
 #include "luminous-particle.h"
 
 Page::Page(const char *name) :
@@ -53,6 +54,7 @@ void Page::setName(const char *name) {
 
 void Page::backButton(int clicks) {
   debugPrintf(DEBUG_TRACE, "Page::backButton (%i)", clicks);
+  menuPop();
 }
 
 void Page::nextButton(int clicks) {

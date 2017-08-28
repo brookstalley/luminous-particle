@@ -25,9 +25,12 @@
 #define LUMINOUS_MENUS_H
 
 #include "page.h"
+#include <vector>
 
 extern std::vector<std::shared_ptr<Page> > menuStack;
 
 bool setupMenus();
+bool menuPop();
+bool redrawCurrentPage();
 
 #endif // ifndef LUMINOUS_MENUS_H

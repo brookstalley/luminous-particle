@@ -44,6 +44,14 @@ bool setupMenus() {
 }
 
 bool redrawCurrentPage() {
-  pageStack.at(0)->render();
+  pageStack.back()->render();
   return true;
+}
+
+bool menuPop() {
+  if (pageStack.size() > 0) {
+    pageStack.pop_back();
+    return redrawCurrentPage();
+  }
+  return false;
 }
