@@ -67,7 +67,7 @@ Adafruit_SSD1351 screen(spi_pin_cs, spi_pin_dc, spi_pin_rst);
 Display display(screen, 128, 128);
 
 ////////////////////////// Controllers and stuff
-ClickButton modeButton(MODE_BUTTON_PIN, LOW,  CLICKBTN_PULLUP);
+ClickButton backButton(BACK_BUTTON_PIN, LOW,  CLICKBTN_PULLUP);
 ClickButton prevButton(PREV_BUTTON_PIN, LOW, CLICKBTN_PULLUP);
 ClickButton nextButton(NEXT_BUTTON_PIN, LOW, CLICKBTN_PULLUP);
 ClickButton selectButton(SELECT_BUTTON_PIN, LOW, CLICKBTN_PULLUP);
@@ -156,10 +156,26 @@ void setupLEDs() {
 
 void setupControls() {
   // Setup the first button with an internal pull-up :
-  pinMode(MODE_BUTTON_PIN, INPUT_PULLUP);
-  modeButton.debounceTime   = 20;  // Debounce timer in ms
-  modeButton.multiclickTime = 250; // Time limit for multi clicks
-  modeButton.longClickTime  = 750; // time until "held-down clicks" register
+  pinMode(BACK_BUTTON_PIN, INPUT_PULLUP);
+  backButton.debounceTime   = 20;    // Debounce timer in ms
+  backButton.multiclickTime = 250;   // Time limit for multi clicks
+  backButton.longClickTime  = 750;   // time until "held-down clicks" register
+
+  pinMode(PREV_BUTTON_PIN, INPUT_PULLUP);
+  prevButton.debounceTime   = 20;    // Debounce timer in ms
+  prevButton.multiclickTime = 250;   // Time limit for multi clicks
+  prevButton.longClickTime  = 750;   // time until "held-down clicks" register
+
+  pinMode(NEXT_BUTTON_PIN, INPUT_PULLUP);
+  nextButton.debounceTime   = 20;    // Debounce timer in ms
+  nextButton.multiclickTime = 250;   // Time limit for multi clicks
+  nextButton.longClickTime  = 750;   // time until "held-down clicks" register
+
+  pinMode(SELECT_BUTTON_PIN, INPUT_PULLUP);
+  selectButton.debounceTime   = 20;  // Debounce timer in ms
+  selectButton.multiclickTime = 250; // Time limit for multi clicks
+  selectButton.longClickTime  = 750; // time until "held-down clicks" register
+
   // Setup the brightness control
   lastBrightnessRemote = false;
   brightnessControl.enableEdgeSnap();
@@ -293,7 +309,7 @@ void loopDisplay() {
 
   displayStatusBar();
 
-  pageStack.at(0)->update();
+  pageStack.back()->update();
 
   lastUpdateMillis  = millis();
   displayMustUpdate = false;
@@ -317,17 +333,17 @@ void loopControlBrightness() {
 }
 
 void loopControls() {
-  static int modeClicks   = 0;
+  static int backClicks   = 0;
   static int prevClicks   = 0;
   static int nextClicks   = 0;
   static int selectClicks = 0;
 
-  modeButton.Update();
+  backButton.Update();
   prevButton.Update();
   nextButton.Update();
   selectButton.Update();
 
-  modeClicks   = modeButton.clicks;
+  backClicks   = backButton.clicks;
   prevClicks   = prevButton.clicks;
   nextClicks   = nextButton.clicks;
   selectClicks = selectButton.clicks;
@@ -359,10 +375,10 @@ void loopControls() {
       }
      }
    */
-  if (modeButton.clicks != 0) {
-    debugPrint(DEBUG_TRACE, "mode click");
+  if (backButton.clicks != 0) {
+    debugPrint(DEBUG_TRACE, "back click");
 
-    pageStack.back()->backButton(nextClicks);
+    pageStack.back()->backButton(backClicks);
   }
 
   if (nextButton.clicks != 0) {
