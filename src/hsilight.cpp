@@ -109,12 +109,16 @@ void HSILight::setColor(const HSIColor& color)  {
 
   // strcpy(_diagnostic, "*");
 
-  /*
-     for (unsigned int i = 0; i < _emitterPowers.size(); i++) {
-      debugPrintf(DEBUG_TRACE, "HSILight: emitter %u power %f", i,
-                  _emitterPowers[i].power);
-     }
-   */
+
+  for (unsigned int i = 0; i < _emitterPowers.size(); i++) {
+    debugPrintf(DEBUG_TRACE,
+                "HSILight: emitter %u (%s, la %u) power %f",
+                i,
+                _emitterPowers[i].emitter->getName(),
+                _emitterPowers[i].outputLocalAddress,
+                _emitterPowers[i].power);
+  }
+
 
   setEmitters();
 }
@@ -144,14 +148,15 @@ void HSILight::setEmitters() {
   // TODO: Move diagnostic calculation to getDiagnostic so it doesn't run so often
   debugPrint(DEBUG_INSANE, "HSILight::setEmitters start");
 
-  /*
-     _diagnostic[0] = '\0';
 
-     for (auto const& e : _emitterPowers) {
-      sprintf(_diagnostic + strlen(_diagnostic), "%02X ",
-              (uint16_t)round(e.power * 255));
-     }
-   */
+  _diagnostic[0] = '\0';
+
+  for (auto const& e : _emitterPowers) {
+    sprintf(_diagnostic + strlen(_diagnostic), "%02X ",
+            (uint16_t)round(e.power * 255));
+  }
+  debugPrintf(DEBUG_INSANE, "diag: %s", _diagnostic);
+
   float scaleFactor = globalBrightness * _localBrightness;
   _outputInterface->setEmitterPowers(_emitterPowers, scaleFactor);
 }

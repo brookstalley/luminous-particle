@@ -137,7 +137,7 @@ void setupLEDs() {
   LZ7.addColorEmitter(emitterLZ7green,  1, false);
   LZ7.addColorEmitter(emitterLZ7cyan,   4, false);
   LZ7.addColorEmitter(emitterLZ7blue,   2, false);
-  LZ7.addColorEmitter(emitterLZ7violet, 6, true);
+  LZ7.addColorEmitter(emitterLZ7violet, 6, false);
   LZ7.calculate();
 
   debugPrint(DEBUG_TRACE, "  setting up lamps");
