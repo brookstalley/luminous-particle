@@ -25,24 +25,27 @@
 #ifndef EMITTER_H
 #define EMITTER_H
 
+#include "color.h"
 #include "Particle.h"
 
 class Emitter {
 private:
 
-  float _u, _v;
+  cieUVcolor _uv;
   uint16_t _maxLumens;
   const char *_name;
 
 public:
 
   Emitter(const char *name,
-          float       u,
-          float       v,
+          cieUVcolor  uv,
           uint16_t    maxLumens);
 
-  float       getU(void) const;
-  float       getV(void) const;
+  Emitter(const char *name,
+          uint16_t    wavelength,
+          uint16_t    maxLumens);
+
+  cieUVcolor  getUV(void) const;
   uint16_t    getMaxLumens(void) const;
   const char* getName(void) const;
 };

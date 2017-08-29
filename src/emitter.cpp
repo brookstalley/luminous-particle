@@ -25,19 +25,19 @@
 #include "Emitter.h"
 #include "Particle.h"
 
-Emitter::Emitter(const char *name, float u, float v, uint16_t maxLumens) :
-  _u(u),
-  _v(v),
+Emitter::Emitter(const char *name, cieUVcolor uv, uint16_t maxLumens) :
+  _uv(uv)
   _maxLumens(maxLumens),
   _name(name)
 {}
 
-float Emitter::getU(void) const {
-  return _u;
+Emitter::Emitter(const char *name, uint16_t wavelength, uint16t maxLumens) :
+  _maxLumens(maxLumens), _name(name) {
+  _uv = cieUVfromWavelength(wavelength);
 }
 
-float Emitter::getV(void) const {
-  return _v;
+float Emitter::getUV(void) const {
+  return _uv;
 }
 
 uint16_t Emitter::getMaxLumens(void) const {
