@@ -40,6 +40,7 @@ public:
           float       u,
           float       v,
           uint16_t    maxLumens);
+
   float       getU(void) const;
   float       getV(void) const;
   uint16_t    getMaxLumens(void) const;

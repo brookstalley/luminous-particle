@@ -344,6 +344,7 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI2(
 
   // Calculate separately because abs() is a goddamned macro that returns
   // goddamned integers which goddamned breaks
+  // TODO: Should scale each emitter relative to the other's maximum power
   float emitter1power = I * S * fabs(ustar - wedge.e2ustar) / fabs(
     wedge.e2ustar - wedge.e1ustar);
   float emitter2power = I * S * fabs(ustar - wedge.e1ustar) / fabs(
