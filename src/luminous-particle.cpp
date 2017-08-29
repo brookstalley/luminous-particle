@@ -86,11 +86,13 @@ std::shared_ptr<E131> mainUniverse = std::make_shared<E131>();
 // Shared lights with coordinates in CIE LUV colorspace
 // LZ7 max lumens are for 1000ma drive
 Emitter emitterLZ7white("LZ7-w", 0.202531646, 0.469936709, 180);
-Emitter emitterLZ7red("LZ7-r", 623, 78);
-Emitter emitterLZ7amber("LZ7-a", 595, 60);
-Emitter emitterLZ7green("LZ7-g", 523, 125);
-Emitter emitterLZ7cyan("LZ7-c", 500, 95);
-Emitter emitterLZ7blue("LZ7-b", 457, 30);
+
+// Following emitters use wavelengths
+Emitter emitterLZ7red("LZ7-r", 623, 110);
+Emitter emitterLZ7amber("LZ7-a", 595, 90);
+Emitter emitterLZ7green("LZ7-g", 523, 180);
+Emitter emitterLZ7cyan("LZ7-c", 500, 120);
+Emitter emitterLZ7blue("LZ7-b", 457, 45);
 Emitter emitterLZ7violet("LZ7-v", 395, 30);
 
 // LEDEngin LZ7 that should be dimmed above 70c and turned off above 90c
