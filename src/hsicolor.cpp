@@ -73,7 +73,7 @@ void HSIColor::setRGB(float red, float green, float blue) {
     _hue = 360.0f - _hue;
   }
   _saturation = 1.0f - 3 * min(rn, min(gn, bn));
-  debugPrintf(DEBUG_TRACE,
+  debugPrintf(DEBUG_INSANE,
               "HSIColor::setRGB converted (%4.4f, %4.4f, %4.4f) to (%4.4f, %4.4f, %4.4f)",
               red,
               green,
@@ -86,10 +86,15 @@ void HSIColor::setRGB(float red, float green, float blue) {
 void HSIColor::setHLS(float hslHue, float hslLightness, float hslSaturation) {
   // Formula from http://codeitdown.com/hsl-hsb-hsv-color/
   _hue       = hslHue;
-  _intensity =
-    ((2.0f * hslLightness) + hslSaturation * (1.0f - fabs(2.0f * hslLightness - 1.0f))) / 2.0f;
-  _saturation = 2.0f * (_intensity - hslLightness) / _intensity;
-  debugPrintf(DEBUG_TRACE,
+  _intensity = ((2.0f * hslLightness) + hslSaturation * (1.0f - fabs(2.0f * hslLightness - 1.0f))) / 2.0f;
+
+  if (_intensity == 0.0f) {
+    _saturation = 0.0f;
+  } else {
+    _saturation = 2.0f * (_intensity - hslLightness) / _intensity;
+  }
+
+  debugPrintf(DEBUG_INSANE,
               "HSIColor::setHLS converted (%4.4f, %4.4f, %4.4f) to (%4.4f, %4.4f, %4.4f)",
               hslHue,
               hslLightness,

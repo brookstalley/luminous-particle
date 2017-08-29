@@ -210,7 +210,7 @@ void setupNetwork() {
               WIFI_SSID,
               WIFI_PASSWORD);
 
-  for (uint16_t i = 0; (wifiCurrentState != WIFI_CONNECTED) && (i < 30);
+  for (uint16_t i = 0; (wifiCurrentState != WIFI_CONNECTED) && (i < 60);
        i++) {
     waitFor(WiFi.ready, 1000);
 
@@ -264,7 +264,7 @@ void loopSensors() {}
 void loopInputs()  {}
 
 void loopLEDs() {
-  // runCurrentMode();
+  runCurrentMode();
 }
 
 void displayStatusBar() {
@@ -348,33 +348,7 @@ void loopControls() {
   nextClicks   = nextButton.clicks;
   selectClicks = selectButton.clicks;
 
-  /*
-     if (modeButton.clicks != 0) {
-      if (modeClicks == 1) {
-        nextMode();
-        debugPrintf(DEBUG_TRACE, "Click: change mode to %s", getCurrentModeName());
-        displayMustUpdate = true;
-        lightsMustUpdate  = true;
-      }
 
-      if (modeClicks == 2) {
-        debugPrint(DEBUG_TRACE, "Double-click: toggle Particle cloud");
-        particleToggle();
-        displayMustUpdate = true;
-      }
-
-      if (modeClicks == 3) {
-        debugPrint(DEBUG_TRACE, "Triple-click: setup particle functions");
-        particleSetupFunctions();
-      }
-
-      if (modeClicks == -1) {
-        debugPrint(DEBUG_TRACE, "Long click: increment debugging");
-        setDebugLevel(getDebugLevel() + 1);
-        displayMustUpdate = true;
-      }
-     }
-   */
   if (backButton.clicks != 0) {
     debugPrint(DEBUG_TRACE, "back click");
 
@@ -393,7 +367,6 @@ void loopControls() {
 
   if (selectButton.clicks != 0) {
     debugPrint(DEBUG_TRACE, "select click");
-
     pageStack.back()->selectButton(selectClicks);
   }
 

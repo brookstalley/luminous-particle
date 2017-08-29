@@ -37,6 +37,7 @@ public:
 
   bool render();
   bool update();
+  void selectButton(int clicks) override;
 };
 
 class LightPage : public Page {

@@ -95,19 +95,27 @@ void HSILight::begin() {
 void HSILight::setColor(const HSIColor& color)  {
   // No sense doing it again for the same value
   if (color == _lastColor) {
-    debugPrint(DEBUG_INSANE,
-               "HSILight::setColor skipping duplicate");
+    // debugPrint(DEBUG_INSANE, "HSILight::setColor skipping duplicate");
     return;
   }
-  _lastColor     = color;
+  _lastColor = color;
+  debugPrintf(DEBUG_TRACE,
+              "Setting HSI to %4.4f, %4.4f, %4.4f",
+              color.getHue(),
+              color.getSaturation(),
+              color.getIntensity());
+
   _emitterPowers = _compositeModule.emitterPowersFromHSI(color);
 
+  // strcpy(_diagnostic, "*");
+
   /*
-        for (unsigned int i = 0; i < _emitterPowers.size(); i++) {
-                debugPrintf(DEBUG_INSANE, "HSILight: emitter %u power %f", i,
-                   _emitterPowers[i].power);
-        }
+     for (unsigned int i = 0; i < _emitterPowers.size(); i++) {
+      debugPrintf(DEBUG_TRACE, "HSILight: emitter %u power %f", i,
+                  _emitterPowers[i].power);
+     }
    */
+
   setEmitters();
 }
 
@@ -135,12 +143,15 @@ void HSILight::setSingleEmitterOn(unsigned int index) {
 void HSILight::setEmitters() {
   // TODO: Move diagnostic calculation to getDiagnostic so it doesn't run so often
   debugPrint(DEBUG_INSANE, "HSILight::setEmitters start");
-  _diagnostic[0] = '\0';
 
-  for (auto const& e : _emitterPowers) {
-    sprintf(_diagnostic + strlen(_diagnostic), "%02X ",
-            (uint16_t)round(e.power * 255));
-  }
+  /*
+     _diagnostic[0] = '\0';
+
+     for (auto const& e : _emitterPowers) {
+      sprintf(_diagnostic + strlen(_diagnostic), "%02X ",
+              (uint16_t)round(e.power * 255));
+     }
+   */
   float scaleFactor = globalBrightness * _localBrightness;
   _outputInterface->setEmitterPowers(_emitterPowers, scaleFactor);
 }

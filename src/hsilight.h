@@ -32,7 +32,7 @@
 
 #include "Particle.h"
 
-#define HSILIGHT_MAX_DIAGNOSTIC 25
+#define HSILIGHT_MAX_DIAGNOSTIC 30
 #define TEMPERATURE_VALID_MILLIS 1000
 
 class HSILight {

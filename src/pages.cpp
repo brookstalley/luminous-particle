@@ -60,28 +60,19 @@ bool StatusPage::render() {
   return true;
 }
 
+void StatusPage::selectButton(int clicks) {
+  if (clicks == 2) {
+    debugPrintf(DEBUG_TRACE, "Changing mode");
+    nextMode();
+  }
+}
+
 bool StatusPage::update() {
   display.setTop();
   display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Running:    %s",
                   TimeToString(millis() / 1000));
 
   display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Mode:       %s", getCurrentModeName());
-
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Loops/s:    %u",
-                  loopsPerSecond);
-
-  if (lastBrightnessRemote) {
-    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Brightness: [%2.0f%%]",
-                    globalBrightness * 100);
-  } else {
-    display.println(DISPLAY_WHITE, DISPLAY_BLACK,
-                    "Brightness: %2.0f%%",
-                    globalBrightness * 100);
-  }
-
-  char debugName[12];
-  getDebugLevelName(getDebugLevel(), debugName, sizeof(debugName));
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Debug:      %s", debugName);
 
   if (wifiCurrentState == WIFI_CONNECTED) {
     display.println(DISPLAY_WHITE, DISPLAY_BLACK, "WiFi:       %s", WiFi.SSID());
@@ -102,6 +93,24 @@ bool StatusPage::update() {
                     PARTICLE_CONNECTED ?
                     "            Connecting" : "            Disconnecting")
                    : ""));
+
+
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Loops/s:    %u",
+                  loopsPerSecond);
+
+  if (lastBrightnessRemote) {
+    display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Brightness: [%2.0f%%]",
+                    globalBrightness * 100);
+  } else {
+    display.println(DISPLAY_WHITE, DISPLAY_BLACK,
+                    "Brightness: %2.0f%%",
+                    globalBrightness * 100);
+  }
+
+  char debugName[12];
+  getDebugLevelName(getDebugLevel(), debugName, sizeof(debugName));
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Debug:      %s", debugName);
+
 
   return true;
 }
@@ -128,7 +137,7 @@ bool LightPage::update() {
   display.println(DISPLAY_WHITE, DISPLAY_BLACK, "%s",                   (*_itspLight)->getDiagnostic());
   display.println(DISPLAY_WHITE,
                   DISPLAY_BLACK,
-                  " C: %2.2f, %2.2f, %2.2f",
+                  " C: %2.1f, %2.2f, %2.2f",
                   color.getHue(),
                   color.getSaturation(),
                   color.getIntensity());

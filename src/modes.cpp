@@ -161,32 +161,35 @@ bool ModeE131::run(std::vector<std::shared_ptr<HSILight> >lights,
 
     const uint16_t e131LocalAddress = val->getE131LocalAddress();
 
+    uint8_t moderaw = e131data[e131LocalAddress];
+    uint16_t hueraw = ((e131data[e131LocalAddress + 1]) << 8 |
+                       e131data[e131LocalAddress + 2]);
+    uint16_t satraw = ((e131data[e131LocalAddress + 3]) << 8 |
+                       e131data[e131LocalAddress + 4]);
+    uint16_t lumraw = ((e131data[e131LocalAddress + 5]) << 8 |
+                       e131data[e131LocalAddress + 6]);
+    debugPrintf(DEBUG_INSANE, "e131 hsl for %s: mode %u, (%u, %u, %u)",
+                val->getName(), moderaw, hueraw, satraw, lumraw);
 
-    /*
-       uint8_t moderaw = e131data[e131LocalAddress];
-       uint16_t hueraw = ((e131data[e131LocalAddress + 1]) << 8 |
-          e131data[e131LocalAddress + 2]);
-       uint16_t satraw = ((e131data[e131LocalAddress + 3]) << 8 |
-          e131data[e131LocalAddress + 4]);
-       uint16_t lumraw = ((e131data[e131LocalAddress + 5]) << 8 |
-          e131data[e131LocalAddress+ 6]);
-       debugPrintf(DEBUG_INSANE, "e131 hsl for %s: mode %u, (%u, %u, %u)",
-          val->getName(), moderaw, hueraw, satraw, lumraw);
-     */
 
     color->setHLS(
       360.0f * twoBytesToFloat(&e131data[e131LocalAddress + 1]),
       twoBytesToFloat(&e131data[e131LocalAddress + 3]),
       twoBytesToFloat(&e131data[e131LocalAddress + 5])
       );
-    debugPrintf(DEBUG_INSANE, "e131 data for %s: (%4.4f, %4.4f, %4.4f)",
-                val->getName(), color->getHue(), color->getSaturation(),
-                color->getIntensity());
+
+    /*
+            debugPrintf(DEBUG_TRACE, "e131 data for %s: (%4.4f, %4.4f, %4.4f)",
+                        val->getName(), color->getHue(), color->getSaturation(),
+                        color->getIntensity());
+     */
+
     val->setColor(*color);
 
     // _lastE131PacketCount = currentE131PacketCount;
     // val->setColorFromE131();
   });
+  delete color;
   return true;
 }
 
