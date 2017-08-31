@@ -86,8 +86,6 @@ public:
                                             uint16_t       outputLocalAddress,
                                             bool           effectOnly);
   void                      calculate();
-  float                     getAngle(int emitternum);
-  float                     getSlope(int emitternum);
   std::vector<outputEmitter>emitterPowersFromHSI(const HSIColor& HSI) const;
 };
 

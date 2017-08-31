@@ -127,6 +127,7 @@ void CompositeModule::calculate() {
   }
 }
 
+// Angle from the white point
 float CompositeModule::getAngle(int num) {
   return _colorEmitters[num]->angle;
 }
