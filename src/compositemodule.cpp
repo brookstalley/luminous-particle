@@ -57,25 +57,17 @@ void CompositeModule::addWhiteEmitter(const Emitter& white,
 void CompositeModule::addColorEmitter(const Emitter& emitter,
                                       uint16_t       outputLocalAddress,
                                       bool           effectOnly) {
-  // To figure out where to put it in the colorspace, calculate the angle from
-  // the white point.
-  cieUVcolor colorUV = emitter.getUV();
-  cieUVcolor whiteUV = _whiteEmitter.emitter->getUV();
-
   debugPrintf(DEBUG_TRACE,
               "CompositeModule::addColorEmitter %s at address %u",
               emitter.getName(),
               outputLocalAddress);
-
-  float colorAngle =
-    fmod(atan2((colorUV.v - whiteUV.v), (colorUV.u - whiteUV.u)) + 360, 360);
 
   // Create our component emitter based on the prototype emitter, plus this
   // one's particular address
   std::shared_ptr<componentEmitter> newEmitter =
     std::make_shared<componentEmitter>(componentEmitter(&emitter,
                                                         outputLocalAddress,
-                                                        newAngle, 0, effectOnly));
+                                                        0, 0, effectOnly));
 
   // Note that we add the emitter at the end without regard for order
   // CompositeModule WILL NOT WORK unless calculate() is called after adding
@@ -92,6 +84,19 @@ void CompositeModule::calculate() {
   debugPrint(DEBUG_TRACE,
              "CompositeModule::calculate start");
 
+  cieUVcolor whiteUV = _whiteEmitter.emitter->getUV();
+
+  // Recalculate all slopes, ustar / vstar, and angle to white
+  for (auto it = _colorEmitters.begin(); it != _colorEmitters.end(); it++) {
+    cieUVcolor colorUV = (*it)->emitter->getUV();
+    (*it)->ustar = colorUV.u - whiteUV.u;
+    (*it)->vstar = colorUV.v - whiteUV.v;
+    (*it)->angle =
+      fmod(atan2((colorUV.v - whiteUV.v), (colorUV.u - whiteUV.u)) + 360, 360);
+
+    std::shared_ptr<componentEmitter> spNextEmitter;
+  }
+
   // Sort the emitters by angle
   std::sort(_colorEmitters.begin(), _colorEmitters.end(),
             [](std::shared_ptr<componentEmitter>a,
@@ -99,16 +104,8 @@ void CompositeModule::calculate() {
     return b->angle > a->angle;
   });
 
-  cieUVcolor whiteUV = _whiteEmitter.emitter->getUV();
-
-  // Recalculate all slopes and ustar / vstar
+  // Now get the slope to the next emitter
   for (auto it = _colorEmitters.begin(); it != _colorEmitters.end(); it++) {
-    cieUVcolor colorUV = (*it)->emitter->getUV();
-    (*it)->ustar = colorUV.u - whiteUV.u;
-    (*it)->vstar = colorUV.v - whiteUV.v;
-
-    std::shared_ptr<componentEmitter> spNextEmitter;
-
     // Slope is to the next emitter, except the last one wraps around to the
     // first
     if (*it != _colorEmitters.back()) {
@@ -117,53 +114,8 @@ void CompositeModule::calculate() {
       spNextEmitter = _colorEmitters.front();
     }
 
-    // I hate this mix of iterators to shared pointers and shared pointers,
-    // but it works
     (*it)->slope = (spNextEmitter->emitter->getV() - colorUV.v)
                    / (spNextEmitter->emitter->getU() - colorUV.u);
-  }
-
-  // Build wedge list (experimental)
-  _colorspaceWedges.clear();
-
-  for (auto it = _colorEmitters.begin(); it != _colorEmitters.end(); it++) {
-    if (!(*it)->effectOnly) {
-      bool found  = false;
-      auto itNext = it;
-
-      while (!found) {
-        if (*itNext != _colorEmitters.back()) {
-          *itNext++;
-        } else {
-          *itNext = _colorEmitters.front();
-        }
-
-        if (!(*itNext)->effectOnly) {
-          found = true;
-        }
-      }
-
-      // Now it points to the start of the wedge and itNext to the end
-      float slope = ((*itNext)->emitter->getV() - (*it)->emitter->getV())
-                    / ((*itNext)->emitter->getU() - (*it)->emitter->getU());
-      float e1ustar = (*it)->emitter->getU() - _whiteEmitter.emitter->getU();
-      float e1vstar = (*it)->vstar = (*it)->emitter->getV() -
-                                     _whiteEmitter.emitter->getV();
-      float e2ustar = (*itNext)->emitter->getU() - _whiteEmitter.emitter->getU();
-      float e2vstar = (*itNext)->vstar = (*itNext)->emitter->getV() -
-                                         _whiteEmitter.emitter->getV();
-
-      colorspaceWedge wedge((*it)->angle,
-                            (*itNext)->angle,
-                            slope,
-                            (*it)->emitter,
-                            e1ustar,
-                            e1vstar,
-                            (*itNext)->emitter,
-                            e2ustar,
-                            e2vstar);
-      _colorspaceWedges.push_back(wedge);
-    }
   }
 
   for (const auto& e : _colorEmitters) {
@@ -171,15 +123,6 @@ void CompositeModule::calculate() {
                 e->emitter->getName(),
                 e->angle,
                 e->slope);
-  }
-
-  for (const auto& w : _colorspaceWedges) {
-    debugPrintf(DEBUG_TRACE, "Wedge: start %4.4f(%s), end %4.4f(%s), slope ",
-                w.startAngle,
-                w.emitter1->getName(),
-                w.endAngle,
-                w.emitter2->getName(),
-                w.slope);
   }
 }
 
