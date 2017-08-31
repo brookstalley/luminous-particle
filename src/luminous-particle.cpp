@@ -160,24 +160,24 @@ void setupLEDs() {
 void setupControls() {
   // Setup the first button with an internal pull-up :
   pinMode(BACK_BUTTON_PIN, INPUT_PULLUP);
-  backButton.debounceTime   = 20;    // Debounce timer in ms
-  backButton.multiclickTime = 250;   // Time limit for multi clicks
-  backButton.longClickTime  = 750;   // time until "held-down clicks" register
+  backButton.debounceTime   = 20;     // Debounce timer in ms
+  backButton.multiclickTime = 350;    // Time limit for multi clicks
+  backButton.longClickTime  = 1000;   // time until "held-down clicks" register
 
   pinMode(PREV_BUTTON_PIN, INPUT_PULLUP);
-  prevButton.debounceTime   = 20;    // Debounce timer in ms
-  prevButton.multiclickTime = 250;   // Time limit for multi clicks
-  prevButton.longClickTime  = 750;   // time until "held-down clicks" register
+  prevButton.debounceTime   = 20;     // Debounce timer in ms
+  prevButton.multiclickTime = 350;    // Time limit for multi clicks
+  prevButton.longClickTime  = 1000;   // time until "held-down clicks" register
 
   pinMode(NEXT_BUTTON_PIN, INPUT_PULLUP);
-  nextButton.debounceTime   = 20;    // Debounce timer in ms
-  nextButton.multiclickTime = 250;   // Time limit for multi clicks
-  nextButton.longClickTime  = 750;   // time until "held-down clicks" register
+  nextButton.debounceTime   = 20;     // Debounce timer in ms
+  nextButton.multiclickTime = 350;    // Time limit for multi clicks
+  nextButton.longClickTime  = 1000;   // time until "held-down clicks" register
 
   pinMode(SELECT_BUTTON_PIN, INPUT_PULLUP);
-  selectButton.debounceTime   = 20;  // Debounce timer in ms
-  selectButton.multiclickTime = 250; // Time limit for multi clicks
-  selectButton.longClickTime  = 750; // time until "held-down clicks" register
+  selectButton.debounceTime   = 20;   // Debounce timer in ms
+  selectButton.multiclickTime = 250;  // Time limit for multi clicks
+  selectButton.longClickTime  = 1000; // time until "held-down clicks" register
 
   // Setup the brightness control
   lastBrightnessRemote = false;
@@ -208,8 +208,7 @@ void setupNetwork() {
   // SSID and password are stored in credentials.h
   WiFi.setCredentials(WIFI_SSID, WIFI_PASSWORD);
   WiFi.connect();
-  debugPrintf(DEBUG_TRACE,
-              "  connecting to %s with password %s",
+  debugPrintf(DEBUG_TRACE, "  connecting to %s with password %s",
               WIFI_SSID,
               WIFI_PASSWORD);
 
@@ -259,7 +258,6 @@ void setup(void) {
   display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Starting E131...");
   setupE131();
   redrawCurrentPage();
-  debugPrint(DEBUG_TRACE, "  Finished");
 }
 
 void loopSensors() {}

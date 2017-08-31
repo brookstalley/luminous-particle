@@ -50,8 +50,7 @@ void CompositeModule::addWhiteEmitter(const Emitter& white,
   _whiteEmitter = componentEmitter(&white, outputLocalAddress, 0.0f, 0.0f, false);
   debugPrintf(DEBUG_INSANE,
               "Added white emitter %s at la %u",
-              white.getName(),
-              outputLocalAddress);
+              white.getName(), outputLocalAddress);
 }
 
 void CompositeModule::addColorEmitter(const Emitter& emitter,
@@ -95,8 +94,7 @@ void CompositeModule::calculate() {
 
   // Sort the emitters by angle
   std::sort(_colorEmitters.begin(), _colorEmitters.end(),
-            [](std::shared_ptr<componentEmitter>a,
-               std::shared_ptr<componentEmitter>b) {
+            [](std::shared_ptr<componentEmitter>a, std::shared_ptr<componentEmitter>b) {
     return b->angle > a->angle;
   });
 
@@ -191,12 +189,8 @@ std::vector<outputChannel>CompositeModule::emitterPowersFromHSI(
                 emitter1->ustar,
                 emitter2->ustar,
                 emitter2->vstar,
-                I,
-                S,
-                ustar,
-                vstar,
-                emitter1power,
-                emitter2power);
+                I, S, ustar, vstar,
+                emitter1power, emitter2power);
   }
 
   return outputChannels;
