@@ -127,11 +127,6 @@ void CompositeModule::calculate() {
   }
 }
 
-// Angle from the white point
-float CompositeModule::getAngle(int num) {
-  return _colorEmitters[num]->angle;
-}
-
 std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI(
   const HSIColor& HSI) const {
   float H = fmod(HSI.getHue() + 360, 360);
@@ -189,10 +184,7 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI(
   // Fill our output power list. For each component emitter, set it to zero
   // unless it is one of the two emitters we are using to mix the color. If it's
   // one of them, set the appropriate power.
-  for (std::vector<std::shared_ptr<componentEmitter> >::const_iterator itspEmitter
-         = _colorEmitters.begin();
-       itspEmitter < _colorEmitters.end();
-       ++itspEmitter) {
+  for (auto itspEmitter = _colorEmitters.begin(); itspEmitter < _colorEmitters.end(); ++itspEmitter) {
     if ((*itspEmitter) == emitter1) {
       emitterPower = emitter1power;
     } else if ((*itspEmitter) == emitter2) {
