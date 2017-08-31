@@ -193,9 +193,10 @@ void setupE131() {
   if (!WiFi.ready()) {
     wifiCurrentState = WIFI_DISCONNECTED;
     debugPrint(DEBUG_ERROR, "setupE131: WiFi not connected");
-    return;
+    return false;
   }
   mainUniverse->begin(10);
+  return true;
 }
 
 void setupNetwork() {
@@ -219,7 +220,7 @@ void setupNetwork() {
     if (WiFi.ready()) {
       wifiCurrentState = WIFI_CONNECTED;
       debugPrint(DEBUG_TRACE, "  connected");
-      return;
+      return true;
     } else {
       debugPrintf(DEBUG_TRACE,
                   "  waiting for connection to %s:%s (%u)",
@@ -228,6 +229,7 @@ void setupNetwork() {
                   i);
     }
   }
+  return false;
 }
 
 void setup(void) {
@@ -256,7 +258,10 @@ void setup(void) {
   display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Starting sensors...");
   setupSensors();
   display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Starting E131...");
-  setupE131();
+
+  if (setupE131()) {
+    setModeByName("E131");
+  }
   redrawCurrentPage();
 }
 
