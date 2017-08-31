@@ -134,12 +134,13 @@ void setupLEDs() {
   // HSILights use this module, their color characteristcs are the same, so
   // there is only one LZ7 object
   LZ7.addWhiteEmitter(emitterLZ7white, 5);
-  LZ7.addColorEmitter(emitterLZ7red,    0, false);
-  LZ7.addColorEmitter(emitterLZ7amber,  3, false);
-  LZ7.addColorEmitter(emitterLZ7green,  1, false);
-  LZ7.addColorEmitter(emitterLZ7cyan,   4, false);
-  LZ7.addColorEmitter(emitterLZ7blue,   2, false);
-  LZ7.addColorEmitter(emitterLZ7violet, 6, false);
+  LZ7.addColorEmitter(emitterLZ7red,   0, false);
+  LZ7.addColorEmitter(emitterLZ7amber, 3, false);
+  LZ7.addColorEmitter(emitterLZ7green, 1, false);
+  LZ7.addColorEmitter(emitterLZ7cyan,  4, false);
+  LZ7.addColorEmitter(emitterLZ7blue,  2, false);
+
+  // LZ7.addColorEmitter(emitterLZ7violet, 6, false);
   LZ7.calculate();
 
   debugPrint(DEBUG_TRACE, "  setting up lamps");
