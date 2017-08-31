@@ -59,19 +59,16 @@ void CompositeModule::addColorEmitter(const Emitter& emitter,
                                       bool           effectOnly) {
   // To figure out where to put it in the colorspace, calculate the angle from
   // the white point.
-  float uEmitter = emitter.getU();
-  float vEmitter = emitter.getV();
-  float uWHITE   = _whiteEmitter.emitter->getU();
-  float vWHITE   = _whiteEmitter.emitter->getV();
+  cieUVcolor colorUV = emitter.getUV();
+  cieUVcolor whiteUV = _whiteEmitter.emitter->getUV();
 
   debugPrintf(DEBUG_TRACE,
               "CompositeModule::addColorEmitter %s at address %u",
               emitter.getName(),
               outputLocalAddress);
 
-  float newAngle =
-    fmod((180 / M_PI) * atan2((vEmitter - vWHITE), (uEmitter - uWHITE)) + 360,
-         360);
+  float colorAngle =
+    fmod(atan2((colorUV.v - whiteUV.v), (colorUV.u - whiteUV.u)) + 360, 360);
 
   // Create our component emitter based on the prototype emitter, plus this
   // one's particular address
@@ -102,10 +99,13 @@ void CompositeModule::calculate() {
     return b->angle > a->angle;
   });
 
-  // Recalculate all slopes and ustar / vtar
+  cieUVcolor whiteUV = _whiteEmitter.emitter->getUV();
+
+  // Recalculate all slopes and ustar / vstar
   for (auto it = _colorEmitters.begin(); it != _colorEmitters.end(); it++) {
-    (*it)->ustar = (*it)->emitter->getU() - _whiteEmitter.emitter->getU();
-    (*it)->vstar = (*it)->emitter->getV() - _whiteEmitter.emitter->getV();
+    cieUVcolor colorUV = (*it)->emitter->getUV();
+    (*it)->ustar = colorUV.u - whiteUV.u;
+    (*it)->vstar = colorUV.v - whiteUV.v;
 
     std::shared_ptr<componentEmitter> spNextEmitter;
 
@@ -119,8 +119,8 @@ void CompositeModule::calculate() {
 
     // I hate this mix of iterators to shared pointers and shared pointers,
     // but it works
-    (*it)->slope = (spNextEmitter->emitter->getV() - (*it)->emitter->getV())
-                   / (spNextEmitter->emitter->getU() - (*it)->emitter->getU());
+    (*it)->slope = (spNextEmitter->emitter->getV() - colorUV.v)
+                   / (spNextEmitter->emitter->getU() - colorUV.u);
   }
 
   // Build wedge list (experimental)
@@ -224,12 +224,9 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI(
               emitter2->emitter->getName(),
               emitter2->angle);
 
-  // Get the slope between LED1 and LED2.
-  float slope = emitter1->slope;
-
-  float ustar = (emitter2->vstar - slope * emitter2->ustar) / (tanH - slope);
-  float vstar = tanH / (slope - tanH) *
-                (slope * emitter2->ustar - emitter2->vstar);
+  float ustar = (emitter2->vstar - emitter1->slope * emitter2->ustar) / (tanH - emitter1->slope);
+  float vstar = tanH / (emitter1->slope - tanH) *
+                (emitter1->slope * emitter2->ustar - emitter2->vstar);
 
   debugPrintf(DEBUG_INSANE, "s: %f, u: %f, v: %f", slope, ustar, vstar);
 
@@ -282,107 +279,6 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI(
                 emitter1->ustar,
                 emitter2->ustar,
                 emitter2->vstar,
-                I,
-                S,
-                ustar,
-                vstar,
-                emitter1power,
-                emitter2power);
-  }
-
-  return emitterPowers;
-}
-
-std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI2(
-  const HSIColor& HSI) const {
-  /***** Experimental version using colorspacewedges ******/
-
-  float H = fmod(HSI.getHue() + 360, 360);
-  float S = HSI.getSaturation();
-  float I = HSI.getIntensity();
-
-  float tanH = tan(M_PI * fmod(H, 360) / (float)180); // Get the tangent since
-
-  // we will use it often.
-
-  std::shared_ptr<componentEmitter> emitter1;
-  std::shared_ptr<componentEmitter> emitter2;
-
-  // We're looking for the wedge that the hue angle lives in
-  std::vector<colorspaceWedge>::const_iterator it =
-    std::find_if(_colorspaceWedges.begin(), _colorspaceWedges.end(),
-                 [H](const colorspaceWedge w) -> bool {
-    // We found the right wedge if 1) startAngle <= H <= endAngle, 2) startAngle
-    // < H && endAngle < startAngle (H is between the start of the last wedge
-    // and 0)
-    return (w.startAngle <= H) &&
-    ((w.endAngle >= H) || (w.endAngle < w.startAngle));
-  });
-
-  // ...or 3) 0 < H < wedge[0].startAngle (in which case we're in the last
-  // wedge, since it wraps around)
-  if (it == _colorspaceWedges.end()) {
-    it = _colorspaceWedges.end() - 1;
-  }
-
-  colorspaceWedge wedge = *it;
-
-  debugPrintf(DEBUG_INSANE,
-              "Hue %f: Emitter 1: %s (%4.0f), Emitter 2: %s (%4.0f)",
-              H,
-              wedge.emitter1->getName(),
-              wedge.startAngle,
-              wedge.emitter2->getName(),
-              wedge.endAngle);
-
-  float ustar = (wedge.e2vstar - wedge.slope * wedge.e2ustar) /
-                (tanH - wedge.slope);
-  float vstar = tanH / (wedge.slope - tanH) *
-                (wedge.slope * wedge.e2ustar - wedge.e2vstar);
-
-  debugPrintf(DEBUG_INSANE, "s: %f, u: %f, v: %f", wedge.slope, ustar, vstar);
-
-  // Calculate separately because abs() is a goddamned macro that returns
-  // goddamned integers which goddamned breaks
-  // TODO: Should scale each emitter relative to the other's maximum power
-  float emitter1power = I * S * fabs(ustar - wedge.e2ustar) / fabs(
-    wedge.e2ustar - wedge.e1ustar);
-  float emitter2power = I * S * fabs(ustar - wedge.e1ustar) / fabs(
-    wedge.e2ustar - wedge.e1ustar);
-
-  // Copy our color emitters with default power of zero
-  std::vector<outputEmitter> emitterPowers;
-  float emitterPower;
-
-  // Fill our output power list. For each component emitter, set it to zero
-  // unless it is one of the two emitters we are using to mix the color. If it's
-  // one of them, set the appropriate power.
-  for (std::vector<std::shared_ptr<componentEmitter> >::const_iterator itspEmitter
-         = _colorEmitters.begin();
-       itspEmitter < _colorEmitters.end();
-       ++itspEmitter) {
-    if ((*itspEmitter)->emitter == wedge.emitter1) {
-      emitterPower = emitter1power;
-    } else if ((*itspEmitter)->emitter == wedge.emitter2) {
-      emitterPower = emitter2power;
-    } else {
-      emitterPower = 0.0f;
-    }
-    outputEmitter o((*itspEmitter)->emitter, (*itspEmitter)->outputLocalAddress, emitterPower);
-    emitterPowers.push_back(o);
-  }
-
-  // Add white to the end, and set the power based on saturation
-  emitterPowers.push_back(outputEmitter(_whiteEmitter.emitter, _whiteEmitter.outputLocalAddress,
-                                        I * (1 - S)));
-
-  if ((emitter1power > 1.0f) || (emitter2power > 1.0f)) {
-    debugPrintf(DEBUG_ERROR,
-                "Power>1: t: %f, e1u: %f, e2u: %f, e2v: %f I: %3.2f S: %3.2f u: %f v: %f p1: %f p2: %f",
-                tanH,
-                wedge.e1ustar,
-                wedge.e2ustar,
-                wedge.e2vstar,
                 I,
                 S,
                 ustar,
