@@ -47,7 +47,7 @@ void CompositeModule::addWhiteEmitter(const Emitter& white,
                                       uint16_t       outputLocalAddress) {
   // slope and angle not relevant for white emitter
   // currently supports only one white emitter per composite module
-  _whiteEmitter = componentEmitter(&white, outputLocalAddress, 0.0f, 0.0f, false);
+  _whiteEmitter = componentEmitter(&white, outputLocalAddress, false);
   debugPrintf(DEBUG_INSANE,
               "Added white emitter %s at la %u",
               white.getName(), outputLocalAddress);
