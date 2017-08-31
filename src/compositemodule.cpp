@@ -66,8 +66,7 @@ void CompositeModule::addColorEmitter(const Emitter& emitter,
   // one's particular address
   std::shared_ptr<componentEmitter> newEmitter =
     std::make_shared<componentEmitter>(componentEmitter(&emitter,
-                                                        outputLocalAddress,
-                                                        0, 0, effectOnly));
+                                                        outputLocalAddress, effectOnly));
 
   // Note that we add the emitter at the end without regard for order
   // CompositeModule WILL NOT WORK unless calculate() is called after adding
@@ -75,14 +74,11 @@ void CompositeModule::addColorEmitter(const Emitter& emitter,
   _colorEmitters.push_back(newEmitter);
 
   debugPrintf(DEBUG_INSANE,
-              "Added emitter %s at la %u",
-              emitter.getName(),
-              outputLocalAddress);
+              "Added emitter %s at la %u", emitter.getName(), outputLocalAddress);
 }
 
 void CompositeModule::calculate() {
-  debugPrint(DEBUG_TRACE,
-             "CompositeModule::calculate start");
+  debugPrint(DEBUG_TRACE, "CompositeModule::calculate start");
 
   cieUVcolor whiteUV = _whiteEmitter.emitter->getUV();
 
@@ -121,9 +117,7 @@ void CompositeModule::calculate() {
 
   for (const auto& e : _colorEmitters) {
     debugPrintf(DEBUG_TRACE, "Emitter %s: angle %4.4f slope %4.4f",
-                e->emitter->getName(),
-                e->angle,
-                e->slope);
+                e->emitter->getName(), e->angle, e->slope);
   }
 }
 
@@ -156,19 +150,9 @@ std::vector<outputChannel>CompositeModule::emitterPowersFromHSI(
     emitter2 = *it;
   }
 
-  debugPrintf(DEBUG_INSANE,
-              "Hue %f: Emitter 1: %s (%4.0f), Emitter 2: %s (%4.0f)",
-              H,
-              emitter1->emitter->getName(),
-              emitter1->angle,
-              emitter2->emitter->getName(),
-              emitter2->angle);
-
   float ustar = (emitter2->vstar - emitter1->slope * emitter2->ustar) / (tanH - emitter1->slope);
   float vstar = tanH / (emitter1->slope - tanH) *
                 (emitter1->slope * emitter2->ustar - emitter2->vstar);
-
-  debugPrintf(DEBUG_INSANE, "s: %f, u: %f, v: %f", slope, ustar, vstar);
 
   // Calculate separately because abs() is a goddamned macro that returns
   // goddamned integers which goddamned breaks
@@ -195,14 +179,6 @@ std::vector<outputChannel>CompositeModule::emitterPowersFromHSI(
     outputChannel o((*itspEmitter)->outputLocalAddress, emitterPower);
 
     outputChannels.push_back(o);
-
-    /*
-       debugPrintf(DEBUG_INSANE, "CompositeModule::emitterPowersFromHSI added
-          emitterPower[%u] at la %u with power %f",
-                emitterPowers.size() - 1,
-                   emitterPowers.back().outputLocalAddress,
-                emitterPowers.back().power);
-     */
   }
 
   // Add white to the end, and set the power based on saturation

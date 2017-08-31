@@ -44,11 +44,11 @@ struct outputChannel {
 
 
 struct componentEmitter {
-  componentEmitter(const Emitter *e, uint16_t la, float a, float s, bool eo) {
+  componentEmitter(const Emitter *e, uint16_t la, bool eo) {
     emitter            = e;
     outputLocalAddress = la;
-    angle              = a;
-    slope              = s;
+    angle              = 0;
+    slope              = 0;
     effectOnly         = eo;
     ustar              = 0;
     vstar              = 0;
