@@ -32,16 +32,14 @@
 #include <vector>
 #include <algorithm>
 
-struct outputEmitter {
-  outputEmitter(const Emitter *e, uint8_t la, float pwr) {
-    emitter            = e;
+struct outputChannel {
+  outputChannel(uint8_t la, float pwr) {
     outputLocalAddress = la;
     power              = pwr;
   }
 
-  const Emitter *emitter;
-  uint16_t       outputLocalAddress;
-  float          power;
+  uint16_t outputLocalAddress;
+  float    power;
 };
 
 
@@ -86,7 +84,7 @@ public:
                                             uint16_t       outputLocalAddress,
                                             bool           effectOnly);
   void                      calculate();
-  std::vector<outputEmitter>emitterPowersFromHSI(const HSIColor& HSI) const;
+  std::vector<outputChannel>emitterPowersFromHSI(const HSIColor& HSI) const;
 };
 
 #endif /* ifndef COMPOSITEMODULE_H */

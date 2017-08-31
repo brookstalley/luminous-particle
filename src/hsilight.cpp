@@ -78,18 +78,13 @@ HSILight::HSILight(const char                     *name,
 {}
 
 void HSILight::begin() {
-  _lastColor     = HSIColor(0, 0, 0);
-  _emitterPowers = _compositeModule.emitterPowersFromHSI(_lastColor);
+  _lastColor      = HSIColor(0, 0, 0);
+  _outputChannels = _compositeModule.emitterPowersFromHSI(_lastColor);
 
   _lastE131PacketCount = 0;
   debugPrintf(DEBUG_TRACE, "HSILight: begin (%u)", _emitterPowers.size());
 
-  for (unsigned int i = 0; i < _emitterPowers.size(); i++) {
-    debugPrintf(DEBUG_INSANE,
-                "HSILight: emitter %u la %u",
-                i,
-                _emitterPowers[i].outputLocalAddress);
-  }
+  debugOutputChannels(DEBUG_INSANE);
 }
 
 void HSILight::setColor(const HSIColor& color)  {
@@ -105,21 +100,7 @@ void HSILight::setColor(const HSIColor& color)  {
               color.getSaturation(),
               color.getIntensity());
 
-  _emitterPowers = _compositeModule.emitterPowersFromHSI(color);
-
-  // strcpy(_diagnostic, "*");
-
-
-  for (unsigned int i = 0; i < _emitterPowers.size(); i++) {
-    debugPrintf(DEBUG_TRACE,
-                "HSILight: emitter %u (%s, la %u) power %f",
-                i,
-                _emitterPowers[i].emitter->getName(),
-                _emitterPowers[i].outputLocalAddress,
-                _emitterPowers[i].power);
-  }
-
-
+  _outputChannels = _compositeModule.emitterPowersFromHSI(color);
   setEmitters();
 }
 
@@ -135,11 +116,9 @@ void HSILight::setSingleEmitterOn(unsigned int index) {
 
   float thisEmitter = 0.0f;
 
-  for (unsigned int i = 0; i < _emitterPowers.size(); i++) {
-    thisEmitter = (index % _emitterPowers.size() == i) ? 1.0 : 0.0;
-    debugPrintf(DEBUG_INSANE, "HSILight: emitter %u power %f", i, thisEmitter);
-
-    _emitterPowers[i].power = thisEmitter;
+  for (unsigned int i = 0; i < __outputChannels.size(); i++) {
+    thisEmitter               = (index % __outputChannels.size() == i) ? 1.0 : 0.0;
+    __outputChannels[i].power = thisEmitter;
   }
   setEmitters();
 }
@@ -147,18 +126,18 @@ void HSILight::setSingleEmitterOn(unsigned int index) {
 void HSILight::setEmitters() {
   // TODO: Move diagnostic calculation to getDiagnostic so it doesn't run so often
   debugPrint(DEBUG_INSANE, "HSILight::setEmitters start");
-
+  debugOutputChannels(DEBUG_INSANE);
 
   _diagnostic[0] = '\0';
 
-  for (auto const& e : _emitterPowers) {
+  for (auto const& c : _outputChannels) {
     sprintf(_diagnostic + strlen(_diagnostic), "%02X ",
-            (uint16_t)round(e.power * 255));
+            (uint16_t)round(c.power * 255));
   }
   debugPrintf(DEBUG_INSANE, "diag: %s", _diagnostic);
 
   float scaleFactor = globalBrightness * _localBrightness;
-  _outputInterface->setEmitterPowers(_emitterPowers, scaleFactor);
+  _outputInterface->setEmitterPowers(_outputChannels, scaleFactor);
 }
 
 const char * HSILight::getName(void) const {
@@ -205,6 +184,13 @@ float HSILight::getTemperature(void) {
   }
 }
 
-const std::vector<outputEmitter>HSILight::getOutputEmitters() const {
-  return _emitterPowers;
+const std::vector<outputChannel>HSILight::getOutputChannels() const {
+  return _outputChannels;
+}
+
+void HSILight::debugOutputChannels(uint16_t debugLevel) {
+  for (unsigned int i = 0; i < _outputChannels.size(); i++) {
+    debugPrintf(debugLevel, "HSILight: channel %u at address %u", i,
+                _outputChannels[i].outputLocalAddress);
+  }
 }

@@ -127,7 +127,7 @@ void CompositeModule::calculate() {
   }
 }
 
-std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI(
+std::vector<outputChannel>CompositeModule::emitterPowersFromHSI(
   const HSIColor& HSI) const {
   float H = fmod(HSI.getHue() + 360, 360);
   float S = HSI.getSaturation();
@@ -178,7 +178,7 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI(
     emitter2->ustar - emitter1->ustar);
 
   // Copy our color emitters with default power of zero
-  std::vector<outputEmitter> emitterPowers;
+  std::vector<outputChannel> outputChannels;
   float emitterPower;
 
   // Fill our output power list. For each component emitter, set it to zero
@@ -192,9 +192,9 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI(
     } else {
       emitterPower = 0.0f;
     }
-    outputEmitter o((*itspEmitter)->emitter, (*itspEmitter)->outputLocalAddress, emitterPower);
+    outputChannel o((*itspEmitter)->outputLocalAddress, emitterPower);
 
-    emitterPowers.push_back(o);
+    outputChannels.push_back(o);
 
     /*
        debugPrintf(DEBUG_INSANE, "CompositeModule::emitterPowersFromHSI added
@@ -206,8 +206,7 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI(
   }
 
   // Add white to the end, and set the power based on saturation
-  emitterPowers.push_back(outputEmitter(_whiteEmitter.emitter, _whiteEmitter.outputLocalAddress,
-                                        I * (1 - S)));
+  outputChannels.push_back(outputChannel(_whiteEmitter.outputLocalAddress, I * (1 - S)));
 
   if ((emitter1power > 1.0f) || (emitter2power > 1.0f)) {
     debugPrintf(DEBUG_INSANE,
@@ -224,5 +223,5 @@ std::vector<outputEmitter>CompositeModule::emitterPowersFromHSI(
                 emitter2power);
   }
 
-  return emitterPowers;
+  return outputChannels;
 }

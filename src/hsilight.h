@@ -50,7 +50,7 @@ private:
   std::shared_ptr<TemperatureInterface>_temperatureInterface;
   const uint16_t _temperatureLocalAddress;
 
-  std::vector<outputEmitter>_emitterPowers;
+  std::vector<outputChannel>_outputChannels;
 
   float _localBrightness;
 
@@ -63,6 +63,7 @@ private:
   HSIColor _lastColor;
 
   void setEmitters();
+  void debugOutputChannels(uint16_t debugLevel);
 
 public:
 
@@ -96,7 +97,7 @@ public:
   const char                    * getDiagnostic(void) const;
   const float                     getLocalBrightness() const;
   void                            setSingleEmitterOn(unsigned int index);
-  const std::vector<outputEmitter>getOutputEmitters() const;
+  const std::vector<outputChannel>getOutputChannels() const;
 };
 
 
