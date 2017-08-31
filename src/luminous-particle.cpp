@@ -52,6 +52,10 @@ SYSTEM_THREAD(ENABLED);
 
 ////////////////////////// GLOBALS ///////////////////////////
 
+const uint16_t BUTTON_DEBOUNCE_MS   = 20;
+const uint16_t BUTTON_MULTICLICK_MS = 500;
+const uint16_t BUTTON_LONGCLICK_MS  = 1000;
+
 float globalBrightness     = 1.0f;
 bool  lastBrightnessRemote = false;
 
@@ -152,32 +156,22 @@ void setupLEDs() {
     light->begin();
   });
 
-  debugPrint(DEBUG_TRACE, "  Setting initial mode");
   setModeByNumber(0);
-  debugPrint(DEBUG_TRACE, "  Finished");
+}
+
+void setupClickButton(ClickButton& button, uint8_t pin) {
+  pinMode(pin, INPUT_PULLUP);
+  button.debounceTime   = BUTTON_DEBOUNCE_MS;   // Debounce timer in ms
+  button.multiclickTime = BUTTON_MULTICLICK_MS; // Time limit for multi clicks
+  button.longClickTime  = BUTTON_LONGCLICK_MS;  // time until "held-down clicks" register
 }
 
 void setupControls() {
   // Setup the first button with an internal pull-up :
-  pinMode(BACK_BUTTON_PIN, INPUT_PULLUP);
-  backButton.debounceTime   = 20;     // Debounce timer in ms
-  backButton.multiclickTime = 350;    // Time limit for multi clicks
-  backButton.longClickTime  = 1000;   // time until "held-down clicks" register
-
-  pinMode(PREV_BUTTON_PIN, INPUT_PULLUP);
-  prevButton.debounceTime   = 20;     // Debounce timer in ms
-  prevButton.multiclickTime = 350;    // Time limit for multi clicks
-  prevButton.longClickTime  = 1000;   // time until "held-down clicks" register
-
-  pinMode(NEXT_BUTTON_PIN, INPUT_PULLUP);
-  nextButton.debounceTime   = 20;     // Debounce timer in ms
-  nextButton.multiclickTime = 350;    // Time limit for multi clicks
-  nextButton.longClickTime  = 1000;   // time until "held-down clicks" register
-
-  pinMode(SELECT_BUTTON_PIN, INPUT_PULLUP);
-  selectButton.debounceTime   = 20;   // Debounce timer in ms
-  selectButton.multiclickTime = 250;  // Time limit for multi clicks
-  selectButton.longClickTime  = 1000; // time until "held-down clicks" register
+  setupClickButton(backButton,   BACK_BUTTON_PIN);
+  setupClickButton(prevButton,   PREV_BUTTON_PIN);
+  setupClickButton(nextButton,   NEXT_BUTTON_PIN);
+  setupClickButton(selectButton, SELECT_BUTTON_PIN);
 
   // Setup the brightness control
   lastBrightnessRemote = false;
@@ -283,9 +277,9 @@ void displayStatusBar() {
   }
 
   if (particleCurrentState == PARTICLE_CONNECTED) {
-    statusBar[1] = (char)0x1e;
+    statusBar[1] = '*';
   } else {
-    statusBar[1] = (char)0x1f;
+    statusBar[1] = ' ';
   }
 
   if (lastBrightnessRemote) {
@@ -305,14 +299,13 @@ void loopDisplay() {
   const unsigned long  maxUpdateLagMillis = 500;
   static unsigned long lastUpdateMillis   = 0;
 
-  if (millis() - lastUpdateMillis > maxUpdateLagMillis) {
+  if ((millis() - lastUpdateMillis) > maxUpdateLagMillis) {
     displayMustUpdate = true;
   }
 
   if (!displayMustUpdate) return;
 
   display.setTop();
-
   displayStatusBar();
 
   pageStack.back()->update();
@@ -326,7 +319,7 @@ void loopControlBrightness() {
 
   if (!brightnessControl.hasChanged()) return;
 
-  globalBrightness = ((float)(4095 - brightnessControl.getValue()) / 4095.0f);
+  globalBrightness = ((float)(4095.0f - brightnessControl.getValue()) / 4095.0f);
 
   if (lastBrightnessRemote) {
     // The previous change was remote; change the indicator and reset the
@@ -354,25 +347,19 @@ void loopControls() {
   nextClicks   = nextButton.clicks;
   selectClicks = selectButton.clicks;
 
-
   if (backButton.clicks != 0) {
-    debugPrint(DEBUG_TRACE, "back click");
-
     pageStack.back()->backButton(backClicks);
   }
 
   if (nextButton.clicks != 0) {
-    debugPrint(DEBUG_TRACE, "Next click");
     pageStack.back()->nextButton(nextClicks);
   }
 
   if (prevButton.clicks != 0) {
-    debugPrint(DEBUG_TRACE, "prev click");
     pageStack.back()->prevButton(prevClicks);
   }
 
   if (selectButton.clicks != 0) {
-    debugPrint(DEBUG_TRACE, "select click");
     pageStack.back()->selectButton(selectClicks);
   }
 
