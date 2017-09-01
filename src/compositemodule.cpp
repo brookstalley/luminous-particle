@@ -102,12 +102,12 @@ void CompositeModule::calculate() {
   for (auto it = _colorEmitters.begin(); it != _colorEmitters.end(); it++) {
     // Slope is to the next emitter, except the last one wraps around to the
     // first
-    auto spNextEmitter = ((it + 1) != _colorEmitters.end()) ? std::next(it) : _colorEmitters.begin();
+    auto itNext = ((it + 1) != _colorEmitters.end()) ? std::next(it) : _colorEmitters.begin();
 
-    auto thisUV = (*it)->emitter->getUV();
-    auto nextUV = (*spNextEmitter)->emitter->getUV();
+    auto thisUV = *((*it)->emitter->getUV());
+    auto nextUV = *((*itNext)->emitter->getUV());
 
-    (*it)->slope = ((*nextUV).v - (*thisUV).v) / ((*nextUV).u - (*thisUV).u);
+    (*it)->slope = (nextUV.v - thisUV.v) / (nextUV.u - thisUV.u);
   }
 
   for (const auto& e : _colorEmitters) {
