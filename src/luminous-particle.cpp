@@ -315,9 +315,10 @@ void loopDisplay() {
 
   if (!displayMustUpdate) return;
 
-  display.setTop();
+
   displayStatusBar();
 
+  display.setTop();
   pageStack.back()->update();
 
   lastUpdateMillis  = millis();

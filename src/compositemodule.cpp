@@ -181,13 +181,22 @@ std::vector<outputChannel>CompositeModule::emitterPowersFromHSI(
 
   if ((emitter1power > 1.0f) || (emitter2power > 1.0f)) {
     debugPrintf(DEBUG_INSANE,
-                "t: %f, e1u: %f, e2u: %f, e2v: %f I: %3.2f S: %3.2f u: %f v: %f p1: %f p2: %f",
+                "HSI: %3f %3.2f %3.2f | t: %3.2f | e1: %s, e2: %s | e1u: %f, e1v: %f, e2u: %f, e2v: %f | u: %f v: %f | p1: %f p2: %f pI: %f",
+                H,
+                S,
+                I,
                 tanH,
+                emitter1->emitter->getName(),
+                emitter2->emitter->getName(),
                 emitter1->ustar,
+                emitter1->vstar,
                 emitter2->ustar,
                 emitter2->vstar,
-                I, S, ustar, vstar,
-                emitter1power, emitter2power);
+                ustar,
+                vstar,
+                emitter1power,
+                emitter2power,
+                I * (1 - S));
   }
 
   return outputChannels;
