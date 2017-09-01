@@ -64,7 +64,7 @@ extern std::vector<std::shared_ptr<HSILight> > allLights;
 extern std::vector<std::shared_ptr<Page> > pageStack;
 extern Display display;
 
-void setupDisplay();
+bool setupDisplay();
 void setup(void);
 void loop();
 void modeOff();

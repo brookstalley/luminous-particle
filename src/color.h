@@ -1,27 +1,30 @@
 /* */
 
-struct cieXYcolor {
-  cieXYcolor(float inx, float iny) {
-    x = inx;
-    y = iny;
-  }
+#ifndef LUMINOUS_COLOR_H
+#define LUMINOUS_COLOR_H
 
+#include "Particle.h"
+
+struct cieXYcolor {
   float x;
   float y;
-}
+
+  cieXYcolor(float inx = 0.0f,
+             float iny = 0.0f) : x(inx), y(iny) {}
+};
 
 struct cieUVcolor {
-  cieUVcolor(float inu, float inv) {
-    x = inu;
-    y = inv;
-  }
-
   float u;
   float v;
-}
 
-cieXYcolor cieXYfromWavelength(uint16_t wavelength);
-cieUVcolor cieUVfromWavelength(uint16_t wavelength);
-cieUVcolor cieUVfromXY(cieXYcolor);
+  cieUVcolor(float inu = 0.0f,
+             float inv = 0.0f) : u(inu), v(inv) {}
+};
+
+cieXYcolor cieXYfromWavelength(uint16_t);
+cieUVcolor cieUVfromWavelength(uint16_t);
+cieUVcolor cieUVfromXY(const cieXYcolor);
 
 extern float const wavelengthToXY[830 - 360 + 1][2];
+
+#endif // ifndef LUMINOUS_COLOR_H

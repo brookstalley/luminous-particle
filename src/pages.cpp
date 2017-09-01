@@ -141,11 +141,11 @@ bool LightPage::update() {
                   color.getHue(),
                   color.getSaturation(),
                   color.getIntensity());
-  std::vector<outputEmitter> o = (*_itspLight)->getOutputEmitters();
+  std::vector<outputChannel> o = (*_itspLight)->getOutputChannels();
 
   for (const auto& it : o) {
     if (it.power > 0.0f) {
-      display.println(DISPLAY_WHITE, DISPLAY_BLACK, " %s : %2.2f", it.emitter->getName(), it.power);
+      display.println(DISPLAY_WHITE, DISPLAY_BLACK, " %u : %2.2f", it.outputLocalAddress, it.power);
     }
   }
   return true;

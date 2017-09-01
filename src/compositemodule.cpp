@@ -79,15 +79,15 @@ void CompositeModule::addColorEmitter(const Emitter& emitter,
 void CompositeModule::calculate() {
   debugPrint(DEBUG_TRACE, "CompositeModule::calculate start");
 
-  cieUVcolor whiteUV = _whiteEmitter.emitter->getUV();
+  auto whiteUV = _whiteEmitter.emitter->getUV();
 
   // Recalculate all slopes, ustar / vstar, and angle to white
   for (auto it = _colorEmitters.begin(); it != _colorEmitters.end(); it++) {
-    cieUVcolor colorUV = (*it)->emitter->getUV();
-    (*it)->ustar = colorUV.u - whiteUV.u;
-    (*it)->vstar = colorUV.v - whiteUV.v;
+    auto colorUV = (*it)->emitter->getUV();
+    (*it)->ustar = (*colorUV).u - (*whiteUV).u;
+    (*it)->vstar = (*colorUV).v - (*whiteUV).v;
     (*it)->angle =
-      fmod(atan2((colorUV.v - whiteUV.v), (colorUV.u - whiteUV.u)) + 360, 360);
+      fmod(atan2(((*colorUV).v - (*whiteUV).v), ((*colorUV).u - (*whiteUV).u)) + 360, 360);
 
     std::shared_ptr<componentEmitter> spNextEmitter;
   }
@@ -102,15 +102,12 @@ void CompositeModule::calculate() {
   for (auto it = _colorEmitters.begin(); it != _colorEmitters.end(); it++) {
     // Slope is to the next emitter, except the last one wraps around to the
     // first
-    if ((it + 1) != _colorEmitters.end()) {
-      spNextEmitter = std::next(it);
-    } else {
-      spNextEmitter = _colorEmitters.begin();
-    }
-    cieUVcolor thisUV = (*it)->emitter->getUV();
-    cieUVcolor nextUV = (*spNextEmitter)->emitter->getUV();
+    auto spNextEmitter = ((it + 1) != _colorEmitters.end()) ? std::next(it) : _colorEmitters.begin();
 
-    (*it)->slope = (nextUV.v - colorUV.v) / (nextUV.u - colorUV.u);
+    auto thisUV = (*it)->emitter->getUV();
+    auto nextUV = (*spNextEmitter)->emitter->getUV();
+
+    (*it)->slope = ((*nextUV).v - (*thisUV).v) / ((*nextUV).u - (*thisUV).u);
   }
 
   for (const auto& e : _colorEmitters) {

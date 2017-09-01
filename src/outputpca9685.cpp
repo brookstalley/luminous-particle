@@ -55,42 +55,42 @@ bool OutputPCA9685::allOffImplementation() const {
   return true;
 }
 
-bool OutputPCA9685::setEmitterPowers(const std::vector<outputEmitter>& emitterPowers, float scaleFactor) {
+bool OutputPCA9685::setEmitterPowers(const std::vector<outputChannel>& outputChannels, float scaleFactor) {
   // Note that this does not support non-contiguous updates;
   // assumes that the start address is the lowest localAddress
   // in emitterPowers
 
   debugPrintf(DEBUG_TRACE,
               "OutputPCA9685::setEmitterPowers start. EmitterPowers.size() == %u, scale %f",
-              emitterPowers.size(), scaleFactor);
+              outputChannels.size(), scaleFactor);
 
-  uint16_t pwms[emitterPowers.size()];
+  uint16_t pwms[outputChannels.size()];
   uint16_t minAddress = UINT16_MAX;
   uint16_t powerTo9685;
 
-  for (uint16_t i = 0; i < emitterPowers.size(); i++) {
-    if (emitterPowers[i].outputLocalAddress < minAddress) {
-      minAddress = emitterPowers[i].outputLocalAddress;
+  for (uint16_t i = 0; i < outputChannels.size(); i++) {
+    if (outputChannels[i].outputLocalAddress < minAddress) {
+      minAddress = outputChannels[i].outputLocalAddress;
     }
   }
 
   debugPrintf(DEBUG_INSANE, "  minAddress == %u", minAddress);
 
-  for (uint16_t i = 0; i < emitterPowers.size(); i++) {
-    if ((scaleFactor == 1.0f) && (emitterPowers[i].power == 1.0f)) {
+  for (uint16_t i = 0; i < outputChannels.size(); i++) {
+    if ((scaleFactor == 1.0f) && (outputChannels[i].power == 1.0f)) {
       powerTo9685 = PCA9685_PWM_FULL;
     } else {
-      powerTo9685 = (uint16_t)(4096.0f * scaleFactor * emitterPowers[i].power) & 0x0FFF;
+      powerTo9685 = (uint16_t)(4096.0f * scaleFactor * outputChannels[i].power) & 0x0FFF;
     }
     debugPrintf(DEBUG_TRACE,
                 "  setting pwms[%u] to %u for i %u, la %u",
-                emitterPowers[i].outputLocalAddress - minAddress,
+                outputChannels[i].outputLocalAddress - minAddress,
                 powerTo9685,
                 i,
-                emitterPowers[i].outputLocalAddress);
-    pwms[emitterPowers[i].outputLocalAddress - minAddress] = powerTo9685;
+                outputChannels[i].outputLocalAddress);
+    pwms[outputChannels[i].outputLocalAddress - minAddress] = powerTo9685;
   }
-  _pwm.setChannelsPWM(minAddress, emitterPowers.size(), pwms);
+  _pwm.setChannelsPWM(minAddress, outputChannels.size(), pwms);
   return true;
 }
 

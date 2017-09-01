@@ -27,26 +27,27 @@
 
 #include "color.h"
 #include "Particle.h"
+#include <memory>
 
 class Emitter {
 private:
 
-  cieUVcolor _uv;
+  std::shared_ptr<cieUVcolor>_uv;
   uint16_t _maxLumens;
   const char *_name;
 
 public:
 
-  Emitter(const char *name,
-          cieUVcolor  uv,
-          uint16_t    maxLumens);
+  Emitter(const char                *name,
+          std::shared_ptr<cieUVcolor>uv,
+          uint16_t                   maxLumens);
 
   Emitter(const char *name,
           uint16_t    wavelength,
           uint16_t    maxLumens);
 
-  cieUVcolor  getUV(void) const;
-  uint16_t    getMaxLumens(void) const;
-  const char* getName(void) const;
+  std::shared_ptr<cieUVcolor>getUV(void) const;
+  uint16_t                   getMaxLumens(void) const;
+  const char               * getName(void) const;
 };
 #endif /* ifndef EMITTER_H */

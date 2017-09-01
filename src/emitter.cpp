@@ -22,21 +22,27 @@
 // **********************************************************
 
 
-#include "Emitter.h"
+#include "emitter.h"
+#include "color.h"
 #include "Particle.h"
+#include <memory>
 
-Emitter::Emitter(const char *name, cieUVcolor uv, uint16_t maxLumens) :
-  _uv(uv)
-  _maxLumens(maxLumens),
-  _name(name)
-{}
-
-Emitter::Emitter(const char *name, uint16_t wavelength, uint16t maxLumens) :
-  _maxLumens(maxLumens), _name(name) {
-  _uv = cieUVfromWavelength(wavelength);
+Emitter::Emitter(const char *name, std::shared_ptr<cieUVcolor>uv, uint16_t maxLumens)
+{
+  _name      = name;
+  _uv        = uv;
+  _maxLumens = maxLumens;
 }
 
-float Emitter::getUV(void) const {
+Emitter::Emitter(const char *name, uint16_t wavelength, uint16_t maxLumens)
+{
+  _name = name;
+  auto uv = std::make_shared<cieUVcolor>(wavelength);
+  _uv        = uv;
+  _maxLumens = maxLumens;
+}
+
+std::shared_ptr<cieUVcolor>Emitter::getUV(void) const {
   return _uv;
 }
 

@@ -1,4 +1,5 @@
-//*********************************************************
+// *********************************************************
+
 //
 // Luminous
 // Copyright 2017 Brooks Talley
@@ -18,7 +19,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Luminous.  If not, see <http://www.gnu.org/licenses/>.
 //
-//**********************************************************
+// **********************************************************
 #ifndef OUTPUTINTERFACE_H
 #define OUTPUTINTERFACE_H
 
@@ -29,12 +30,12 @@
 class OutputInterface {
 public:
 
-	virtual bool setEmitterPowers(const std::vector < outputEmitter >& emitters,
-	                              float scaleFactor) = 0;
+  virtual bool setEmitterPowers(const std::vector<outputChannel>& channels,
+                                float                             scaleFactor) = 0;
 
-	virtual bool init()         = 0;
-	virtual bool sleep() const  = 0;
-	virtual bool allOff() const = 0;
+  virtual bool init()         = 0;
+  virtual bool sleep() const  = 0;
+  virtual bool allOff() const = 0;
 };
 
 #endif /* ifndef OUTPUTINTERFACE_H */

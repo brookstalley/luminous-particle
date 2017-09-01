@@ -49,7 +49,7 @@ public:
   OutputPCA9685(TwoWire& i2cbus,
                 uint8_t  i2caddress);
 
-  bool setEmitterPowers(const std::vector<outputEmitter>& emitters,
+  bool setEmitterPowers(const std::vector<outputChannel>& channels,
                         float                             scaleFactor);
 
   bool init();

@@ -82,7 +82,7 @@ void HSILight::begin() {
   _outputChannels = _compositeModule.emitterPowersFromHSI(_lastColor);
 
   _lastE131PacketCount = 0;
-  debugPrintf(DEBUG_TRACE, "HSILight: begin (%u)", _emitterPowers.size());
+  debugPrintf(DEBUG_TRACE, "HSILight: begin (%u)", _outputChannels.size());
 
   debugOutputChannels(DEBUG_INSANE);
 }
@@ -112,13 +112,13 @@ void HSILight::setSingleEmitterOn(unsigned int index) {
   debugPrintf(DEBUG_INSANE,
               "HSILight: Setting single emitter for index %u (%u)",
               index,
-              _emitterPowers.size());
+              _outputChannels.size());
 
   float thisEmitter = 0.0f;
 
-  for (unsigned int i = 0; i < __outputChannels.size(); i++) {
-    thisEmitter               = (index % __outputChannels.size() == i) ? 1.0 : 0.0;
-    __outputChannels[i].power = thisEmitter;
+  for (unsigned int i = 0; i < _outputChannels.size(); i++) {
+    thisEmitter              = (index % _outputChannels.size() == i) ? 1.0 : 0.0;
+    _outputChannels[i].power = thisEmitter;
   }
   setEmitters();
 }

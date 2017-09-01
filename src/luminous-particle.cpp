@@ -21,6 +21,7 @@
 //
 // **********************************************************
 #include "luminous-particle.h"
+#include "color.h"
 #include "emitter.h"
 #include "hsicolor.h"
 #include "compositemodule.h"
@@ -89,7 +90,10 @@ std::shared_ptr<E131> mainUniverse = std::make_shared<E131>();
 
 // Shared lights with coordinates in CIE LUV colorspace
 // LZ7 max lumens are for 1000ma drive
-Emitter emitterLZ7white("LZ7-w", 0.202531646, 0.469936709, 180);
+auto D65 = std::make_shared<cieUVcolor>(0.202531646, 0.469936709);
+
+// The LZ7 white channel isn't *exactly* D65, but we're going to use it as the white reference
+Emitter emitterLZ7white("LZ7-w", D65, 180);
 
 // Following emitters use wavelengths
 Emitter emitterLZ7red("LZ7-r", 623, 110);
@@ -117,7 +121,7 @@ std::vector<std::shared_ptr<HSILight> > allLights = {
 
 ////////////////////////// MAIN ////////////////////////////
 
-void setupDisplay() {
+bool setupDisplay() {
   debugPrint(DEBUG_TRACE, "setupDisplay: starting");
 
   screen.begin();
@@ -125,9 +129,10 @@ void setupDisplay() {
   display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Starting...");
   setupMenus(); // creates our pageStack with the first screen on top
   debugPrint(DEBUG_TRACE, "  Finished");
+  return true;
 }
 
-void setupLEDs() {
+bool setupLEDs() {
   debugPrint(DEBUG_TRACE, "setupLEDs: starting");
   Wire.begin();          // Wire must be started first
   Wire.setClock(400000); // Supported baud rates are 100kHz, 400kHz, and 1000kHz
@@ -157,16 +162,18 @@ void setupLEDs() {
   });
 
   setModeByNumber(0);
+  return true;
 }
 
-void setupClickButton(ClickButton& button, uint8_t pin) {
+bool setupClickButton(ClickButton& button, uint8_t pin) {
   pinMode(pin, INPUT_PULLUP);
   button.debounceTime   = BUTTON_DEBOUNCE_MS;   // Debounce timer in ms
   button.multiclickTime = BUTTON_MULTICLICK_MS; // Time limit for multi clicks
   button.longClickTime  = BUTTON_LONGCLICK_MS;  // time until "held-down clicks" register
+  return true;
 }
 
-void setupControls() {
+bool setupControls() {
   // Setup the first button with an internal pull-up :
   setupClickButton(backButton,   BACK_BUTTON_PIN);
   setupClickButton(prevButton,   PREV_BUTTON_PIN);
@@ -177,11 +184,14 @@ void setupControls() {
   lastBrightnessRemote = false;
   brightnessControl.enableEdgeSnap();
   brightnessControl.setAnalogResolution(4096);
+  return true;
 }
 
-void setupSensors() {}
+bool setupSensors() {
+  return true;
+}
 
-void setupE131() {
+bool setupE131() {
   debugPrint(DEBUG_TRACE, "setupE131: Starting");
 
   if (!WiFi.ready()) {
@@ -193,7 +203,7 @@ void setupE131() {
   return true;
 }
 
-void setupNetwork() {
+bool setupNetwork() {
   debugPrint(DEBUG_TRACE, "setupNetwork: starting");
   WiFi.on();
   WiFi.disconnect();
