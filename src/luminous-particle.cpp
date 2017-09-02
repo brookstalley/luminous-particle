@@ -360,20 +360,22 @@ void loopControls() {
   nextClicks   = nextButton.clicks;
   selectClicks = selectButton.clicks;
 
-  if (backButton.clicks != 0) {
+  if (backButton.clicks > 0) {
     pageStack.back()->backButton(backClicks);
   }
 
-  if (nextButton.clicks != 0) {
+  if (nextButton.clicks > 0) {
     pageStack.back()->nextButton(nextClicks);
   }
 
-  if (prevButton.clicks != 0) {
+  if (prevButton.clicks > 0) {
     pageStack.back()->prevButton(prevClicks);
   }
 
-  if (selectButton.clicks != 0) {
+  if (selectButton.clicks > 0) {
     pageStack.back()->selectButton(selectClicks);
+  } else if (selectButton.clicks < 0) {
+    particleConnect();
   }
 
   loopControlBrightness();
