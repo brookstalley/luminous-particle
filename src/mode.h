@@ -1,4 +1,5 @@
-//*********************************************************
+// *********************************************************
+
 //
 // Luminous
 // Copyright 2017 Brooks Talley
@@ -18,7 +19,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Luminous.  If not, see <http://www.gnu.org/licenses/>.
 //
-//**********************************************************
+// **********************************************************
 #ifndef MODE_H
 #define MODE_H
 
@@ -30,20 +31,19 @@
 class Mode {
 private:
 
-	const char *_name;
+  String _name;
 
 public:
 
-	Mode(const char *name);
-	virtual ~Mode() {
-	};
+  Mode(String name);
+  virtual ~Mode() {}
 
-	virtual bool start(std::vector < std::shared_ptr < HSILight >> lights);
-	virtual bool run(std::vector < std::shared_ptr < HSILight >> lights,
-	                 bool lightsMustUpdate);
-	virtual bool end(std::vector < std::shared_ptr < HSILight >> lights);
+  virtual bool start(std::vector<std::shared_ptr<HSILight> >lights);
+  virtual bool run(std::vector<std::shared_ptr<HSILight> >lights,
+                   bool                                   lightsMustUpdate);
+  virtual bool end(std::vector<std::shared_ptr<HSILight> >lights);
 
-	const char * getName();
+  const String getName();
 };
 
 #endif /* ifndef MODE_H */

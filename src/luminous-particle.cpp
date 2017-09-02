@@ -265,6 +265,8 @@ void setup(void) {
 
   if (setupE131()) {
     setModeByName("E131");
+  }  else {
+    debugPrintf(DEBUG_ERROR, "No E131");
   }
   redrawCurrentPage();
 }

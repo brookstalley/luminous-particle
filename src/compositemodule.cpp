@@ -79,15 +79,15 @@ void CompositeModule::addColorEmitter(const Emitter& emitter,
 void CompositeModule::calculate() {
   debugPrint(DEBUG_TRACE, "CompositeModule::calculate start");
 
-  auto whiteUV = _whiteEmitter.emitter->getUV();
+  auto whiteUV = *(_whiteEmitter.emitter->getUV());
 
   // Recalculate all slopes, ustar / vstar, and angle to white
   for (auto it = _colorEmitters.begin(); it != _colorEmitters.end(); it++) {
-    auto colorUV = (*it)->emitter->getUV();
-    (*it)->ustar = (*colorUV).u - (*whiteUV).u;
-    (*it)->vstar = (*colorUV).v - (*whiteUV).v;
+    auto colorUV = *((*it)->emitter->getUV());
+    (*it)->ustar = colorUV.u - whiteUV.u;
+    (*it)->vstar = colorUV.v - whiteUV.v;
     (*it)->angle =
-      fmod(atan2(((*colorUV).v - (*whiteUV).v), ((*colorUV).u - (*whiteUV).u)) + 360, 360);
+      fmod((180 / M_PI) * atan2((colorUV.v - whiteUV.v), (colorUV.u - whiteUV.u)) + 360, 360);
 
     std::shared_ptr<componentEmitter> spNextEmitter;
   }
@@ -111,8 +111,8 @@ void CompositeModule::calculate() {
   }
 
   for (const auto& e : _colorEmitters) {
-    debugPrintf(DEBUG_TRACE, "Emitter %s: angle %4.4f slope %4.4f",
-                e->emitter->getName(), e->angle, e->slope);
+    debugPrintf(DEBUG_TRACE, "Emitter %s: u %3.2f v %3.2f angle %4.4f slope %4.4f",
+                e->emitter->getName(), e->emitter->getUV()->u, e->emitter->getUV()->v, e->angle, e->slope);
   }
 }
 
@@ -132,12 +132,12 @@ std::vector<outputChannel>CompositeModule::emitterPowersFromHSI(
   // bigger than H. H is bewtween that angle and the previous one
   // (component emitter list is sorted in ascending order)
   std::vector<std::shared_ptr<componentEmitter> >::const_iterator it =
-    std::find_if(_colorEmitters.begin() + 1, _colorEmitters.end(),
+    std::find_if(_colorEmitters.begin(), _colorEmitters.end(),
                  [H](const std::shared_ptr<componentEmitter>e) -> bool {
     return e->angle > H;
   });
 
-  if ((it == _colorEmitters.end()) || ((it + 1) == _colorEmitters.end())) {
+  if ((it == _colorEmitters.end()) || (it == _colorEmitters.begin())) {
     emitter1 = _colorEmitters.back();
     emitter2 = _colorEmitters.front();
   } else {
@@ -179,25 +179,26 @@ std::vector<outputChannel>CompositeModule::emitterPowersFromHSI(
   // Add white to the end, and set the power based on saturation
   outputChannels.push_back(outputChannel(_whiteEmitter.outputLocalAddress, I * (1 - S)));
 
-  if ((emitter1power > 1.0f) || (emitter2power > 1.0f)) {
-    debugPrintf(DEBUG_INSANE,
-                "HSI: %3f %3.2f %3.2f | t: %3.2f | e1: %s, e2: %s | e1u: %f, e1v: %f, e2u: %f, e2v: %f | u: %f v: %f | p1: %f p2: %f pI: %f",
-                H,
-                S,
-                I,
-                tanH,
-                emitter1->emitter->getName(),
-                emitter2->emitter->getName(),
-                emitter1->ustar,
-                emitter1->vstar,
-                emitter2->ustar,
-                emitter2->vstar,
-                ustar,
-                vstar,
-                emitter1power,
-                emitter2power,
-                I * (1 - S));
-  }
+  debugPrintf(DEBUG_TRACE,
+              "HSI: %3f %3.2f %3.2f | t: %3.2f | e1: %s (%3.2f), e2: %s (%3.2f) | e1s: %3.2f e1u: %f, e1v: %f, e2u: %f, e2v: %f | u: %f v: %f | p1: %f p2: %f pI: %f",
+              H,
+              S,
+              I,
+              tanH,
+              emitter1->emitter->getName(),
+              emitter1->angle,
+              emitter2->emitter->getName(),
+              emitter2->angle,
+              emitter1->slope,
+              emitter1->ustar,
+              emitter1->vstar,
+              emitter2->ustar,
+              emitter2->vstar,
+              ustar,
+              vstar,
+              emitter1power,
+              emitter2power,
+              I * (1 - S));
 
   return outputChannels;
 }

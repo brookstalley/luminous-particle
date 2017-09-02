@@ -60,7 +60,7 @@ bool OutputPCA9685::setEmitterPowers(const std::vector<outputChannel>& outputCha
   // assumes that the start address is the lowest localAddress
   // in emitterPowers
 
-  debugPrintf(DEBUG_TRACE,
+  debugPrintf(DEBUG_INSANE,
               "OutputPCA9685::setEmitterPowers start. EmitterPowers.size() == %u, scale %f",
               outputChannels.size(), scaleFactor);
 
@@ -82,7 +82,7 @@ bool OutputPCA9685::setEmitterPowers(const std::vector<outputChannel>& outputCha
     } else {
       powerTo9685 = (uint16_t)(4096.0f * scaleFactor * outputChannels[i].power) & 0x0FFF;
     }
-    debugPrintf(DEBUG_TRACE,
+    debugPrintf(DEBUG_INSANE,
                 "  setting pwms[%u] to %u for i %u, la %u",
                 outputChannels[i].outputLocalAddress - minAddress,
                 powerTo9685,

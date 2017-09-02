@@ -1,4 +1,5 @@
-//*********************************************************
+// *********************************************************
+
 //
 // Luminous
 // Copyright 2017 Brooks Talley
@@ -18,25 +19,24 @@
 // You should have received a copy of the GNU General Public License
 // along with Luminous.  If not, see <http://www.gnu.org/licenses/>.
 //
-//**********************************************************
+// **********************************************************
 #include "mode.h"
 
-Mode::Mode(const char *name) :
-	_name(name) {
-}
+Mode::Mode(const String name) :
+  _name(name) {}
 
 bool Mode::start(std::vector<std::shared_ptr<HSILight> >lights) {
-	return true;
+  return true;
 }
 
 bool Mode::run(std::vector<std::shared_ptr<HSILight> >lights, bool lightsMustUpdate) {
-	return true;
+  return true;
 }
 
 bool Mode::end(std::vector<std::shared_ptr<HSILight> >lights) {
-	return true;
+  return true;
 }
 
-const char * Mode::getName() {
-	return _name;
+const String Mode::getName() {
+  return _name;
 }

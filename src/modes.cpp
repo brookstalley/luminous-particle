@@ -205,6 +205,8 @@ bool setModeByNumber(uint16_t modeNumber) {
 }
 
 bool setModeByName(String modeName) {
+  debugPrintf(DEBUG_TRACE, "setModeByName: start for %s", modeName.c_str());
+
   for (uint16_t i = 0; i < modeCount; i++) {
     if (modes[i]->getName() == modeName) {
       modes[currentMode]->end(allLights);
@@ -215,6 +217,7 @@ bool setModeByName(String modeName) {
       return true;
     }
   }
+  debugPrintf(DEBUG_ERROR, "setModeByName: no such mode %s", modeName.c_str());
   return false;
 }
 
@@ -231,7 +234,7 @@ void runCurrentMode() {
   lightsMustUpdate = false;
 }
 
-const char* getCurrentModeName() {
+const String getCurrentModeName() {
   return modes[currentMode]->getName();
 }
 

@@ -24,6 +24,7 @@
 
 #include "emitter.h"
 #include "color.h"
+#include "ldebug.h"
 #include "Particle.h"
 #include <memory>
 
@@ -37,9 +38,10 @@ Emitter::Emitter(const char *name, std::shared_ptr<cieUVcolor>uv, uint16_t maxLu
 Emitter::Emitter(const char *name, uint16_t wavelength, uint16_t maxLumens)
 {
   _name = name;
-  auto uv = std::make_shared<cieUVcolor>(wavelength);
+  auto uv = std::make_shared<cieUVcolor>(cieUVfromWavelength(wavelength));
   _uv        = uv;
   _maxLumens = maxLumens;
+  debugPrintf(DEBUG_TRACE, "Emitter %s: u=%3.2f v=%3.2f ml=%u", name, (*uv).u, (*uv).v);
 }
 
 std::shared_ptr<cieUVcolor>Emitter::getUV(void) const {

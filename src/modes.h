@@ -69,20 +69,20 @@ class ModeE131 : public Mode {
 public:
 
   using Mode::Mode;
-  bool      start(std::vector<std::shared_ptr<HSILight> >);
-  bool      run(std::vector<std::shared_ptr<HSILight> >,
-                bool);
-  bool      end(std::vector<std::shared_ptr<HSILight> >);
+  bool       start(std::vector<std::shared_ptr<HSILight> >);
+  bool       run(std::vector<std::shared_ptr<HSILight> >,
+                 bool);
+  bool       end(std::vector<std::shared_ptr<HSILight> >);
 };
 
-void        nextMode();
-bool        setModeByNumber(uint16_t modeNumber);
-bool        setModeByName(String modeName);
-void        runCurrentMode();
-const char* getCurrentModeName();
+void         nextMode();
+bool         setModeByNumber(uint16_t modeNumber);
+bool         setModeByName(String modeName);
+void         runCurrentMode();
+const String getCurrentModeName();
 
 // Stray, but this seems a reasonable place for it
-float       twoBytesToFloat(const uint8_t *buf);
+float        twoBytesToFloat(const uint8_t *buf);
 
 
 #endif /* ifndef MODES_H */

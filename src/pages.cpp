@@ -72,7 +72,7 @@ bool StatusPage::update() {
   display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Running:    %s",
                   TimeToString(millis() / 1000));
 
-  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Mode:       %s", getCurrentModeName());
+  display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Mode:       %s", getCurrentModeName().c_str());
 
   if (wifiCurrentState == WIFI_CONNECTED) {
     display.println(DISPLAY_WHITE, DISPLAY_BLACK, "WiFi:       %s", WiFi.SSID());
