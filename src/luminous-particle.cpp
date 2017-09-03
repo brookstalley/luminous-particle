@@ -381,6 +381,30 @@ void loopControls() {
   loopControlBrightness();
 }
 
+void loopNetwork() {
+  static bool connecting = false;
+  static unsigned long connectionStartMillis;
+
+  if (wifiCurrentState == WIFI_DISCONNECTED) {
+    if (WiFi.ready()) {
+      wifiCurrentState == WIFI_CONNECTED;
+      connecting = false;
+      return;
+    }
+
+    if (!connecting) {
+      connecting            = true;
+      connectionStartMillis = millis();
+      WiFi.connect();
+    } else {
+      if ((millis() - connectionStartMillis) > 60000) {
+        WiFi.disconnect();
+        connecting = false;
+      }
+    }
+  }
+}
+
 void loopE131() {
   if (wifiCurrentState == WIFI_CONNECTED) {
     if (!WiFi.ready()) {
