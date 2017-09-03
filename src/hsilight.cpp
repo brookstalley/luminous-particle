@@ -94,7 +94,7 @@ void HSILight::setColor(const HSIColor& color)  {
     return;
   }
   _lastColor = color;
-  debugPrintf(DEBUG_TRACE,
+  debugPrintf(DEBUG_INSANE,
               "Setting HSI to %4.4f, %4.4f, %4.4f",
               color.getHue(),
               color.getSaturation(),

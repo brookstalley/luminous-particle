@@ -179,7 +179,7 @@ std::vector<outputChannel>CompositeModule::emitterPowersFromHSI(
   // Add white to the end, and set the power based on saturation
   outputChannels.push_back(outputChannel(_whiteEmitter.outputLocalAddress, I * (1 - S)));
 
-  debugPrintf(DEBUG_TRACE,
+  debugPrintf(DEBUG_INSANE,
               "HSI: %3f %3.2f %3.2f | t: %3.2f | e1: %s (%3.2f), e2: %s (%3.2f) | e1s: %3.2f e1u: %f, e1v: %f, e2u: %f, e2v: %f | u: %f v: %f | p1: %f p2: %f pI: %f",
               H,
               S,
