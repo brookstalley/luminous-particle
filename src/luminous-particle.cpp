@@ -264,7 +264,7 @@ void setup(void) {
   display.println(DISPLAY_WHITE, DISPLAY_BLACK, "Starting E131...");
 
   if (setupE131()) {
-    setModeByName("E131");
+    // setModeByName("E131");
   }  else {
     debugPrintf(DEBUG_ERROR, "No E131");
   }
@@ -362,10 +362,14 @@ void loopControls() {
 
   if (backButton.clicks > 0) {
     pageStack.back()->backButton(backClicks);
+  } else if (backButton.clicks < 0) {
+    setDebugLevel(DEBUG_INSANE);
   }
 
   if (nextButton.clicks > 0) {
     pageStack.back()->nextButton(nextClicks);
+  } else if (nextButton.clicks < 0) {
+    nextMode();
   }
 
   if (prevButton.clicks > 0) {
@@ -387,8 +391,8 @@ void loopNetwork() {
 
   if (wifiCurrentState == WIFI_DISCONNECTED) {
     if (WiFi.ready()) {
-      wifiCurrentState == WIFI_CONNECTED;
-      connecting = false;
+      wifiCurrentState = WIFI_CONNECTED;
+      connecting       = false;
       return;
     }
 
@@ -440,6 +444,7 @@ void loop() {
   particleProcess();
   loopE131();
   particleProcess();
+
   loopLEDs();
   particleProcess();
   loopDisplay();

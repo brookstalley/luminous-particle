@@ -82,7 +82,8 @@ void         runCurrentMode();
 const String getCurrentModeName();
 
 // Stray, but this seems a reasonable place for it
-float        twoBytesToFloat(const uint8_t *buf);
+float        twoBytesToFloat(const uint8_t *buf,
+                             uint16_t       offset);
 
 
 #endif /* ifndef MODES_H */

@@ -88,6 +88,8 @@ void HSILight::begin() {
 }
 
 void HSILight::setColor(const HSIColor& color)  {
+  debugPrintf(DEBUG_INSANE, "HSILight::setColor starting for %s", this->getName());
+
   // No sense doing it again for the same value
   if (color == _lastColor) {
     // debugPrint(DEBUG_INSANE, "HSILight::setColor skipping duplicate");

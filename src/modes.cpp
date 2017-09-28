@@ -136,6 +136,8 @@ bool ModeRotate::doRotate() {
 
 bool ModeRotate::run(std::vector<std::shared_ptr<HSILight> >lights,
                      bool                                   lightsMustUpdate) {
+  doRotate();
+
   std::for_each(lights.begin(), lights.end(), [&](std::shared_ptr<HSILight>val) {
     val->setColor(_rotateColor);
   });
@@ -153,37 +155,24 @@ bool ModeE131::run(std::vector<std::shared_ptr<HSILight> >lights,
                    bool                                   lightsMustUpdate) {
   debugPrint(DEBUG_INSANE, "effectModeE131: starting");
 
-  std::for_each(lights.begin(), lights.end(), [&](std::shared_ptr<HSILight>val) {
-    // debugPrintf(DEBUG_INSANE, "effectModeE131: %u on", counter);
-    const std::shared_ptr<E131>e131 = val->getE131();
-    const uint8_t *e131data = e131->data;
+  std::for_each(lights.begin(), lights.end(), [&](std::shared_ptr<HSILight>light) {
+    // debugPrintf(DEBUG_TRACE, "effectModeE131: %s on", light->getName());
 
-    const uint16_t e131LocalAddress = val->getE131LocalAddress();
+    const std::shared_ptr<E131>e131 = light->getE131();
+    const uint16_t e131LocalAddress = light->getE131LocalAddress();
 
-    uint8_t moderaw = e131data[e131LocalAddress];
-    uint16_t hueraw = ((e131data[e131LocalAddress + 1]) << 8 |
-                       e131data[e131LocalAddress + 2]);
-    uint16_t satraw = ((e131data[e131LocalAddress + 3]) << 8 |
-                       e131data[e131LocalAddress + 4]);
-    uint16_t lumraw = ((e131data[e131LocalAddress + 5]) << 8 |
-                       e131data[e131LocalAddress + 6]);
-    debugPrintf(DEBUG_INSANE, "e131 hsl for %s: mode %u, (%u, %u, %u)",
-                val->getName(), moderaw, hueraw, satraw, lumraw);
+    uint8_t moderaw = e131->data[e131LocalAddress];
+    float hueraw = twoBytesToFloat(e131->data, e131LocalAddress + 1);
+    float sat = twoBytesToFloat(e131->data, e131LocalAddress + 3);
+    float lum = twoBytesToFloat(e131->data, e131LocalAddress + 5);
 
+    HSIColor color(360.0f * hueraw, sat, lum);
 
-    HSIColor color(
-      360.0f * twoBytesToFloat(&e131data[e131LocalAddress + 1]),
-      twoBytesToFloat(&e131data[e131LocalAddress + 3]),
-      twoBytesToFloat(&e131data[e131LocalAddress + 5])
-      );
+    debugPrintf(DEBUG_INSANE, "e131 data for %s: mode %u (%4.4f, %4.4f, %4.4f)",
+                light->getName(), moderaw, color.getHue(), color.getSaturation(),
+                color.getIntensity());
 
-    /*
-            debugPrintf(DEBUG_TRACE, "e131 data for %s: (%4.4f, %4.4f, %4.4f)",
-                        val->getName(), color->getHue(), color->getSaturation(),
-                        color->getIntensity());
-     */
-
-    val->setColor(color);
+    light->setColor(color);
   });
   return true;
 }
@@ -238,6 +227,6 @@ const String getCurrentModeName() {
   return modes[currentMode]->getName();
 }
 
-float twoBytesToFloat(const uint8_t *buf) {
-  return (float)(buf[0] << 8 | buf[1]) / 65535.0f;
+float twoBytesToFloat(const uint8_t *buf, uint16_t offset) {
+  return (float)(buf[offset] << 8 | buf[offset + 1]) / 65535.0f;
 }
